@@ -2,13 +2,15 @@
 
 | 项目 | 内容 |
 | :-- | :-- |
-| 版本 | v1.2（草案，待自评审；较 v1.1：对齐 PRD v1.4，新增房主管理，修正消息表分区方案，补充本地运行说明） |
-| 对应 PRD | 《跨国 MBTI 情感 AI 电子宠物 PRD v1.4》 |
-| 配套文档 | 《前端 TRD（Flutter）v1.2》：WebSocket 协议、API 调用方式以本文第 8、9 章为准 |
-| 语言 / 运行时 | Go 1.22+ |
+| 版本 | v1.3（草案，待自评审；较 v1.2：对齐 PRD v1.5 与前端 TRD v1.3，Google 登录接入真实校验，Apple 登录延后，本地端口统一为 8090。v1.2 较 v1.1：对齐 PRD v1.4，新增房主管理，修正消息表分区方案，补充本地运行说明） |
+| 对应 PRD | 《跨国 MBTI 情感 AI 电子宠物 PRD v1.5》 |
+| 配套文档 | 《前端 TRD（Flutter）v1.3》：WebSocket 协议、API 调用方式以本文第 8、9 章为准 |
+| 语言 / 运行时 | Go 1.26（以 `go.mod` 为准） |
 | 开发模式 | **单人全栈开发**，所有选型以“一个人能长期维护”为第一约束 |
 | 目标区域 | 日本东京区域起步（覆盖 JP / KR / TW 延迟；中国大陆暂不首发） |
 
+> **V1.3 变更说明**：对齐 PRD v1.5 与前端 TRD v1.3，配合前端 F0（登录与 onboarding）设计定稿，无接口变更。① **Google 登录接入真实校验**（7.1、第 5 章 `pkg/idtoken`）：`pkg/idtoken` 新增 Google 验证器——从 Google 的 JWKS（`https://www.googleapis.com/oauth2/v3/certs`，按 `Cache-Control` 缓存）取公钥，用 `golang-jwt` 校验 RS256 签名、`iss`（`accounts.google.com` 或 `https://accounts.google.com`）、`aud == GOOGLE_CLIENT_ID`、`exp`，返回 `sub`；`GOOGLE_CLIENT_ID` 为空时仍返回 501 `PROVIDER_NOT_CONFIGURED`。`GOOGLE_CLIENT_ID` 明确为 Google Cloud 中 **Web 应用类型** OAuth 客户端的 ID（前端 `google_sign_in` 的 `serverClientId` 用同一个值，Android 端另建 Android 客户端，不需要传给后端）。② **Apple 登录延后**：没有 Mac 与 Apple 开发者账号，Apple 继续使用占位验证器，上架 iOS 前补齐。③ 本地端口统一为 **8090**（与 `.env.example` 一致，15.4、15.5）。④ 4.4 公开路由组补上 `POST /auth/login/dev`（仅 local）。⑤ Go 版本按 `go.mod` 改为 1.26。⑥ 15.5 本地命令以 go-task（`task …`）为准，`make` 写法仅作对照；worker 尚未实现。
+>
 > **（2026-11-14 结构调整，无接口变更）** 第 4 章“总体架构”扩写为 4.1～4.6：新增 mermaid 架构总图、分层与依赖方向、路由分组与鉴权、三条关键链路时序图、子系统解耦说明；第 5 章“项目目录结构”改为 `handler / service / repository / model / middleware / task / platform / pkg` 的经典分层（api 与 worker 共用 service、repository、model，仅入口层不同）。原按业务域分包（`internal/auth`、`internal/invite` 等）的结构作废；已实现代码需按新结构迁移。
 >
 > **V1.2 变更说明**：对齐 PRD v1.4，并修正 V1.1 的几处设计缺陷。① **新增房主管理**（新增 7.8 节）：房主可移除成员、解散小屋、自助补码，房主不可退出自己的小屋；对应新增 `room_bans` 表、`room_members.left_reason`、`invite_codes.source=owner_regen`，第 8 章新增 3 个接口与 `ROOM_LIMIT`/`NOT_ROOM_OWNER`/`OWNER_CANNOT_LEAVE`/`CODE_ISSUE_LIMIT` 四个错误码，第 9 章新增 `room.kicked` 事件、`member.left` 增加 `reason` 字段。② **入房事务（7.2）补全**：V1.1 只写了规则、没落实到事务步骤——新增用户行锁（否则同一用户并发用两个码入房会突破"最多 2 间房"）、禁用自己的码、`room_bans` 黑名单校验、未成年人双向隔离（成年人也不能进含未成年成员的房间）；并定下全局统一加锁顺序 `users → invite_codes → rooms → room_members`，防止入房与解散并发时死锁。③ 奖励码数量改为 `min(配置值, 自己小屋空位数 − 现有未用有效码数)`，终身上限 20 的口径改为除种子码外所有来源累计，新增环境变量 `OWNER_REGEN_DAILY_LIMIT`。④ **`messages` MVP 不分区**：PostgreSQL 分区表的主键和唯一索引必须包含分区键 `created_at`，V1.1 的"按月分区"会让 `(sender_id, client_msg_id)` 无法全局唯一、重发幂等失效；单库 200 QPS 写入不分区足够，靠 30 天清理任务控制体积，第 1.2、3、6.1、18.3 节同步。⑤ 新增 Widget 刷新用的 data-only 推送 `widget.refresh`，`devices` 表新增 `widget_installed`（7.7）：V1.1 前端依赖静默推送刷新 Widget，后端却未定义。⑥ **纯本地运行说明**（15.1、15.5）：当前没有云端预算，仅本地开发与测试；补充依赖服务的两种运行方式（Docker Desktop / 原生安装）及 Windows 下用 go-task 替代 make。第 16 章测试与第 17 章排期同步。5.x 的整体架构、第 10 章 AI 网关、第 11~12 章 Redis 与稳定性设计不变。**（2026-11-14 补充，无接口变更）** 7.1 新增“账号状态与前后顺序”表：登录只建空 `users` 行，小屋与 signup 码只在 onboarding 事务里创建；并约定未完成 onboarding 的用户入房返回 `ONBOARDING_REQUIRED`（B3 实现，尚未列入第 8 章错误码清单）。
@@ -65,7 +67,7 @@
 
 | 层 | 选型 | 理由 / 备注 |
 | :-- | :-- | :-- |
-| 语言 | Go 1.22+ | 协程适合长连接与并发 IO |
+| 语言 | Go 1.26（以 `go.mod` 为准） | 协程适合长连接与并发 IO |
 | Web 框架 | Gin | 生态成熟，资料多，单人上手快 |
 | WebSocket | `coder/websocket` | 维护活跃，API 简洁，原生支持 context |
 | 数据库 | **PostgreSQL 16** | JSONB、行级锁、`FOR UPDATE SKIP LOCKED` 一套搞定 |
@@ -216,7 +218,7 @@ flowchart LR
 
 | 分组 | 覆盖接口 | 中间件链 |
 | :-- | :-- | :-- |
-| 公开 | `POST /auth/login/apple`、`/auth/login/google`、`POST /auth/refresh`；健康检查 `/healthz`、`/readyz` | 版本检查 → 限流（按 IP） |
+| 公开 | `POST /auth/login/apple`、`/auth/login/google`、`POST /auth/refresh`、`POST /auth/login/dev`（仅 `APP_ENV=local` 且 `DEV_LOGIN_ENABLED=true`）；健康检查 `/healthz`、`/readyz` | 版本检查 → 限流（按 IP） |
 | 登录即可（含未 onboarding） | `POST /auth/logout`、`GET /me`、`PATCH /me`、`POST /me/onboarding`、`PUT /devices/current`、`DELETE /me` | 版本检查 → `Auth()` |
 | 登录且已 onboarding | `/codes*`、`/rooms*`、`/deliveries*`、`/config/phrases`、`/reports`、`/blocks*`、`/widget/snapshot`、`GET /ws` | 版本检查 → `Auth()` → `RequireOnboarded()` → 限流（按用户） |
 | 房主专属（在上一组基础上） | `DELETE /rooms/{id}/members/{uid}`、`POST /rooms/{id}/dissolve`、`POST /rooms/{id}/codes` | 同上；房主身份由 `room_service` 在事务内校验，失败返回 `NOT_ROOM_OWNER` |
@@ -431,7 +433,7 @@ petbridge/
 │   ├── llm/                           # Translator / Polisher 接口 + 各供应商实现 + gobreaker
 │   ├── mt/                            # 机器翻译兜底
 │   ├── fcm/                           # FCM HTTP v1 封装
-│   ├── idtoken/                       # Apple / Google ID Token 校验（Verifier 接口；真实实现待开发者账号）
+│   ├── idtoken/                       # Apple / Google ID Token 校验（Verifier 接口；Google 用 JWKS 真实校验，Apple 暂为占位）
 │   └── wordfilter/                    # Aho-Corasick 敏感词自动机（按语言分库）
 ├── db/
 │   ├── migrations/                    # goose SQL
@@ -503,6 +505,8 @@ ALTER TABLE room_bans ADD CONSTRAINT pk_room_ban PRIMARY KEY (room_id, user_id);
 ### 7.1 注册与 onboarding
 
 1. 客户端用 Apple / Google 登录，把 ID Token 交给 `POST /auth/login/apple|google`，后端校验后创建或找到用户，返回 access + refresh token。
+   - **Google 校验**（v1.3）：`pkg/idtoken` 的 Google 验证器从 `https://www.googleapis.com/oauth2/v3/certs` 取 JWKS（按响应的 `Cache-Control` 缓存，遇到未知 `kid` 时刷新一次），用 `golang-jwt` 校验 RS256 签名、`iss ∈ {accounts.google.com, https://accounts.google.com}`、`aud == GOOGLE_CLIENT_ID`（Web 应用类型 OAuth 客户端 ID）、`exp`，以 `sub` 作为 `auth_identities` 的主体。`GOOGLE_CLIENT_ID` 为空时不启用，返回 501 `PROVIDER_NOT_CONFIGURED`。单测用本地生成的 RSA 密钥与假 JWKS 服务器，不依赖外网。
+   - **Apple 校验**：延后（没有 Mac 与 Apple 开发者账号），继续使用占位验证器；上架 iOS 前补齐。
 2. 新用户调用 `POST /me/onboarding`（母语、MBTI、昵称、年龄区间、时区）。**一个事务内**完成：写 users → 按映射表写 pet\_type → 创建 rooms（owner=自己，member\_count=1）→ 写 room\_members（seat 1）→ 生成 1 个 signup 验证码绑定该房间。
 3. 极简测试在**客户端本地**计分，只把结果 MBTI 传给后端，后端不存题库。
 4. 接口幂等：已完成 onboarding 的用户再次调用，直接返回现有结果。
@@ -903,7 +907,7 @@ ALTER TABLE room_bans ADD CONSTRAINT pk_room_ban PRIMARY KEY (room_id, user_id);
 # ===== 运行环境 =====
 APP_ENV=local                  # 必填：local | staging | production
 APP_HOST=127.0.0.1             # local 默认仅本机；其余环境默认 0.0.0.0
-APP_PORT=8080
+APP_PORT=8090
 LOG_LEVEL=debug                # debug | info | warn
 
 # ===== 数据库 / 缓存（必填）=====
@@ -914,8 +918,8 @@ REDIS_URL=redis://localhost:6379/0
 JWT_SIGNING_KEY=local-dev-only-change-me   # 必填；线上必须是随机长密钥
 ACCESS_TOKEN_TTL=15m
 REFRESH_TOKEN_TTL=720h
-APPLE_CLIENT_ID=                           # 本地可留空
-GOOGLE_CLIENT_ID=                          # 本地可留空
+APPLE_CLIENT_ID=                           # 本地可留空（Apple 登录延后）
+GOOGLE_CLIENT_ID=                          # Google Cloud「Web 应用」类型 OAuth 客户端 ID；留空则 Google 登录返回 501
 DEV_LOGIN_ENABLED=true                     # 仅 local 允许为 true；APP_ENV 不是 local 时若为 true，启动直接失败
 
 # ===== AI 网关 =====
@@ -1031,9 +1035,9 @@ volumes:
 **首次启动步骤**
 
 1. `cp .env.example .env`（本地默认值可直接使用）。
-2. `make up`，再 `make migrate`，再 `make seed`。
-3. 两个终端分别运行 `make dev` 与 `make worker`。
-4. `curl localhost:8080/healthz` 与 `/readyz` 返回正常。
+2. `task up`，再 `task migrate`，再 `task seed`（Windows 用 go-task；对应 `make` 写法见上表）。
+3. 运行 `task dev`（worker 尚未实现，消息阶段再加 `task worker`）。
+4. `curl localhost:8090/healthz` 与 `/readyz` 返回正常。
 
 **本地替代外部依赖**
 
@@ -1055,14 +1059,14 @@ volumes:
 **手动验证流程（人工冒烟）**
 
 1. 用开发登录给 A、B 各拿一个 token。
-2. 用 `wscat -c ws://localhost:8080/ws -H "Authorization: Bearer <token>"` 模拟两个客户端订阅同一小屋。
+2. 用 `wscat -c ws://localhost:8090/ws -H "Authorization: Bearer <token>"` 模拟两个客户端订阅同一小屋。
 3. B 使用 `DEVA2345` 入房，A 的连接应收到 `member.joined`，B 收到奖励验证码。
 4. A 发一条消息，B 的连接应收到 `message.new`，含原文与基础译文。
 5. 停掉 Redis：消息收发仍应正常，限流退化为进程内。
 6. 设置 `FAKE_AI_FAIL_RATE=1` 重启 worker：消息应以原文 + 未翻译标记送达。
 7. 重启 api：客户端应收到 `server.restart` 并重连。
 
-**让手机或模拟器访问本机后端**：api 默认监听 `0.0.0.0:8080`。Android 模拟器用 `10.0.2.2`，iOS 模拟器用 `localhost`，真机用电脑的局域网 IP（同一 Wi-Fi，防火墙放行 8080）；Android 真机也可用 `adb reverse tcp:8080 tcp:8080`。
+**让手机或模拟器访问本机后端**：端口以 `.env` 的 `APP_PORT` 为准（默认 8090）。Android 模拟器用 `10.0.2.2:8090`，iOS 模拟器用 `localhost:8090`，真机用电脑的局域网 IP（同一 Wi-Fi，`APP_HOST=0.0.0.0`，防火墙放行 8090）；Android 真机也可用 `adb reverse tcp:8090 tcp:8090`。
 
 ### 15.6 上线前自检（本地 → 预发 → 线上）
 

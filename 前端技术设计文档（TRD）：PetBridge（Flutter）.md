@@ -2,13 +2,15 @@
 
 | 项目 | 内容 |
 | :-- | :-- |
-| 版本 | v1.2（草案，待自评审；较 v1.1：对齐 PRD v1.4 与后端 TRD v1.2，修复会话状态机，新增房主管理界面） |
-| 对应 PRD | 《跨国 MBTI 情感 AI 电子宠物 PRD v1.4》 |
-| 配套文档 | 《后端 TRD（Go）v1.2》：REST 接口见其第 8 章，WebSocket 协议见其第 9 章，本文以其为准 |
+| 版本 | v1.3（草案，待自评审；较 v1.2：对齐 PRD v1.5 与后端 TRD v1.3，F0 登录与 onboarding 设计定稿，首页改为四个 Tab，契约生成改用 swagger_parser） |
+| 对应 PRD | 《跨国 MBTI 情感 AI 电子宠物 PRD v1.5》 |
+| 配套文档 | 《后端 TRD（Go）v1.3》：REST 接口见其第 8 章，WebSocket 协议见其第 9 章，本文以其为准 |
 | 技术栈 | Flutter 3.x 稳定版 / Dart 3 |
 | 平台 | iOS 15+、Android 8+（竖屏，手机优先，不适配平板） |
 | 开发模式 | **单人全栈开发**，选型以“一个人能长期维护”为第一约束 |
 
+> **V1.3 变更说明**：对齐 PRD v1.5 与后端 TRD v1.3，前端 F0（登录与 onboarding）设计定稿，详见 `docs/superpowers/specs/2026-11-16-f0-login-onboarding-design.md`。① **契约生成改用 `swagger_parser`**（纯 Dart，无需 Java），替代 `openapi-generator` dart-dio（第 3 章、8.2）。② **环境先只建 dev**：暂不建 staging / prod flavor 与多入口，只用一个 `main.dart` + `--dart-define-from-file`；新增 `GOOGLE_SERVER_CLIENT_ID`、`APPLE_LOGIN_ENABLED` 两个键；本地后端端口改为 **8090**（与后端 `.env` 一致）（19.4、19.5）。③ **feature 内按需建层**：本地模型先放在用到它的 `application/`，出现跨 feature 共用时再建 `shared/models/`（第 5 章）。④ **首页底部导航改为四个 Tab：小屋 / 聊天 / 背包 / 我的**，场景与聊天分开，与常见社交 App 一致（11.0 线框、6.2 路由、11.4）。⑤ Onboarding 写入 4 道测试题、每个维度可手动翻转确认、“未满 13 岁”独立说明页（11.1、6.2）；会话状态在小屋阶段之前先用 `unknown / unauthenticated / needsOnboarding / ready` 四态（6.1）。⑥ **Apple 登录延后**：目前没有 Mac 与 Apple 开发者账号，F0 只做按钮与接口层（`APPLE_LOGIN_ENABLED=false`），上架 iOS 前必须补齐（第 20 章、21.1）。⑦ Android `applicationId` 定为 `io.github.jinheng0301.petbridge`，`minSdk 26`；Google 登录用 `google_sign_in` v7，`serverClientId` 为 Web 客户端 ID（第 3 章、15 章前）。⑧ 联调与测试去掉 docker compose，改为本机原生 PostgreSQL + Memurai 与 go-task；worker 尚未实现（19.2、19.5、21.2）。⑨ 背包状态“已满员作废”改为“已作废”（满员与解散都会作废）；错误处理补 `ROOM_NOT_FOUND`、`ONBOARDING_REQUIRED`、`ALREADY_MEMBER` 直接进房（11.3、第 18 章）。⑩ 宠物资源与 `PetView` 改按 `pet_type`（如 `happy_shiba`）命名，不再按 MBTI：后端成员信息只下发 `pet_type`（4.6、第 5 章、10.1、10.2、21.1）。其余章节（WebSocket 客户端、小屋渲染、本地存储、性能与安全）不变。
+>
 > **（2026-11-14 结构调整，无功能变更）** 第 4 章“总体架构”扩写为 4.1～4.6：新增 mermaid 总览图、分层职责与依赖规则、MVVM 对应、三条关键链路时序图（启动与会话判定 / 发送消息 / WS 事件入站）、子系统解耦说明；第 5 章“项目目录结构”改为 feature-first 且 feature 内按 `data / application / presentation / models` 分层，新增 `config/`、`shared/`（通用组件与共用模型）、`app/router`、`app/event_reducer`，并给出与常见前端分层的对照表；新增 11.0“界面总览与线框大纲”。`core/config/env.dart` 调整为 `config/env.dart`（19.4 同步）。
 >
 > **V1.2 变更说明**：对齐 PRD v1.4 与后端 TRD v1.2。① **修复会话状态机**（6.1、第 7 章）：V1.1 中只有"自己加入他人房间"才会从 `solo` 进入 `inRoom`，且 `solo` 状态不连接 WebSocket——朋友加入了你的小屋，你却收不到 `member.joined`、看不到小屋，最关键的邀请链路会直接坏掉。现改为 `solo` / `inRoom` 由房间数据派生（任一在席房间的成员数 > 1 即为 `inRoom`，全部回到 1 人时退回 `solo`，双向可切换），WebSocket 在完成 onboarding 后即连接并订阅自己的小屋，回到前台时再调用一次 `GET /rooms/mine` 校正。② **新增房主管理界面**（新增 11.6 节、6.2 新增 `/room/:id/manage` 路由）：移除成员、解散、自助补码，房主在自己的小屋里不显示"退出小屋"；被移除或被解散的一方收到 `room.kicked` 后退回首页、清除该房间的本地消息缓存与 `last_seq`，只提示"你已离开该小屋"，不展示原因与操作者（第 7 章 reducer 新增规则 5，第 18 章补充降级体验）。③ 极简测试确定为 4 题（每维度 1 题），PRD 已同步，11.1、21.1 去掉"待确认"。④ 错误码展示新增 `ROOM_LIMIT`、`NOT_ROOM_OWNER`、`OWNER_CANNOT_LEAVE`、`CODE_ISSUE_LIMIT`（后者按 `details.reason` 区分四种文案）。⑤ Widget 刷新对齐后端新增的 `widget.refresh` data-only 推送，并通过 `PUT /devices/current` 上报 `widget_installed`（14.2）；iOS 对静默推送有系统节流，不保证送达，Widget 上继续标注更新时间。⑥ 联调清单（19.5）补充房主移除成员、解散与补码、别人加入我的小屋三个场景。其余章节（网络层、WebSocket 客户端、小屋渲染、本地存储、i18n、性能与安全）不变。
@@ -49,7 +51,7 @@
 | :-- | :-- | :-- |
 | 状态管理 | `flutter_riverpod`（配合 `riverpod_generator`） | 依赖注入与状态一体，测试方便；生成器减少样板 |
 | 路由 | `go_router` | 声明式路由 + redirect 守卫，深链接天然支持 |
-| 网络 | `dio` + OpenAPI 生成客户端（`openapi-generator` 的 dart-dio） | 与后端 `openapi.yaml` 同源，见第 8 章 |
+| 网络 | `dio` + OpenAPI 生成客户端（`swagger_parser`，纯 Dart） | 与后端 `openapi.yaml` 同源，见第 8 章；不用 `openapi-generator`（依赖 Java，Windows 上配置麻烦）（v1.3） |
 | 模型 | 生成代码 + `freezed`（仅用于本地状态模型） | 不可变状态，`copyWith` 与联合类型 |
 | WebSocket | `web_socket_channel`（`IOWebSocketChannel`） | 升级请求可带 `Authorization` 头，与后端约定一致 |
 | 本地数据库 | `drift`（SQLite） | 消息缓存、离线发送队列 |
@@ -58,7 +60,8 @@
 | 动画 | **Rive**（宠物与小屋动效）；`lottie` 备选（简单图标动效） | 状态机输入便于统一 16 只宠物的接口；文件小 |
 | 小屋渲染 | Flutter 原生 `Stack` + Rive，**不引入游戏引擎** | 同屏最多 5 只宠物，原生足够；`flame` 仅在后续出现镜头、粒子系统时评估 |
 | 国际化 | `flutter_localizations` + `intl`（ARB，`gen-l10n`） | 官方方案 |
-| 登录 | `sign_in_with_apple`、`google_sign_in` | 与后端一致，MVP 只做这两种 |
+| 登录 | `sign_in_with_apple`、`google_sign_in`（v7） | 与后端一致，MVP 只做这两种；Google 的 `serverClientId` 用 Web 客户端 ID（与后端 `GOOGLE_CLIENT_ID` 相同）；Apple 登录在 F0 只做按钮与接口层，上架 iOS 前补齐 |
+| 时区 | `flutter_timezone` | 取设备 IANA 时区名，提交 onboarding 的 `tz` |
 | 推送 | `firebase_messaging` + `flutter_local_notifications` | 见第 15 章 |
 | 深链接 | `app_links` | Universal Links / App Links |
 | 分享 | `share_plus` + `RepaintBoundary` 截图 | 海报图生成，调用系统分享面板 |
@@ -290,7 +293,7 @@ sequenceDiagram
 ### 4.6 子系统解耦说明
 
 - **实时通道与页面解耦**：`WsClient` 只暴露 `connectionState` 与 `events` 两个流，页面不接触 WS；房间页销毁只取消对应房间订阅，不关闭连接（连接是会话级的）。
-- **宠物动画与代码解耦**：所有宠物实现同一份 Rive 接口契约（见第 10 章），`PetView` 只认 `mbti` 与 `mood`；开发期统一用 `pet_placeholder.riv`，美术到位后只替换资源。
+- **宠物动画与代码解耦**：所有宠物实现同一份 Rive 接口契约（见第 10 章），`PetView` 只认 `pet_type` 与 `mood`；开发期统一用 `pet_placeholder.riv`，美术到位后只替换资源。
 - **桌面 Widget 与主应用解耦**：`widget_bridge` 只负责把状态写入共享存储并触发刷新，原生 Widget 独立渲染，不运行 Flutter 代码（见第 14 章）。
 - **埋点与业务解耦**：业务代码只调 `core/analytics` 的封装，不直接依赖具体 SDK（见 19.1）。
 - **环境配置与业务解耦**：环境差异只出现在 `config/env.dart`，业务代码不读取 `String.fromEnvironment`（见 19.4）。
@@ -318,7 +321,7 @@ sequenceDiagram
 ```
 petbridge_app/
 ├── lib/
-│   ├── main_dev.dart / main_staging.dart / main_prod.dart   # 入口：只选择环境并调用 bootstrap
+│   ├── main.dart                         # 入口：调用 bootstrap（F0 只有 dev 环境；出现 staging / prod 时再拆 main_*.dart 与 flavor）
 │   ├── app/                              # 应用装配（不含业务）
 │   │   ├── app.dart                      # MaterialApp.router、主题、locale
 │   │   ├── bootstrap.dart                # 初始化 Sentry / Firebase / 依赖覆盖，挂载 ProviderScope
@@ -378,12 +381,12 @@ petbridge_app/
 │   │   │   └── presentation/             #   widgets/(courier_card、chat_input_bar、phrase_bar、message_list)
 │   │   ├── safety/                       # 举报、屏蔽
 │   │   ├── settings/                     # 语言、推送、隐私、删除账号
-│   │   ├── home/                         # 底部 Tab 容器（小屋 / 背包 / 我的）
+│   │   ├── home/                         # 底部 Tab 容器（小屋 / 聊天 / 背包 / 我的）
 │   │   └── widget_bridge/                # 向原生 Widget 写数据（home_widget）
 │   └── gen/                              # OpenAPI 生成的客户端与 DTO（不手改）
 ├── assets/
 │   ├── images/                           # 通用图标、插画（WebP / SVG）
-│   ├── pets/                             # pet_{mbti}.riv（含占位 pet_placeholder.riv）与 Widget 静态图
+│   ├── pets/                             # pet_{pet_type}.riv（如 pet_happy_shiba.riv）（含占位 pet_placeholder.riv）与 Widget 静态图
 │   ├── decor/                            # 装扮 WebP 与解锁前剪影
 │   ├── l10n/                             # ARB（ja / ko / zh-Hant / zh-Hans / en）
 │   └── phrases/                          # 随包的短语模板兜底版本
@@ -398,7 +401,7 @@ petbridge_app/
 
 - **feature 内按需建目录**：不是每个 feature 都需要四个子目录（如 `pet`、`safety` 没有 `data/`），没有内容就不建空目录。
 - **page 私有的组件放在自己 feature 的 `presentation/widgets/`**，只有被两个以上 feature 使用时才上移到 `shared/widgets/`，避免 `shared` 变成杂物间。
-- **models 就近放置**：只在一个 feature 内使用的模型留在该 feature 的 `models/`；被多个 feature 共用的才放 `shared/models/`。
+- **models 就近放置**：只在一个 feature 内使用的模型留在该 feature 内（模型很少时直接放在用到它的 `application/`，多了再建 `models/`）；被多个 feature 共用的才放 `shared/models/`。
 - **生成代码隔离**：`gen/` 与 `core/l10n/` 下的生成文件不手改，CI 中校验生成结果无差异。
 - **测试目录与 `lib/` 同构**，便于一眼找到对应的测试。
 
@@ -424,6 +427,7 @@ unauthenticated ──登录成功──► needsOnboarding ──完成──�
 - `inRoom`：首页展示小屋场景；自己的小屋与已加入的小屋可切换【假设最多 2 间】。
 - **WebSocket 在完成 onboarding 后即连接，`solo` 状态也连接**，并订阅自己的小屋，这样别人加入时能实时收到 `member.joined` 并从 `solo` 切换到 `inRoom`。App 回到前台时额外调用一次 `GET /rooms/mine` 校正，防止错过事件。
 - `go_router` 的 `redirect` 只读取 `sessionProvider`，保证页面不会在不合法状态下被打开。
+- **F0 阶段**（小屋功能之前）先用四态：`unknown`（启动中）/ `unauthenticated` / `needsOnboarding` / `ready`；`ready` 在小屋阶段再细分为 `solo` / `inRoom`。
 
 ### 6.2 路由表
 
@@ -436,8 +440,10 @@ unauthenticated ──登录成功──► needsOnboarding ──完成──�
 | `/onboarding/quiz` | 极简测试 | 见 11.1 |
 | `/onboarding/reveal` | 宠物揭晓 | 出生动画 + 性格文案 |
 | `/onboarding/profile` | 昵称与年龄区间 | 年龄门槛校验 |
-| `/home` | 底部 Tab 容器 | 小屋 / 背包 / 我的 |
-| `/room/:id` | 小屋 | 场景 + 聊天面板 |
+| `/onboarding/too-young` | 未满 13 岁说明 | 只提供“退出登录”，不提交资料 |
+| `/home` | 底部 Tab 容器 | 小屋 / 聊天 / 背包 / 我的（v1.3 起场景与聊天分为两个 Tab） |
+| `/room/:id` | 小屋 | 场景（宠物、打卡、装扮）；聊天在“聊天”Tab |
+| `/room/:id/chat` | 聊天 | 该房间的消息列表与输入栏 |
 | `/room/:id/manage` | 房主管理 | 仅自己的小屋可进入：成员移除、解散，见 11.6 |
 | `/codes`、`/codes/share/:code` | 背包与分享海报 |  |
 | `/join` | 输入验证码 | 也可由深链接 `?code=` 打开 |
@@ -491,7 +497,8 @@ unauthenticated ──登录成功──► needsOnboarding ──完成──�
 - 超时：连接 5 秒、接收 10 秒；润色相关请求单独放宽到 12 秒（服务端 6 秒超时 + 排队）。
 - 错误码映射到本地化文案：`err.CODE_INVALID`、`err.ROOM_FULL` 等，文案放 ARB，**不显示服务端 `message`**。
 - `request_id` 随错误上报到 Sentry，便于和后端日志对上。
-- 契约生成：`tool/gen_api.sh` 从后端仓库的 `api/openapi.yaml` 生成 `lib/gen/`，CI 中校验生成结果无差异。
+- 契约生成：用 `swagger_parser` 从后端仓库的 `api/openapi.yaml` 生成 `lib/gen/`（`dart run swagger_parser` + `build_runner`），CI 中校验生成结果无差异。
+- F0 只启用 `AuthInterceptor`、`ErrorMapInterceptor`、`LogInterceptor`；`IdempotencyInterceptor` 与 `RetryInterceptor` 随入房 / 发消息阶段加入。
 
 ---
 
@@ -534,7 +541,7 @@ RoomScene（固定比例容器，RepaintBoundary）
 ├── 背景层：房间底图（WebP）
 ├── 装扮层：已解锁装扮（按 item_id 摆放在预设锚点）
 ├── 宠物层：最多 5 个座位锚点（seat_no 1–5 → 固定坐标）
-│     └── PetView(mbti, mood, 昵称标签, 国旗角标)
+│     └── PetView(pet_type, mood, 昵称标签, 国旗角标)
 └── 特效层：打招呼、打卡完成、装扮解锁的一次性动画
 ```
 
@@ -547,7 +554,7 @@ RoomScene（固定比例容器，RepaintBoundary）
 
 | 项 | 约定 |
 | :-- | :-- |
-| 文件 | `assets/pets/pet_{mbti小写}.riv`，画板 512×512，一个状态机 `Main` |
+| 文件 | `assets/pets/pet_{pet_type}.riv`（如 `pet_happy_shiba.riv`；后端只下发 `pet_type`），画板 512×512，一个状态机 `Main` |
 | 数值输入 | `mood`：0 待机 / 1 开心 / 2 害羞 / 3 瞌睡 |
 | 触发输入 | `greet`（打招呼）、`tap`（被轻触）、`deliver`（递送信件）、`celebrate`（打卡庆祝） |
 | 专属动作 | MBTI 专属打招呼由 `greet` 触发，不同宠物内部实现不同（如 ENTJ 威严、INFP 害羞） |
@@ -587,11 +594,13 @@ flowchart LR
 
     subgraph Tabs["底部 Tab（/home）"]
         TabRoom["小屋"]
+        TabChat["聊天"]
         TabCodes["背包 /codes"]
         TabMe["我的 /settings"]
     end
     Home --> Tabs
     TabRoom --> Room["小屋页 /room/:id"]
+    TabChat --> Chat["聊天页 /room/:id/chat"]
     Room --> Manage["房主管理 /room/:id/manage"]
     Room --> Report["举报 /report"]
     TabRoom --> Join["输入验证码 /join"]
@@ -642,23 +651,33 @@ flowchart LR
 │  + “输入验证码解锁小屋”）   │
 │                          │
 ├──────────────────────────┤
-│   小屋     背包     我的   │
+│ 小屋   聊天   背包   我的  │
 └──────────────────────────┘
 ```
 
-**④ 小屋页（场景 + 聊天，核心页面）**
+**④ 小屋 Tab 与聊天 Tab（核心页面；v1.3 起场景与聊天分为两个 Tab，顶部的房间切换两边共用）**
+
+```
+小屋 Tab                              聊天 Tab
+┌──────────────────────────┐        ┌──────────────────────────┐
+│ ← 小屋名/房间切换   ⋯ 设置  │        │ 小屋名/房间切换             │
+├──────────────────────────┤        ├──────────────────────────┤
+│  ┌────────────────────┐  │        │ 聊天列表（倒序，游标分页）   │
+│  │ 背景 + 装扮层        │  │        │  （见下方信使卡片）         │
+│  │  [宠物2]  [宠物1房主] │  │        │                          │
+│  │  [宠物3]  [宠物4]    │  │        │                          │
+│  └────────────────────┘  │        ├──────────────────────────┤
+│  能量条 ▓▓▓▓░░   [打卡]   │        │ 常用短语 · 润色 · 输入框 ➤  │
+├──────────────────────────┤        ├──────────────────────────┤
+│ 小屋   聊天   背包   我的  │        │ 小屋   聊天   背包   我的  │
+└──────────────────────────┘        └──────────────────────────┘
+⋯：房主 → 管理；成员 → 退出小屋        solo 时显示“邀请朋友后就能在这里聊天”
+```
+
+聊天 Tab 的消息与输入栏细节：
 
 ```
 ┌──────────────────────────┐
-│ ← 小屋名/房间切换   ⋯ 设置  │  ⋯：房主 → 管理；成员 → 退出小屋
-├──────────────────────────┤
-│  ┌────────────────────┐  │
-│  │ 背景 + 装扮层        │  │  场景（固定比例，RepaintBoundary）
-│  │  [宠物2]  [宠物1房主] │  │  座位 1–5 固定锚点
-│  │  [宠物3]  [宠物4]    │  │  点击宠物：本地立即动画 + pet.tap
-│  └────────────────────┘  │
-│  能量条 ▓▓▓▓░░   [打卡]   │
-├──────────────────────────┤  ← 可上拉全屏
 │ 聊天列表（倒序，游标分页）   │
 │  ┌ 信使卡片 ───────────┐  │
 │  │ 🐱 昵称 🇯🇵          │  │
@@ -734,10 +753,18 @@ flowchart LR
 ### 11.1 Onboarding
 
 1. 语言：默认取系统语言，五选一。界面语言与“母语（翻译目标语言）”默认相同，设置里可分开【假设】。
-2. MBTI：4 个维度的二选一滑块，或 16 型网格直选；底部“我不确定”进入测试。
-3. 极简测试：**4 题（每个 MBTI 维度 1 题）**，PRD v1.4 已同步；客户端本地计分，只提交结果。
-4. 宠物揭晓：出生动画 + 该宠物的性格介绍（五语种文案，16 × 5 共 80 条，进 ARB）。
-5. 昵称与年龄：昵称过敏感词预检；年龄区间选择，未满 13 岁给出友好提示并终止；未满 18 岁给出提示（私聊关闭等限制）。
+2. MBTI：16 型网格直选（F0 先不做四维滑块）；底部“我不确定”进入测试。
+3. 极简测试：**4 题（每个 MBTI 维度 1 题，每题二选一）**，PRD v1.4 已同步；客户端本地计分，只提交结果。结果页显示 4 个字母，每个维度可点击翻转后再确认（PRD F1.3“可手动二次确认”），确认后回到 MBTI 页并选中结果。题目（v1.3 定稿，文案进 ARB）：
+
+   | 维度 | 题目 | A | B |
+   | :-- | :-- | :-- | :-- |
+   | E / I | 忙了一周，周末你更想… | 约朋友出去热闹一下（E） | 自己待着充电（I） |
+   | S / N | 朋友跟你讲一部新电影，你更想知道… | 讲了什么、谁演的（S） | 它想表达什么（N） |
+   | T / F | 朋友做了个不太好的决定来问你，你会… | 直接分析哪里有问题（T） | 先照顾他的感受（F） |
+   | J / P | 出去旅行，你通常… | 提前排好行程（J） | 到了再看心情（P） |
+
+4. 宠物揭晓：出生动画 + 该宠物的性格介绍（五语种文案，16 × 5 共 80 条，进 ARB）。揭晓在提交之前，宠物由客户端按 MBTI 本地查 `pet_type`（与后端 `internal/service/pet.go` 映射一致，单测核对 16 个 slug 与 openapi 枚举相同）；资源按 `pet_type` 命名。F0 用占位宠物。
+5. 昵称与年龄：昵称去首尾空格后 1–20 字、无控制字符（敏感词由服务端判定）；年龄三选一：未满 13 岁 / 13–17 岁 / 18 岁以上。选“未满 13 岁”进入 `/onboarding/too-young` 说明页，只提供“退出登录”，不提交；13–17 岁给出提示（私聊关闭等限制）。提交的 `tz` 取设备 IANA 时区。
 6. 完成后调用 `POST /me/onboarding`（幂等，失败可原样重试）。
 7. **权限不在首启就弹**：推送权限延迟到“首次加入小屋或首次分享验证码”之后，用一个应用内说明弹窗做预授权。
 
@@ -750,13 +777,13 @@ flowchart LR
 
 ### 11.3 背包与分享海报
 
-- 背包列表：验证码、状态（未使用 / 已使用 / 已过期 / 已满员作废）、剩余有效期；未使用的显示“分享”。
+- 背包列表：验证码、状态（未使用 / 已使用 / 已过期 / 已作废——满员与房主解散都会作废，对应后端 `void`）、剩余有效期；未使用的显示“分享”。
 - 海报：离屏构建 1080×1440 的 Widget，`RepaintBoundary.toImage` 导出 PNG，含宠物形象、验证码、房间人数进度、二维码（`https://<域名>/j/{code}`）；字体使用系统字体，确保导出前已完成布局。
 - 分享：调用系统分享面板（`share_plus`），同时附带文本与链接；**不接入 X / Instagram / 小红书各自的 SDK**【假设】，系统面板已覆盖，省去大量适配与审核成本。
 
 ### 11.4 小屋与聊天
 
-- 页面上半为场景，下半为聊天面板（可上拉全屏）。
+- 场景在“小屋”Tab，聊天在“聊天”Tab（v1.3 起分开，原“上半场景、下半聊天”作废）；两个 Tab 共用顶部的房间切换，切到哪间房两边一起变。
 - 输入栏：母语输入、**常用短语快捷条**（读取 `phraseTemplatesProvider`，点击发送 `phrase_id`，不触发 AI）、“AI 润色”开关（默认关）、发送按钮。
 - 发送：生成 `client_msg_id`，先在列表中以“发送中”状态上屏，REST 成功改为“已发送”，失败显示重试（复用同一个 `client_msg_id`）。
 - 列表：倒序 `ListView`，向上滚动用 `before` 游标分页；本地 drift 缓存最近 30 天（与后端保留期一致）。
@@ -929,6 +956,9 @@ Android：Jetpack Glance（或 RemoteViews）读取共享存储渲染
 | 被房主移除 / 房间被解散 | 轻量提示“你已离开该小屋”，退回首页；不展示原因与操作者（见 11.6） |
 | 自助补码被拒（`CODE_ISSUE_LIMIT`） | 按 `details.reason` 展示对应文案，按钮不进入加载死循环 |
 | 服务繁忙（503/`RATE_LIMITED`） | Toast 提示并按 `Retry-After` 退避，不连续自动轰炸 |
+| 房间不存在或已无关（`ROOM_NOT_FOUND`） | 刷新房间列表，退回首页 |
+| 未完成 onboarding（`ONBOARDING_REQUIRED`） | 刷新 `/me`，会话回到 `needsOnboarding`，跳转 onboarding |
+| 已在该房间（`ALREADY_MEMBER`） | 用 `details.room_id` 直接进入该房间 |
 | 版本过旧 | 全屏强制更新页，跳转商店 |
 | 未捕获异常 | 全局 `FlutterError.onError` / `PlatformDispatcher.onError` 上报 Sentry，显示通用错误页而不是白屏 |
 
@@ -946,7 +976,7 @@ Android：Jetpack Glance（或 RemoteViews）读取共享存储渲染
 | :-- | :-- |
 | 单元测试 | `RoomEventReducer`（去重、乱序、缺口、resync）、验证码格式化与校验、outbox 状态流转、会话状态机 |
 | Widget / Golden | 信使卡片的各状态（翻译中、基础译文、已润色、原文、不可用）、验证码输入页的各错误态、分享海报、五语言长文案溢出检查 |
-| 集成测试 | `integration_test` 对本地后端（docker compose）跑通：登录 → onboarding → 入房 → 发消息 → 收到事件 |
+| 集成测试 | `integration_test` 对本地后端（本机原生 PostgreSQL + Memurai，go-task 启动）跑通：登录 → onboarding → 入房 → 发消息 → 收到事件 |
 | 真机矩阵 | iPhone SE 与较新机型各一台；Android：一台低端机、一台主流机；每次发版手测核心流程 |
 | 手动脚本 | 断网/弱网、杀进程重启、前后台切换、后端重启时重连 |
 
@@ -967,22 +997,24 @@ Flutter 没有 `.env` 机制，用 JSON 文件加 `--dart-define-from-file` 在�
 | 文件 | 用途 | 入库 |
 | :-- | :-- | :-- |
 | `env/dev_android.json` | Android 模拟器连本机后端 | 是 |
-| `env/dev_ios.json` | iOS 模拟器连本机后端 | 是 |
+| `env/dev_ios.json` | iOS 模拟器连本机后端（有 Mac 后再建） | 是 |
 | `env/local.json` | 真机连电脑局域网 IP（每人不同） | 否，写进 `.gitignore` |
-| `env/staging.json` | 预发 | 是 |
-| `env/prod.json` | 线上 | 是 |
+| `env/staging.json` | 预发（有预发环境后再建） | 是 |
+| `env/prod.json` | 线上（上线前再建） | 是 |
+
+F0 只有 `env/dev_android.json` 与 `env/local.json`，键随功能逐步加入：
 
 ```json
 {
   "ENV": "dev",
-  "API_BASE_URL": "http://10.0.2.2:8080/api/v1",
-  "WS_URL": "ws://10.0.2.2:8080/ws",
-  "SHARE_BASE_URL": "https://dev.example.com/j",
-  "SENTRY_DSN": "",
-  "ANALYTICS_ENABLED": false,
-  "DEV_LOGIN": true
+  "API_BASE_URL": "http://10.0.2.2:8090/api/v1",
+  "GOOGLE_SERVER_CLIENT_ID": "234594731344-fkbbq90jse9giqlmlkrn3qgjn3om9c8r.apps.googleusercontent.com",
+  "DEV_LOGIN": true,
+  "APPLE_LOGIN_ENABLED": false
 }
 ```
+
+后续阶段再加入 `WS_URL`（`ws://10.0.2.2:8090/ws`）、`SHARE_BASE_URL`、`SENTRY_DSN`、`ANALYTICS_ENABLED`。
 
 | 键 | 含义 |
 | :-- | :-- |
@@ -992,6 +1024,8 @@ Flutter 没有 `.env` 机制，用 JSON 文件加 `--dart-define-from-file` 在�
 | `SENTRY_DSN` | 本地留空 |
 | `ANALYTICS_ENABLED` | 本地与预发默认关闭，避免污染线上数据 |
 | `DEV_LOGIN` | 为 true 时登录页才出现“开发登录”入口；staging 与 prod 为 false，并用 `const bool.fromEnvironment` 让该分支在发布包里被剔除 |
+| `GOOGLE_SERVER_CLIENT_ID` | Google OAuth **Web 客户端** ID（非机密），传给 `google_sign_in` 的 `serverClientId`，与后端 `GOOGLE_CLIENT_ID` 相同；Android 端另需在 Google Cloud 登记包名 `io.github.jinheng0301.petbridge` + 签名 SHA-1 的 Android 客户端 |
+| `APPLE_LOGIN_ENABLED` | false 时 Apple 按钮点击只提示“即将开放” |
 
 **规则**：客户端不放任何密钥（与第 17 章一致）。Google / Apple 登录用到的 Client ID 与 Firebase 配置文件属于平台工程配置，不是机密，按 flavor 放在各自目录（`google-services.json`、`GoogleService-Info.plist`），dev、staging、prod 使用不同的 Firebase 项目。
 
@@ -999,13 +1033,13 @@ Flutter 没有 `.env` 机制，用 JSON 文件加 `--dart-define-from-file` 在�
 
 先在本地和后端跑通，再进预发。
 
-1. **启动后端**：按后端 TRD 15.5 执行 `make up`、`make migrate`、`make seed`、`make dev`、`make worker`。
-2. **生成 API 客户端**：运行 `tool/gen_api.sh`。
+1. **启动后端**：按后端 TRD 15.5 执行 `task up`、`task migrate`、`task seed`、`task dev`（Windows 用 go-task；worker 尚未实现，消息阶段再加）。
+2. **生成 API 客户端**：`dart run swagger_parser` 后 `dart run build_runner build`。
 3. **启动 App**：
 
 ```
-flutter run --flavor dev -t lib/main_dev.dart --dart-define-from-file=env/dev_android.json
-flutter run -d <真机ID> --flavor dev -t lib/main_dev.dart --dart-define-from-file=env/local.json
+flutter run --dart-define-from-file=env/dev_android.json
+flutter run -d <真机ID> --dart-define-from-file=env/local.json
 ```
 
 4. **登录**：dev 构建的登录页有“开发登录”，输入种子邮箱（如 `dev-a@local`）即可，调用后端 `POST /auth/login/dev`，不需要 Apple / Google 账号。
@@ -1015,10 +1049,10 @@ flutter run -d <真机ID> --flavor dev -t lib/main_dev.dart --dart-define-from-f
 
 | 运行位置 | 后端地址 | 备注 |
 | :-- | :-- | :-- |
-| Android 模拟器 | `http://10.0.2.2:8080` | 模拟器访问宿主机的固定地址 |
-| iOS 模拟器 | `http://localhost:8080` |  |
-| 真机（同一 Wi-Fi） | `http://<电脑局域网 IP>:8080` | 后端监听 `0.0.0.0`，防火墙放行 8080 |
-| Android 真机（USB） | 先执行 `adb reverse tcp:8080 tcp:8080`，再用 `http://localhost:8080` | 不依赖 Wi-Fi |
+| Android 模拟器 | `http://10.0.2.2:8090` | 模拟器访问宿主机的固定地址；端口以后端 `.env` 的 `APP_PORT` 为准（默认 8090） |
+| iOS 模拟器 | `http://localhost:8090` | 需要 Mac |
+| 真机（同一 Wi-Fi） | `http://<电脑局域网 IP>:8090` | 后端监听 `0.0.0.0`，防火墙放行 8090 |
+| Android 真机（USB） | 先执行 `adb reverse tcp:8090 tcp:8090`，再用 `http://localhost:8090` | 不依赖 Wi-Fi |
 
 **明文流量**：本地后端是 `http` 与 `ws`，不是 `https` 与 `wss`。Android 只在 debug 与 profile 的 manifest 里允许明文流量；iOS 只在 dev flavor 的 `Info.plist` 加本地网络例外，staging 与 prod 一律不允许。
 
@@ -1045,7 +1079,7 @@ flutter run -d <真机ID> --flavor dev -t lib/main_dev.dart --dart-define-from-f
 
 | 周 | 后端（对应后端 TRD 第 17 章） | 前端 | 里程碑 |
 | :-- | :-- | :-- | :-- |
-| W1–2 | B1 骨架、B2 登录与 onboarding | F0 项目骨架、主题、i18n、网络层、契约生成、登录页 | 能登录并创建用户 |
+| W1–2 | B1 骨架、B2 登录与 onboarding | F0 项目骨架、主题、i18n、网络层、契约生成、登录页（Google + 开发登录；Apple 只做按钮与接口层，v1.3 起延后），onboarding 全流程提前到此阶段 | 能登录并创建用户 |
 | W3–4 | B3 验证码与入房事务 | F1 onboarding 全流程、占位宠物、验证码输入、背包 | **核心机制跑通（M1）** |
 | W5–6 | B4 WS 与事件分发 | F2 WsClient、reducer、小屋场景与座位、presence | 多人实时可见（M2） |
 | W7–8 | B5 消息与 AI 网关 | F3 聊天、信使卡片、短语、outbox | **跨语言消息可用（M3）** |
@@ -1075,6 +1109,8 @@ flutter run -d <真机ID> --flavor dev -t lib/main_dev.dart --dart-define-from-f
 8. 平台下限为 iOS 15+ / Android 8+，与 PRD 非功能指标一致。
 9. 中国大陆暂不首发（已确认），其 Android 推送与分发不在 MVP 范围。
 10. 美术资源规范（第 10.3 节）需先于美术开工与你确认，避免返工。
+11. **Apple 登录延后**（v1.3）：目前没有 Mac 与 Apple 开发者账号，开发期只在 Android 上测试。App Store 要求提供第三方登录的 App 同时提供 Apple 登录，所以**上架 iOS 前必须补齐**，不能砍。
+12. 宠物资源按 `pet_type`（如 `happy_shiba`）命名，而不是按 MBTI：后端 `MemberInfo` 只返回 `pet_type`（v1.3）。
 
 ### 21.2 主要风险
 
@@ -1085,7 +1121,7 @@ flutter run -d <真机ID> --flavor dev -t lib/main_dev.dart --dart-define-from-f
 | iOS 后台 WS 被系统挂起 | 不依赖后台长连接，依赖推送 + 前台恢复时补发 |
 | 低端 Android 掉帧 | 控制同屏动画数量，真机早测，必要时降级为静态宠物 |
 | 商店审核卡 UGC / AI | 提前具备举报、屏蔽、协议、账号删除、审核账号与种子验证码 |
-| 一人兼顾两端导致状态不同步 | 契约生成、CI 校验、联调用同一 docker compose 环境 |
+| 一人兼顾两端导致状态不同步 | 契约生成、CI 校验、联调用同一套本机环境（原生 PostgreSQL + Memurai） |
 
 ---
 
