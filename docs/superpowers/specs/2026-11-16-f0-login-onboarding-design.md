@@ -200,4 +200,4 @@ ARB 五种语言（`en` 为源、`zh-Hans`、`zh-Hant`、`ja`、`ko`）。本阶
 - 主题视觉：先用 Material 3 默认配色加一个主色，视觉稿出来后替换。
 - 占位宠物：一个带 `pet_type` 名字的圆形色块，颜色按 pet_type 固定。
 - ARB key 命名按 TRD 13 章的分组（`onb.*`、`err.*`、`pet.*`）。
-- 前端仓库尚未 `git init`，在实施计划第一步初始化（不自动提交）。
+- 前端仓库已初始化（远端 `jinheng`），沿用现有 `main` 分支。
