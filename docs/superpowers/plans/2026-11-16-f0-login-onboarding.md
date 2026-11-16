@@ -20,7 +20,7 @@
 - UI 只认 `error.code`，**不显示服务端 `message`**；每个 code 对应 ARB 的 `err_<CODE>`，缺失时回落 `err_UNKNOWN`。
 - 客户端只做格式预校验，业务结论以服务端为准。
 - 五种语言 `en`（源）、`zh_Hans`、`zh_Hant`、`ja`、`ko`；`ja`、`ko`、`zh_Hant` 为 AI 初译，ARB 中 `@@x-reviewed: false`。
-- **不自动提交**：每个任务末尾只给出建议提交信息，由用户审阅后自己提交（两个仓库都一样）。
+- **分阶段提交推送**：每个任务测试通过后按建议信息提交，并推送到 `jinheng main`（涉及后端的任务两个仓库都推）。
 - 后端改动遵守后端仓库现有风格（手写 pgx、`go test ./...`、`task` 命令）。
 
 ## Review Focus
@@ -87,7 +87,7 @@ PetBridge_frontend/
 - [ ] **Step 6: 实现** `env.dart`、`app.dart`（`MaterialApp`，`localizationsDelegates`/`supportedLocales` 来自 gen-l10n，`Locale.fromSubtags` 区分 `zh_Hans` / `zh_Hant`，系统字号缩放夹在 0.8–1.3）、`bootstrap.dart`（`ProviderScope`）、`app_theme.dart`（Material 3，单一主色）、五个 ARB（先只有 `appTitle`）。
 - [ ] **Step 7: 运行确认通过** — `flutter gen-l10n && flutter analyze && flutter test`，预期 PASS、无 analyze 问题；`flutter run --dart-define-from-file=env/dev_android.json` 在 Android 模拟器显示占位页。
 - [ ] **Step 8: 取 debug SHA-1 交给用户** — 首次编译后运行 `cd android && ./gradlew signingReport`，把 `debug` 变体的 SHA1 告诉用户，由用户在 Google Cloud 建 Android 客户端（包名 + SHA-1）。
-- [ ] **Step 9: 建议提交信息** `chore: scaffold Flutter app with env config, theme and l10n`（不执行提交）
+- [ ] **Step 9: 提交信息** `chore: scaffold Flutter app with env config, theme and l10n`，提交并推送 `jinheng main`
 
 ---
 
@@ -107,7 +107,7 @@ PetBridge_frontend/
 - [ ] **Step 4: 运行确认失败** — `flutter test test/gen`，预期编译失败。
 - [ ] **Step 5: 生成** — `pwsh tool/gen_api.ps1`。若生成器对 `nullable`、枚举（如 `13_17`）或内联 `{data: …}` 响应的命名有问题，用 `swagger_parser.yaml` 的选项解决，不手改 `lib/gen`。
 - [ ] **Step 6: 运行确认通过** — `flutter analyze && flutter test test/gen`，预期 PASS。
-- [ ] **Step 7: 建议提交信息** — 前端：`build: generate API client from backend openapi.yaml`；后端：`docs(api): add operationId to every operation`（不执行提交）
+- [ ] **Step 7: 提交信息** — 前端：`build: generate API client from backend openapi.yaml`；后端：`docs(api): add operationId to every operation`，提交并推送 `jinheng main`
 
 ---
 
@@ -135,7 +135,7 @@ PetBridge_frontend/
 - [ ] **Step 2: 运行确认失败** — `flutter test test/core test/config`，预期编译失败。
 - [ ] **Step 3: 实现** 上述类型。单飞刷新用一个共享的 `Future<TokenPair>?`（进行中时后来的 401 等待同一个 Future，完成后置空）。`/auth/*` 登录与刷新请求不带也不刷新 token。ARB 加入 `err_UNKNOWN`、`err_NETWORK`、`err_VALIDATION_FAILED`、`err_PROVIDER_NOT_CONFIGURED`、`err_ACCOUNT_DISABLED`、`err_RATE_LIMITED` 文案。
 - [ ] **Step 4: 运行确认通过** — `flutter test test/core test/config && flutter analyze`，预期 PASS。
-- [ ] **Step 5: 建议提交信息** `feat(core): add dio client, error mapping and single-flight token refresh`（不执行提交）
+- [ ] **Step 5: 提交信息** `feat(core): add dio client, error mapping and single-flight token refresh`，提交并推送 `jinheng main`
 
 ---
 
@@ -153,7 +153,7 @@ PetBridge_frontend/
 - [ ] **Step 2: 运行确认失败** — `go test ./pkg/idtoken -run TestGoogle -v`，预期编译失败。
 - [ ] **Step 3: 实现** — 只接受 `RS256`；JWKS 按 `Cache-Control: max-age` 缓存（缺省 1 小时），遇未知 `kid` 刷新一次；HTTP 调用设 5 秒超时；`main.go` 中 `cfg.GoogleClientID != ""` 时用 `idtoken.NewGoogleVerifier(cfg.GoogleClientID)`，否则保持 `NotConfiguredVerifier{}`（先确认 config 中字段名）。
 - [ ] **Step 4: 运行确认通过** — `go vet ./... && go test ./pkg/idtoken ./internal/handler -v`，预期 PASS。
-- [ ] **Step 5: 建议提交信息** `feat(idtoken): verify Google ID tokens against Google JWKS`（不执行提交）
+- [ ] **Step 5: 提交信息** `feat(idtoken): verify Google ID tokens against Google JWKS`，提交并推送 `jinheng main`
 
 ---
 
@@ -179,7 +179,7 @@ PetBridge_frontend/
 - [ ] **Step 2: 运行确认失败** — `flutter test test/features/pet test/features/onboarding`。
 - [ ] **Step 3: 实现**，并在 ARB 中加 16 个宠物名 `pet_<slug>_name`、16 段性格介绍 `pet_<slug>_intro`（en 与 zh_Hans 由实现者写，其余 AI 初译）、4 道题的题干与选项（文案取自 spec 第 7 节）。
 - [ ] **Step 4: 运行确认通过** — `flutter gen-l10n && flutter test && flutter analyze`。
-- [ ] **Step 5: 建议提交信息** `feat(onboarding): add pet catalog, quiz scoring, nickname and locale rules`（不执行提交）
+- [ ] **Step 5: 提交信息** `feat(onboarding): add pet catalog, quiz scoring, nickname and locale rules`，提交并推送 `jinheng main`
 
 ---
 
@@ -208,7 +208,7 @@ PetBridge_frontend/
 - [ ] **Step 3: 实现** — `GoRouter` 的 `refreshListenable` 监听 `sessionControllerProvider`；`dioProvider` 的 `onSessionExpired` 调 `SessionController.expire()`；splash 只显示 logo + 进度；登录页按 spec 第 7 节线框；开发登录邮箱默认 `dev-a@local`。`LoginPage` 构造参数 `devLoginEnabled`（默认 `Env.devLogin`）、`appleEnabled`（默认 `Env.appleLoginEnabled`）。新增 ARB：登录页文案、`err_APPLE_LOGIN_UNAVAILABLE`。
 - [ ] **Step 4: 运行确认通过** — `flutter test && flutter analyze`。
 - [ ] **Step 5: 手动验证** — 本地后端 `task dev` 运行中，`flutter run --dart-define-from-file=env/dev_android.json`，开发登录 `dev-a@local`（已 onboarding 的种子用户）→ 进 `/home` 占位；新邮箱 `dev-new1@local` → 进 `/onboarding/lang` 占位。
-- [ ] **Step 6: 建议提交信息** `feat(auth): add session state, router guard and dev/Google/Apple login`（不执行提交）
+- [ ] **Step 6: 提交信息** `feat(auth): add session state, router guard and dev/Google/Apple login`，提交并推送 `jinheng main`
 
 ---
 
@@ -235,7 +235,7 @@ PetBridge_frontend/
 - [ ] **Step 2: 运行确认失败** — `flutter test test/features/onboarding`。
 - [ ] **Step 3: 实现** 七个页面（按 spec 第 7 节；顶部进度条 1–5，quiz 与 quiz_result 计为第 2 步内的子页）、controller 与 repository（`completeOnboarding` 调用，接口幂等，失败原样重试）。too-young 页只有说明与“退出登录”。新增全部 onboarding ARB 文案。
 - [ ] **Step 4: 运行确认通过** — `flutter gen-l10n && flutter test && flutter analyze`。
-- [ ] **Step 5: 建议提交信息** `feat(onboarding): add language, MBTI, quiz, reveal and profile steps`（不执行提交）
+- [ ] **Step 5: 提交信息** `feat(onboarding): add language, MBTI, quiz, reveal and profile steps`，提交并推送 `jinheng main`
 
 ---
 
@@ -254,7 +254,7 @@ PetBridge_frontend/
 - [ ] **Step 2: 运行确认失败** — `flutter test test/features/home`。
 - [ ] **Step 3: 实现**。
 - [ ] **Step 4: 运行确认通过** — `flutter test && flutter analyze`。
-- [ ] **Step 5: 建议提交信息** `feat(home): add four-tab home shell with profile and logout`（不执行提交）
+- [ ] **Step 5: 提交信息** `feat(home): add four-tab home shell with profile and logout`，提交并推送 `jinheng main`
 
 ---
 
@@ -266,7 +266,7 @@ PetBridge_frontend/
 - [ ] **Step 4: 异常路径** — 停后端时登录显示 `err_NETWORK` 文案；选“未满 13 岁”进入说明页且后端没有收到 onboarding 请求；退出登录回登录页、再进需要重新登录。
 - [ ] **Step 5: 全量检查** — 前端 `flutter analyze && flutter test`；后端 `go vet ./... && go test ./... -count=1`。
 - [ ] **Step 6: 文档同步核对** — 若实现中改了任何设计（例如生成器限制导致的调整），按规则同步更新两个仓库的 PRD、前端 TRD、后端 TRD 并写变更记录，`md5sum` 核对两边一致。
-- [ ] **Step 7: 建议提交信息** — 无代码改动则无需提交；文档有改动：`docs: sync F0 implementation notes across PRD and TRDs`（不执行提交）
+- [ ] **Step 7: 提交信息** — 无代码改动则无需提交；文档有改动：`docs: sync F0 implementation notes across PRD and TRDs`，提交并推送 `jinheng main`
 
 ---
 
