@@ -1,0 +1,7 @@
+{
+  "@@locale": "en",
+  "appTitle": "PetBridge",
+  "@appTitle": {
+    "description": "App name; not translated."
+  }
+}

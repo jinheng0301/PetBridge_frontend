@@ -1,0 +1,7 @@
+{
+  "ENV": "dev",
+  "API_BASE_URL": "http://10.0.2.2:8090/api/v1",
+  "GOOGLE_SERVER_CLIENT_ID": "234594731344-fkbbq90jse9giqlmlkrn3qgjn3om9c8r.apps.googleusercontent.com",
+  "DEV_LOGIN": true,
+  "APPLE_LOGIN_ENABLED": false
+}
