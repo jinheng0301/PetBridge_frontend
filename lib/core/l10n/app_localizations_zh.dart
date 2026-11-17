@@ -29,6 +29,138 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get err_RATE_LIMITED => '尝试次数过多，请稍后再试。';
+
+  @override
+  String get pet_lone_leopard_name => '独行豹';
+
+  @override
+  String get pet_lone_leopard_intro => '安静又有远见。独行豹先定好计划，再按自己的节奏把它做完。';
+
+  @override
+  String get pet_leader_lion_name => '领袖狮';
+
+  @override
+  String get pet_leader_lion_intro => '果断又有魄力。领袖狮定下方向，带着大家一起往前走。';
+
+  @override
+  String get pet_thinker_owl_name => '思考猫头鹰';
+
+  @override
+  String get pet_thinker_owl_intro => '好奇又讲逻辑。思考猫头鹰最爱问“为什么”，把想法翻来覆去琢磨。';
+
+  @override
+  String get pet_clever_fox_name => '机灵狐';
+
+  @override
+  String get pet_clever_fox_intro => '脑子快又爱玩。机灵狐总有新点子，也爱来一场有趣的辩论。';
+
+  @override
+  String get pet_guardian_deer_name => '守护鹿';
+
+  @override
+  String get pet_guardian_deer_intro => '温柔又敏锐。守护鹿总能静静读懂别人的心情。';
+
+  @override
+  String get pet_guide_dolphin_name => '引路海豚';
+
+  @override
+  String get pet_guide_dolphin_intro => '热情又会鼓励人。引路海豚把大家聚在一起，给每个人打气。';
+
+  @override
+  String get pet_healing_rabbit_name => '治愈兔';
+
+  @override
+  String get pet_healing_rabbit_intro => '善良又爱幻想。治愈兔会认真倾听，让朋友感到安心。';
+
+  @override
+  String get pet_happy_shiba_name => '快乐柴犬';
+
+  @override
+  String get pet_happy_shiba_intro => '开朗又点子多。快乐柴犬能把平凡的一天变成冒险。';
+
+  @override
+  String get pet_steady_beaver_name => '踏实河狸';
+
+  @override
+  String get pet_steady_beaver_intro => '可靠又勤快。踏实河狸一步一步，把事情稳稳做好。';
+
+  @override
+  String get pet_order_sheepdog_name => '秩序牧羊犬';
+
+  @override
+  String get pet_order_sheepdog_intro => '有条理又靠谱。秩序牧羊犬让大家都不掉队。';
+
+  @override
+  String get pet_guardian_penguin_name => '守护企鹅';
+
+  @override
+  String get pet_guardian_penguin_intro => '忠诚又贴心。守护企鹅记得那些重要的小事。';
+
+  @override
+  String get pet_warm_otter_name => '暖心水獭';
+
+  @override
+  String get pet_warm_otter_intro => '友善又细心。暖心水獭不会让任何人被冷落。';
+
+  @override
+  String get pet_calm_blackcat_name => '冷静黑猫';
+
+  @override
+  String get pet_calm_blackcat_intro => '沉着又手巧。冷静黑猫遇事不慌，还能把坏掉的东西修好。';
+
+  @override
+  String get pet_daring_falcon_name => '勇敢猎隼';
+
+  @override
+  String get pet_daring_falcon_intro => '精力充沛又无畏。勇敢猎隼总是先冲上去，边做边想。';
+
+  @override
+  String get pet_easygoing_alpaca_name => '随性羊驼';
+
+  @override
+  String get pet_easygoing_alpaca_intro => '随和又有艺术感。随性羊驼享受当下，处处发现美。';
+
+  @override
+  String get pet_party_parrot_name => '派对鹦鹉';
+
+  @override
+  String get pet_party_parrot_intro => '活泼又好玩。派对鹦鹉走到哪儿，哪儿就热闹起来。';
+
+  @override
+  String get quiz_ei_prompt => '忙了一周，周末你更想…';
+
+  @override
+  String get quiz_ei_a => '约朋友出去热闹一下';
+
+  @override
+  String get quiz_ei_b => '自己待着充电';
+
+  @override
+  String get quiz_sn_prompt => '朋友跟你讲一部新电影，你更想知道…';
+
+  @override
+  String get quiz_sn_a => '讲了什么、谁演的';
+
+  @override
+  String get quiz_sn_b => '它想表达什么';
+
+  @override
+  String get quiz_tf_prompt => '朋友做了个不太好的决定来问你，你会…';
+
+  @override
+  String get quiz_tf_a => '直接分析哪里有问题';
+
+  @override
+  String get quiz_tf_b => '先照顾他的感受';
+
+  @override
+  String get quiz_jp_prompt => '出去旅行，你通常…';
+
+  @override
+  String get quiz_jp_a => '提前排好行程';
+
+  @override
+  String get quiz_jp_b => '到了再看心情';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -55,6 +187,138 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get err_RATE_LIMITED => '尝试次数过多，请稍后再试。';
+
+  @override
+  String get pet_lone_leopard_name => '独行豹';
+
+  @override
+  String get pet_lone_leopard_intro => '安静又有远见。独行豹先定好计划，再按自己的节奏把它做完。';
+
+  @override
+  String get pet_leader_lion_name => '领袖狮';
+
+  @override
+  String get pet_leader_lion_intro => '果断又有魄力。领袖狮定下方向，带着大家一起往前走。';
+
+  @override
+  String get pet_thinker_owl_name => '思考猫头鹰';
+
+  @override
+  String get pet_thinker_owl_intro => '好奇又讲逻辑。思考猫头鹰最爱问“为什么”，把想法翻来覆去琢磨。';
+
+  @override
+  String get pet_clever_fox_name => '机灵狐';
+
+  @override
+  String get pet_clever_fox_intro => '脑子快又爱玩。机灵狐总有新点子，也爱来一场有趣的辩论。';
+
+  @override
+  String get pet_guardian_deer_name => '守护鹿';
+
+  @override
+  String get pet_guardian_deer_intro => '温柔又敏锐。守护鹿总能静静读懂别人的心情。';
+
+  @override
+  String get pet_guide_dolphin_name => '引路海豚';
+
+  @override
+  String get pet_guide_dolphin_intro => '热情又会鼓励人。引路海豚把大家聚在一起，给每个人打气。';
+
+  @override
+  String get pet_healing_rabbit_name => '治愈兔';
+
+  @override
+  String get pet_healing_rabbit_intro => '善良又爱幻想。治愈兔会认真倾听，让朋友感到安心。';
+
+  @override
+  String get pet_happy_shiba_name => '快乐柴犬';
+
+  @override
+  String get pet_happy_shiba_intro => '开朗又点子多。快乐柴犬能把平凡的一天变成冒险。';
+
+  @override
+  String get pet_steady_beaver_name => '踏实河狸';
+
+  @override
+  String get pet_steady_beaver_intro => '可靠又勤快。踏实河狸一步一步，把事情稳稳做好。';
+
+  @override
+  String get pet_order_sheepdog_name => '秩序牧羊犬';
+
+  @override
+  String get pet_order_sheepdog_intro => '有条理又靠谱。秩序牧羊犬让大家都不掉队。';
+
+  @override
+  String get pet_guardian_penguin_name => '守护企鹅';
+
+  @override
+  String get pet_guardian_penguin_intro => '忠诚又贴心。守护企鹅记得那些重要的小事。';
+
+  @override
+  String get pet_warm_otter_name => '暖心水獭';
+
+  @override
+  String get pet_warm_otter_intro => '友善又细心。暖心水獭不会让任何人被冷落。';
+
+  @override
+  String get pet_calm_blackcat_name => '冷静黑猫';
+
+  @override
+  String get pet_calm_blackcat_intro => '沉着又手巧。冷静黑猫遇事不慌，还能把坏掉的东西修好。';
+
+  @override
+  String get pet_daring_falcon_name => '勇敢猎隼';
+
+  @override
+  String get pet_daring_falcon_intro => '精力充沛又无畏。勇敢猎隼总是先冲上去，边做边想。';
+
+  @override
+  String get pet_easygoing_alpaca_name => '随性羊驼';
+
+  @override
+  String get pet_easygoing_alpaca_intro => '随和又有艺术感。随性羊驼享受当下，处处发现美。';
+
+  @override
+  String get pet_party_parrot_name => '派对鹦鹉';
+
+  @override
+  String get pet_party_parrot_intro => '活泼又好玩。派对鹦鹉走到哪儿，哪儿就热闹起来。';
+
+  @override
+  String get quiz_ei_prompt => '忙了一周，周末你更想…';
+
+  @override
+  String get quiz_ei_a => '约朋友出去热闹一下';
+
+  @override
+  String get quiz_ei_b => '自己待着充电';
+
+  @override
+  String get quiz_sn_prompt => '朋友跟你讲一部新电影，你更想知道…';
+
+  @override
+  String get quiz_sn_a => '讲了什么、谁演的';
+
+  @override
+  String get quiz_sn_b => '它想表达什么';
+
+  @override
+  String get quiz_tf_prompt => '朋友做了个不太好的决定来问你，你会…';
+
+  @override
+  String get quiz_tf_a => '直接分析哪里有问题';
+
+  @override
+  String get quiz_tf_b => '先照顾他的感受';
+
+  @override
+  String get quiz_jp_prompt => '出去旅行，你通常…';
+
+  @override
+  String get quiz_jp_a => '提前排好行程';
+
+  @override
+  String get quiz_jp_b => '到了再看心情';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -81,4 +345,136 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get err_RATE_LIMITED => '嘗試次數過多，請稍後再試。';
+
+  @override
+  String get pet_lone_leopard_name => '獨行豹';
+
+  @override
+  String get pet_lone_leopard_intro => '安靜又有遠見。獨行豹先訂好計畫，再按自己的節奏把它完成。';
+
+  @override
+  String get pet_leader_lion_name => '領袖獅';
+
+  @override
+  String get pet_leader_lion_intro => '果斷又有魄力。領袖獅定下方向，帶著大家一起往前走。';
+
+  @override
+  String get pet_thinker_owl_name => '思考貓頭鷹';
+
+  @override
+  String get pet_thinker_owl_intro => '好奇又講邏輯。思考貓頭鷹最愛問「為什麼」，把想法反覆琢磨。';
+
+  @override
+  String get pet_clever_fox_name => '機靈狐';
+
+  @override
+  String get pet_clever_fox_intro => '腦筋快又愛玩。機靈狐總有新點子，也愛來一場有趣的辯論。';
+
+  @override
+  String get pet_guardian_deer_name => '守護鹿';
+
+  @override
+  String get pet_guardian_deer_intro => '溫柔又敏銳。守護鹿總能靜靜讀懂別人的心情。';
+
+  @override
+  String get pet_guide_dolphin_name => '引路海豚';
+
+  @override
+  String get pet_guide_dolphin_intro => '熱情又會鼓勵人。引路海豚把大家聚在一起，替每個人打氣。';
+
+  @override
+  String get pet_healing_rabbit_name => '療癒兔';
+
+  @override
+  String get pet_healing_rabbit_intro => '善良又愛幻想。療癒兔會認真傾聽，讓朋友感到安心。';
+
+  @override
+  String get pet_happy_shiba_name => '快樂柴犬';
+
+  @override
+  String get pet_happy_shiba_intro => '開朗又點子多。快樂柴犬能把平凡的一天變成冒險。';
+
+  @override
+  String get pet_steady_beaver_name => '踏實河狸';
+
+  @override
+  String get pet_steady_beaver_intro => '可靠又勤快。踏實河狸一步一步，把事情穩穩做好。';
+
+  @override
+  String get pet_order_sheepdog_name => '秩序牧羊犬';
+
+  @override
+  String get pet_order_sheepdog_intro => '有條理又可靠。秩序牧羊犬讓大家都不掉隊。';
+
+  @override
+  String get pet_guardian_penguin_name => '守護企鵝';
+
+  @override
+  String get pet_guardian_penguin_intro => '忠誠又貼心。守護企鵝記得那些重要的小事。';
+
+  @override
+  String get pet_warm_otter_name => '暖心水獺';
+
+  @override
+  String get pet_warm_otter_intro => '友善又細心。暖心水獺不會讓任何人被冷落。';
+
+  @override
+  String get pet_calm_blackcat_name => '冷靜黑貓';
+
+  @override
+  String get pet_calm_blackcat_intro => '沉著又手巧。冷靜黑貓遇事不慌，還能把壞掉的東西修好。';
+
+  @override
+  String get pet_daring_falcon_name => '勇敢獵隼';
+
+  @override
+  String get pet_daring_falcon_intro => '精力充沛又無畏。勇敢獵隼總是先衝上去，邊做邊想。';
+
+  @override
+  String get pet_easygoing_alpaca_name => '隨性羊駝';
+
+  @override
+  String get pet_easygoing_alpaca_intro => '隨和又有藝術感。隨性羊駝享受當下，處處發現美。';
+
+  @override
+  String get pet_party_parrot_name => '派對鸚鵡';
+
+  @override
+  String get pet_party_parrot_intro => '活潑又好玩。派對鸚鵡走到哪裡，哪裡就熱鬧起來。';
+
+  @override
+  String get quiz_ei_prompt => '忙了一週，週末你更想…';
+
+  @override
+  String get quiz_ei_a => '約朋友出去熱鬧一下';
+
+  @override
+  String get quiz_ei_b => '自己待著充電';
+
+  @override
+  String get quiz_sn_prompt => '朋友跟你講一部新電影，你更想知道…';
+
+  @override
+  String get quiz_sn_a => '講了什麼、誰演的';
+
+  @override
+  String get quiz_sn_b => '它想表達什麼';
+
+  @override
+  String get quiz_tf_prompt => '朋友做了個不太好的決定來問你，你會…';
+
+  @override
+  String get quiz_tf_a => '直接分析哪裡有問題';
+
+  @override
+  String get quiz_tf_b => '先照顧他的感受';
+
+  @override
+  String get quiz_jp_prompt => '出去旅行，你通常…';
+
+  @override
+  String get quiz_jp_a => '提前排好行程';
+
+  @override
+  String get quiz_jp_b => '到了再看心情';
 }

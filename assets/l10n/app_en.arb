@@ -27,5 +27,181 @@
   "err_RATE_LIMITED": "Too many attempts. Please wait a moment and try again.",
   "@err_RATE_LIMITED": {
     "description": "Server rate limit hit."
+  },
+  "pet_lone_leopard_name": "Lone Leopard",
+  "@pet_lone_leopard_name": {
+    "description": "Display name of the lone_leopard pet."
+  },
+  "pet_lone_leopard_intro": "Quiet and far-sighted. Lone Leopard makes a plan, then sees it through on its own terms.",
+  "@pet_lone_leopard_intro": {
+    "description": "One- or two-sentence personality blurb for the lone_leopard pet, shown on the onboarding reveal page."
+  },
+  "pet_leader_lion_name": "Leader Lion",
+  "@pet_leader_lion_name": {
+    "description": "Display name of the leader_lion pet."
+  },
+  "pet_leader_lion_intro": "Bold and decisive. Leader Lion sets the direction and gets everyone moving.",
+  "@pet_leader_lion_intro": {
+    "description": "One- or two-sentence personality blurb for the leader_lion pet, shown on the onboarding reveal page."
+  },
+  "pet_thinker_owl_name": "Thinker Owl",
+  "@pet_thinker_owl_name": {
+    "description": "Display name of the thinker_owl pet."
+  },
+  "pet_thinker_owl_intro": "Curious and logical. Thinker Owl loves asking why and turning ideas over.",
+  "@pet_thinker_owl_intro": {
+    "description": "One- or two-sentence personality blurb for the thinker_owl pet, shown on the onboarding reveal page."
+  },
+  "pet_clever_fox_name": "Clever Fox",
+  "@pet_clever_fox_name": {
+    "description": "Display name of the clever_fox pet."
+  },
+  "pet_clever_fox_intro": "Quick-witted and playful. Clever Fox always has a new idea or a fun debate ready.",
+  "@pet_clever_fox_intro": {
+    "description": "One- or two-sentence personality blurb for the clever_fox pet, shown on the onboarding reveal page."
+  },
+  "pet_guardian_deer_name": "Guardian Deer",
+  "@pet_guardian_deer_name": {
+    "description": "Display name of the guardian_deer pet."
+  },
+  "pet_guardian_deer_intro": "Gentle and insightful. Guardian Deer quietly understands what others feel.",
+  "@pet_guardian_deer_intro": {
+    "description": "One- or two-sentence personality blurb for the guardian_deer pet, shown on the onboarding reveal page."
+  },
+  "pet_guide_dolphin_name": "Guide Dolphin",
+  "@pet_guide_dolphin_name": {
+    "description": "Display name of the guide_dolphin pet."
+  },
+  "pet_guide_dolphin_intro": "Warm and encouraging. Guide Dolphin brings people together and lifts them up.",
+  "@pet_guide_dolphin_intro": {
+    "description": "One- or two-sentence personality blurb for the guide_dolphin pet, shown on the onboarding reveal page."
+  },
+  "pet_healing_rabbit_name": "Healing Rabbit",
+  "@pet_healing_rabbit_name": {
+    "description": "Display name of the healing_rabbit pet."
+  },
+  "pet_healing_rabbit_intro": "Kind and dreamy. Healing Rabbit listens closely and makes friends feel safe.",
+  "@pet_healing_rabbit_intro": {
+    "description": "One- or two-sentence personality blurb for the healing_rabbit pet, shown on the onboarding reveal page."
+  },
+  "pet_happy_shiba_name": "Happy Shiba",
+  "@pet_happy_shiba_name": {
+    "description": "Display name of the happy_shiba pet."
+  },
+  "pet_happy_shiba_intro": "Cheerful and full of ideas. Happy Shiba turns any day into an adventure.",
+  "@pet_happy_shiba_intro": {
+    "description": "One- or two-sentence personality blurb for the happy_shiba pet, shown on the onboarding reveal page."
+  },
+  "pet_steady_beaver_name": "Steady Beaver",
+  "@pet_steady_beaver_name": {
+    "description": "Display name of the steady_beaver pet."
+  },
+  "pet_steady_beaver_intro": "Reliable and hardworking. Steady Beaver builds things carefully, one step at a time.",
+  "@pet_steady_beaver_intro": {
+    "description": "One- or two-sentence personality blurb for the steady_beaver pet, shown on the onboarding reveal page."
+  },
+  "pet_order_sheepdog_name": "Order Sheepdog",
+  "@pet_order_sheepdog_name": {
+    "description": "Display name of the order_sheepdog pet."
+  },
+  "pet_order_sheepdog_intro": "Organized and dependable. Order Sheepdog keeps everyone on track.",
+  "@pet_order_sheepdog_intro": {
+    "description": "One- or two-sentence personality blurb for the order_sheepdog pet, shown on the onboarding reveal page."
+  },
+  "pet_guardian_penguin_name": "Guardian Penguin",
+  "@pet_guardian_penguin_name": {
+    "description": "Display name of the guardian_penguin pet."
+  },
+  "pet_guardian_penguin_intro": "Loyal and caring. Guardian Penguin remembers the little things that matter.",
+  "@pet_guardian_penguin_intro": {
+    "description": "One- or two-sentence personality blurb for the guardian_penguin pet, shown on the onboarding reveal page."
+  },
+  "pet_warm_otter_name": "Warm Otter",
+  "@pet_warm_otter_name": {
+    "description": "Display name of the warm_otter pet."
+  },
+  "pet_warm_otter_intro": "Friendly and attentive. Warm Otter makes sure no one feels left out.",
+  "@pet_warm_otter_intro": {
+    "description": "One- or two-sentence personality blurb for the warm_otter pet, shown on the onboarding reveal page."
+  },
+  "pet_calm_blackcat_name": "Calm Black Cat",
+  "@pet_calm_blackcat_name": {
+    "description": "Display name of the calm_blackcat pet."
+  },
+  "pet_calm_blackcat_intro": "Cool-headed and handy. Calm Black Cat stays steady and fixes what's broken.",
+  "@pet_calm_blackcat_intro": {
+    "description": "One- or two-sentence personality blurb for the calm_blackcat pet, shown on the onboarding reveal page."
+  },
+  "pet_daring_falcon_name": "Daring Falcon",
+  "@pet_daring_falcon_name": {
+    "description": "Display name of the daring_falcon pet."
+  },
+  "pet_daring_falcon_intro": "Energetic and fearless. Daring Falcon jumps in first and figures it out on the way.",
+  "@pet_daring_falcon_intro": {
+    "description": "One- or two-sentence personality blurb for the daring_falcon pet, shown on the onboarding reveal page."
+  },
+  "pet_easygoing_alpaca_name": "Easygoing Alpaca",
+  "@pet_easygoing_alpaca_name": {
+    "description": "Display name of the easygoing_alpaca pet."
+  },
+  "pet_easygoing_alpaca_intro": "Relaxed and artistic. Easygoing Alpaca enjoys the moment and notices beauty everywhere.",
+  "@pet_easygoing_alpaca_intro": {
+    "description": "One- or two-sentence personality blurb for the easygoing_alpaca pet, shown on the onboarding reveal page."
+  },
+  "pet_party_parrot_name": "Party Parrot",
+  "@pet_party_parrot_name": {
+    "description": "Display name of the party_parrot pet."
+  },
+  "pet_party_parrot_intro": "Lively and fun. Party Parrot brings the energy wherever it goes.",
+  "@pet_party_parrot_intro": {
+    "description": "One- or two-sentence personality blurb for the party_parrot pet, shown on the onboarding reveal page."
+  },
+  "quiz_ei_prompt": "After a busy week, on the weekend you'd rather…",
+  "@quiz_ei_prompt": {
+    "description": "MBTI mini-quiz EI question."
+  },
+  "quiz_ei_a": "Go out with friends and have fun",
+  "@quiz_ei_a": {
+    "description": "MBTI mini-quiz EI answer option A."
+  },
+  "quiz_ei_b": "Stay in and recharge on your own",
+  "@quiz_ei_b": {
+    "description": "MBTI mini-quiz EI answer option B."
+  },
+  "quiz_sn_prompt": "A friend tells you about a new movie. You want to know…",
+  "@quiz_sn_prompt": {
+    "description": "MBTI mini-quiz SN question."
+  },
+  "quiz_sn_a": "What happens and who's in it",
+  "@quiz_sn_a": {
+    "description": "MBTI mini-quiz SN answer option A."
+  },
+  "quiz_sn_b": "What it's trying to say",
+  "@quiz_sn_b": {
+    "description": "MBTI mini-quiz SN answer option B."
+  },
+  "quiz_tf_prompt": "A friend made a not-so-great decision and asks you about it. You…",
+  "@quiz_tf_prompt": {
+    "description": "MBTI mini-quiz TF question."
+  },
+  "quiz_tf_a": "Point out what went wrong",
+  "@quiz_tf_a": {
+    "description": "MBTI mini-quiz TF answer option A."
+  },
+  "quiz_tf_b": "Look after their feelings first",
+  "@quiz_tf_b": {
+    "description": "MBTI mini-quiz TF answer option B."
+  },
+  "quiz_jp_prompt": "When you travel, you usually…",
+  "@quiz_jp_prompt": {
+    "description": "MBTI mini-quiz JP question."
+  },
+  "quiz_jp_a": "Plan the itinerary ahead",
+  "@quiz_jp_a": {
+    "description": "MBTI mini-quiz JP answer option A."
+  },
+  "quiz_jp_b": "Decide when you get there",
+  "@quiz_jp_b": {
+    "description": "MBTI mini-quiz JP answer option B."
   }
 }
