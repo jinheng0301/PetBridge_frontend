@@ -165,4 +165,37 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get quiz_jp_b => '가서 기분 따라 정해요';
+
+  @override
+  String get err_APPLE_LOGIN_UNAVAILABLE => 'Apple 로그인은 아직 사용할 수 없어요.';
+
+  @override
+  String get err_GOOGLE_SIGN_IN_FAILED => 'Google 로그인에 실패했어요. 다시 시도해 주세요.';
+
+  @override
+  String get common_continue => '계속';
+
+  @override
+  String get common_retry => '다시 시도';
+
+  @override
+  String get common_logout => '로그아웃';
+
+  @override
+  String get login_google => 'Google로 계속하기';
+
+  @override
+  String get login_apple => 'Apple로 계속하기';
+
+  @override
+  String get login_apple_coming_soon => 'Apple 로그인은 곧 제공될 예정이에요.';
+
+  @override
+  String get login_dev_title => '개발자 로그인 (dev 전용)';
+
+  @override
+  String get login_dev_email_label => '이메일';
+
+  @override
+  String get login_dev_submit => '로그인';
 }

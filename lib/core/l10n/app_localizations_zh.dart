@@ -161,6 +161,39 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get quiz_jp_b => '到了再看心情';
+
+  @override
+  String get err_APPLE_LOGIN_UNAVAILABLE => 'Apple 登录暂未开放。';
+
+  @override
+  String get err_GOOGLE_SIGN_IN_FAILED => 'Google 登录失败，请重试。';
+
+  @override
+  String get common_continue => '继续';
+
+  @override
+  String get common_retry => '重试';
+
+  @override
+  String get common_logout => '退出登录';
+
+  @override
+  String get login_google => '使用 Google 登录';
+
+  @override
+  String get login_apple => '使用 Apple 登录';
+
+  @override
+  String get login_apple_coming_soon => 'Apple 登录即将开放。';
+
+  @override
+  String get login_dev_title => '开发登录（仅 dev）';
+
+  @override
+  String get login_dev_email_label => '邮箱';
+
+  @override
+  String get login_dev_submit => '登录';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -319,6 +352,39 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get quiz_jp_b => '到了再看心情';
+
+  @override
+  String get err_APPLE_LOGIN_UNAVAILABLE => 'Apple 登录暂未开放。';
+
+  @override
+  String get err_GOOGLE_SIGN_IN_FAILED => 'Google 登录失败，请重试。';
+
+  @override
+  String get common_continue => '继续';
+
+  @override
+  String get common_retry => '重试';
+
+  @override
+  String get common_logout => '退出登录';
+
+  @override
+  String get login_google => '使用 Google 登录';
+
+  @override
+  String get login_apple => '使用 Apple 登录';
+
+  @override
+  String get login_apple_coming_soon => 'Apple 登录即将开放。';
+
+  @override
+  String get login_dev_title => '开发登录（仅 dev）';
+
+  @override
+  String get login_dev_email_label => '邮箱';
+
+  @override
+  String get login_dev_submit => '登录';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -477,4 +543,37 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get quiz_jp_b => '到了再看心情';
+
+  @override
+  String get err_APPLE_LOGIN_UNAVAILABLE => 'Apple 登入暫未開放。';
+
+  @override
+  String get err_GOOGLE_SIGN_IN_FAILED => 'Google 登入失敗，請重試。';
+
+  @override
+  String get common_continue => '繼續';
+
+  @override
+  String get common_retry => '重試';
+
+  @override
+  String get common_logout => '登出';
+
+  @override
+  String get login_google => '使用 Google 登入';
+
+  @override
+  String get login_apple => '使用 Apple 登入';
+
+  @override
+  String get login_apple_coming_soon => 'Apple 登入即將開放。';
+
+  @override
+  String get login_dev_title => '開發登入（僅 dev）';
+
+  @override
+  String get login_dev_email_label => '電子郵件';
+
+  @override
+  String get login_dev_submit => '登入';
 }

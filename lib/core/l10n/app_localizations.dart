@@ -409,6 +409,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Decide when you get there'**
   String get quiz_jp_b;
+
+  /// Apple sign-in is not available yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with Apple isn\'t available yet.'**
+  String get err_APPLE_LOGIN_UNAVAILABLE;
+
+  /// Google sign-in failed on the device (not a cancel).
+  ///
+  /// In en, this message translates to:
+  /// **'Google sign-in didn\'t work. Please try again.'**
+  String get err_GOOGLE_SIGN_IN_FAILED;
+
+  /// Primary button to go to the next step.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get common_continue;
+
+  /// Button to try a failed action again.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get common_retry;
+
+  /// Log out button.
+  ///
+  /// In en, this message translates to:
+  /// **'Log out'**
+  String get common_logout;
+
+  /// Google sign-in button on the login page.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Google'**
+  String get login_google;
+
+  /// Apple sign-in button on the login page.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Apple'**
+  String get login_apple;
+
+  /// Snackbar when the Apple button is tapped but Apple sign-in is off.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with Apple is coming soon.'**
+  String get login_apple_coming_soon;
+
+  /// Divider label above the developer email login (dev builds only).
+  ///
+  /// In en, this message translates to:
+  /// **'Developer login (dev only)'**
+  String get login_dev_title;
+
+  /// Label of the developer login email field.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get login_dev_email_label;
+
+  /// Button that logs in with the developer email.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in'**
+  String get login_dev_submit;
 }
 
 class _AppLocalizationsDelegate

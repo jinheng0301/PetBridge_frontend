@@ -50,5 +50,16 @@
   "quiz_tf_b": "先照顾他的感受",
   "quiz_jp_prompt": "出去旅行，你通常…",
   "quiz_jp_a": "提前排好行程",
-  "quiz_jp_b": "到了再看心情"
+  "quiz_jp_b": "到了再看心情",
+  "err_APPLE_LOGIN_UNAVAILABLE": "Apple 登录暂未开放。",
+  "err_GOOGLE_SIGN_IN_FAILED": "Google 登录失败，请重试。",
+  "common_continue": "继续",
+  "common_retry": "重试",
+  "common_logout": "退出登录",
+  "login_google": "使用 Google 登录",
+  "login_apple": "使用 Apple 登录",
+  "login_apple_coming_soon": "Apple 登录即将开放。",
+  "login_dev_title": "开发登录（仅 dev）",
+  "login_dev_email_label": "邮箱",
+  "login_dev_submit": "登录"
 }

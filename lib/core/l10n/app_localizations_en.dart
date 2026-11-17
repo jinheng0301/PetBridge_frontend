@@ -184,4 +184,39 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get quiz_jp_b => 'Decide when you get there';
+
+  @override
+  String get err_APPLE_LOGIN_UNAVAILABLE =>
+      'Sign in with Apple isn\'t available yet.';
+
+  @override
+  String get err_GOOGLE_SIGN_IN_FAILED =>
+      'Google sign-in didn\'t work. Please try again.';
+
+  @override
+  String get common_continue => 'Continue';
+
+  @override
+  String get common_retry => 'Try again';
+
+  @override
+  String get common_logout => 'Log out';
+
+  @override
+  String get login_google => 'Continue with Google';
+
+  @override
+  String get login_apple => 'Continue with Apple';
+
+  @override
+  String get login_apple_coming_soon => 'Sign in with Apple is coming soon.';
+
+  @override
+  String get login_dev_title => 'Developer login (dev only)';
+
+  @override
+  String get login_dev_email_label => 'Email';
+
+  @override
+  String get login_dev_submit => 'Log in';
 }

@@ -161,4 +161,37 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get quiz_jp_b => '着いてから気分で決める';
+
+  @override
+  String get err_APPLE_LOGIN_UNAVAILABLE => 'Apple でのサインインはまだご利用いただけません。';
+
+  @override
+  String get err_GOOGLE_SIGN_IN_FAILED => 'Google でのサインインに失敗しました。もう一度お試しください。';
+
+  @override
+  String get common_continue => '次へ';
+
+  @override
+  String get common_retry => '再試行';
+
+  @override
+  String get common_logout => 'ログアウト';
+
+  @override
+  String get login_google => 'Google で続ける';
+
+  @override
+  String get login_apple => 'Apple で続ける';
+
+  @override
+  String get login_apple_coming_soon => 'Apple でのサインインは近日公開予定です。';
+
+  @override
+  String get login_dev_title => '開発者ログイン（dev のみ）';
+
+  @override
+  String get login_dev_email_label => 'メールアドレス';
+
+  @override
+  String get login_dev_submit => 'ログイン';
 }

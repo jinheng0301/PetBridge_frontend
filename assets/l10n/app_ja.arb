@@ -51,5 +51,16 @@
   "quiz_tf_b": "まず気持ちに寄り添う",
   "quiz_jp_prompt": "旅行に行くとき、いつもは…",
   "quiz_jp_a": "前もって予定を決めておく",
-  "quiz_jp_b": "着いてから気分で決める"
+  "quiz_jp_b": "着いてから気分で決める",
+  "err_APPLE_LOGIN_UNAVAILABLE": "Apple でのサインインはまだご利用いただけません。",
+  "err_GOOGLE_SIGN_IN_FAILED": "Google でのサインインに失敗しました。もう一度お試しください。",
+  "common_continue": "次へ",
+  "common_retry": "再試行",
+  "common_logout": "ログアウト",
+  "login_google": "Google で続ける",
+  "login_apple": "Apple で続ける",
+  "login_apple_coming_soon": "Apple でのサインインは近日公開予定です。",
+  "login_dev_title": "開発者ログイン（dev のみ）",
+  "login_dev_email_label": "メールアドレス",
+  "login_dev_submit": "ログイン"
 }

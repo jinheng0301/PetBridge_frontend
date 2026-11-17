@@ -2,7 +2,17 @@ import 'package:material_ui/material_ui.dart';
 import 'package:petbridge/app/theme/app_theme.dart';
 import 'package:petbridge/core/l10n/app_localizations.dart';
 
-/// Root widget. Routing arrives in Task 6; until then a placeholder home.
+/// Localization delegates for the app. The material and cupertino ones
+/// come from `material_ui` / `cupertino_ui`; gen-l10n's default list uses
+/// `flutter_localizations`' versions, which those packages' widgets do not
+/// read, so AppBar etc. would fail in every language but English.
+const List<LocalizationsDelegate<dynamic>> appLocalizationsDelegates = [
+  AppLocalizations.delegate,
+  ...GlobalMaterialLocalizations.delegates,
+];
+
+/// Root widget. Routing is wired in once the onboarding and home pages
+/// exist; until then a placeholder home.
 class PetBridgeApp extends StatelessWidget {
   const new({super.key});
 
@@ -12,7 +22,7 @@ class PetBridgeApp extends StatelessWidget {
       onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      localizationsDelegates: appLocalizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       builder: (context, child) => _ClampTextScale(child: child!),
       home: const _PlaceholderHome(),

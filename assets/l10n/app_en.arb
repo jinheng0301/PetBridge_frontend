@@ -203,5 +203,49 @@
   "quiz_jp_b": "Decide when you get there",
   "@quiz_jp_b": {
     "description": "MBTI mini-quiz JP answer option B."
+  },
+  "err_APPLE_LOGIN_UNAVAILABLE": "Sign in with Apple isn't available yet.",
+  "@err_APPLE_LOGIN_UNAVAILABLE": {
+    "description": "Apple sign-in is not available yet."
+  },
+  "err_GOOGLE_SIGN_IN_FAILED": "Google sign-in didn't work. Please try again.",
+  "@err_GOOGLE_SIGN_IN_FAILED": {
+    "description": "Google sign-in failed on the device (not a cancel)."
+  },
+  "common_continue": "Continue",
+  "@common_continue": {
+    "description": "Primary button to go to the next step."
+  },
+  "common_retry": "Try again",
+  "@common_retry": {
+    "description": "Button to try a failed action again."
+  },
+  "common_logout": "Log out",
+  "@common_logout": {
+    "description": "Log out button."
+  },
+  "login_google": "Continue with Google",
+  "@login_google": {
+    "description": "Google sign-in button on the login page."
+  },
+  "login_apple": "Continue with Apple",
+  "@login_apple": {
+    "description": "Apple sign-in button on the login page."
+  },
+  "login_apple_coming_soon": "Sign in with Apple is coming soon.",
+  "@login_apple_coming_soon": {
+    "description": "Snackbar when the Apple button is tapped but Apple sign-in is off."
+  },
+  "login_dev_title": "Developer login (dev only)",
+  "@login_dev_title": {
+    "description": "Divider label above the developer email login (dev builds only)."
+  },
+  "login_dev_email_label": "Email",
+  "@login_dev_email_label": {
+    "description": "Label of the developer login email field."
+  },
+  "login_dev_submit": "Log in",
+  "@login_dev_submit": {
+    "description": "Button that logs in with the developer email."
   }
 }
