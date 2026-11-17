@@ -109,6 +109,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'PetBridge'**
   String get appTitle;
+
+  /// Fallback for any error code without its own text.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get err_UNKNOWN;
+
+  /// No connection, DNS failure or timeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t reach the server. Check your connection and try again.'**
+  String get err_NETWORK;
+
+  /// Server rejected the submitted fields.
+  ///
+  /// In en, this message translates to:
+  /// **'Some of the information isn\'t valid. Please check and try again.'**
+  String get err_VALIDATION_FAILED;
+
+  /// Server has no config for the chosen login provider.
+  ///
+  /// In en, this message translates to:
+  /// **'This sign-in method isn\'t available right now.'**
+  String get err_PROVIDER_NOT_CONFIGURED;
+
+  /// Login refused because the account is disabled.
+  ///
+  /// In en, this message translates to:
+  /// **'This account has been disabled.'**
+  String get err_ACCOUNT_DISABLED;
+
+  /// Server rate limit hit.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Please wait a moment and try again.'**
+  String get err_RATE_LIMITED;
 }
 
 class _AppLocalizationsDelegate

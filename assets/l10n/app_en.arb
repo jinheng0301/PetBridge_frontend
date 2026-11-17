@@ -3,5 +3,29 @@
   "appTitle": "PetBridge",
   "@appTitle": {
     "description": "App name; not translated."
+  },
+  "err_UNKNOWN": "Something went wrong. Please try again.",
+  "@err_UNKNOWN": {
+    "description": "Fallback for any error code without its own text."
+  },
+  "err_NETWORK": "Can't reach the server. Check your connection and try again.",
+  "@err_NETWORK": {
+    "description": "No connection, DNS failure or timeout."
+  },
+  "err_VALIDATION_FAILED": "Some of the information isn't valid. Please check and try again.",
+  "@err_VALIDATION_FAILED": {
+    "description": "Server rejected the submitted fields."
+  },
+  "err_PROVIDER_NOT_CONFIGURED": "This sign-in method isn't available right now.",
+  "@err_PROVIDER_NOT_CONFIGURED": {
+    "description": "Server has no config for the chosen login provider."
+  },
+  "err_ACCOUNT_DISABLED": "This account has been disabled.",
+  "@err_ACCOUNT_DISABLED": {
+    "description": "Login refused because the account is disabled."
+  },
+  "err_RATE_LIMITED": "Too many attempts. Please wait a moment and try again.",
+  "@err_RATE_LIMITED": {
+    "description": "Server rate limit hit."
   }
 }
