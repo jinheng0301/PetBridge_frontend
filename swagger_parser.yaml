@@ -1,0 +1,9 @@
+# swagger_parser 2.x config (the 1.x keys merge_clients / json_serializer no
+# longer exist; the root facade replaces the merged client).
+swagger_parser:
+  schema_path: ../PetBridge_backend/api/openapi.yaml
+  output_directory: lib/gen
+  generation:
+    root_api_class_name: PetBridgeApi
+    http_client: retrofit
+    serializer: freezed
