@@ -38,6 +38,7 @@ export 'me/models/onboarding_result_room.dart';
 export 'me/models/profile.dart';
 export 'me/models/profile_age_band.dart';
 export 'me/models/profile_native_lang.dart';
+export 'realtime/realtime_client.dart';
 export 'rooms/models/code_info.dart';
 export 'rooms/models/dissolve_room_response200.dart';
 export 'rooms/models/join_request.dart';

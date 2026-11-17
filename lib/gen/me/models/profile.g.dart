@@ -10,7 +10,7 @@ Profile _$ProfileFromJson(Map<String, dynamic> json) {
   $checkKeys(
     json,
     requiredKeys: const ['id', 'onboarded'],
-    disallowNullValues: const ['id', 'native_lang', 'age_band', 'onboarded'],
+    disallowNullValues: const ['id', 'onboarded'],
   );
   return Profile(
     id: json['id'] as String,

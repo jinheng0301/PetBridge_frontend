@@ -21,7 +21,6 @@ class const Profile({
 
   @JsonKey(
     name: "native_lang",
-    disallowNullValue: true,
     includeIfNull: false,
     fromJson: Profile._read_nativeLang,
     toJson: Profile._write_nativeLang,
@@ -34,7 +33,6 @@ class const Profile({
 
   @JsonKey(
     name: "age_band",
-    disallowNullValue: true,
     includeIfNull: false,
     fromJson: Profile._read_ageBand,
     toJson: Profile._write_ageBand,

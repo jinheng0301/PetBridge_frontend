@@ -4,7 +4,13 @@ import 'package:dio/dio.dart' as transport;
 
 import 'exports.dart'
     as clients
-    show ApiClient, AuthClient, CodesClient, MeClient, RoomsClient;
+    show
+        ApiClient,
+        AuthClient,
+        CodesClient,
+        MeClient,
+        RealtimeClient,
+        RoomsClient;
 
 export 'exports.dart';
 
@@ -25,5 +31,6 @@ final class PetBridgeApi {
   late final clients.AuthClient auth = clients.AuthClient(_client);
   late final clients.CodesClient codes = clients.CodesClient(_client);
   late final clients.MeClient me = clients.MeClient(_client);
+  late final clients.RealtimeClient realtime = clients.RealtimeClient(_client);
   late final clients.RoomsClient rooms = clients.RoomsClient(_client);
 }

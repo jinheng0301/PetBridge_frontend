@@ -51,7 +51,7 @@ abstract mixin class $ProfileCopyWith<$Res>  {
   factory $ProfileCopyWith(Profile value, $Res Function(Profile) _then) = _$ProfileCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(required: true, disallowNullValue: true) String id,@JsonKey(includeIfNull: false) String? nickname,@JsonKey(name: "native_lang", disallowNullValue: true, includeIfNull: false, fromJson: Profile._read_nativeLang, toJson: Profile._write_nativeLang) ProfileNativeLang? nativeLang,@JsonKey(includeIfNull: false) String? mbti,@JsonKey(name: "pet_type", includeIfNull: false) String? petType,@JsonKey(name: "age_band", disallowNullValue: true, includeIfNull: false, fromJson: Profile._read_ageBand, toJson: Profile._write_ageBand) ProfileAgeBand? ageBand,@JsonKey(includeIfNull: false) String? tz,@JsonKey(required: true, disallowNullValue: true) bool onboarded,@JsonKey(readValue: Profile._extras, fromJson: Profile._readExtras, includeToJson: false) Map<String, Object?> additionalProperties
+@JsonKey(required: true, disallowNullValue: true) String id,@JsonKey(includeIfNull: false) String? nickname,@JsonKey(name: "native_lang", includeIfNull: false, fromJson: Profile._read_nativeLang, toJson: Profile._write_nativeLang) ProfileNativeLang? nativeLang,@JsonKey(includeIfNull: false) String? mbti,@JsonKey(name: "pet_type", includeIfNull: false) String? petType,@JsonKey(name: "age_band", includeIfNull: false, fromJson: Profile._read_ageBand, toJson: Profile._write_ageBand) ProfileAgeBand? ageBand,@JsonKey(includeIfNull: false) String? tz,@JsonKey(required: true, disallowNullValue: true) bool onboarded,@JsonKey(readValue: Profile._extras, fromJson: Profile._readExtras, includeToJson: false) Map<String, Object?> additionalProperties
 });
 
 

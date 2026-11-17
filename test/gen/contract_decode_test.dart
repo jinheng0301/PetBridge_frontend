@@ -18,6 +18,23 @@ void main() {
     expect(profile.petType, 'happy_shiba');
   });
 
+  test('Profile decodes a new user with null fields', () {
+    final profile = Profile.fromJson(const {
+      'id': '6f1c2a9e-3b7d-4c1e-9a2f-1d2e3f4a5b6c',
+      'nickname': null,
+      'native_lang': null,
+      'mbti': null,
+      'pet_type': null,
+      'age_band': null,
+      'tz': null,
+      'onboarded': false,
+    });
+
+    expect(profile.onboarded, isFalse);
+    expect(profile.nativeLang, isNull);
+    expect(profile.ageBand, isNull);
+  });
+
   test('OnboardingRequest encodes snake_case', () {
     final json = OnboardingRequest.fromJson(const {
       'nickname': 'Aki',
