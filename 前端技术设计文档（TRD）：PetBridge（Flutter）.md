@@ -2,13 +2,15 @@
 
 | 项目 | 内容 |
 | :-- | :-- |
-| 版本 | v1.4（草案，待自评审；较 v1.3：对齐后端 B4 的 WebSocket 协议，reducer 改为以订阅快照为准，presence 只有在线 / 离线、离线显示为睡觉。v1.3 较 v1.2：对齐 PRD v1.5 与后端 TRD v1.3，F0 登录与 onboarding 设计定稿，首页改为四个 Tab，契约生成改用 swagger_parser） |
+| 版本 | v1.5（草案，待自评审；较 v1.4：对齐后端 TRD v1.5 的 WebSocket 加固：处理关闭码 4401、升级 429 / 503 与 `room.sub` 限流。v1.4 较 v1.3：对齐后端 B4 的 WebSocket 协议，reducer 改为以订阅快照为准，presence 只有在线 / 离线、离线显示为睡觉。v1.3 较 v1.2：对齐 PRD v1.5 与后端 TRD v1.3，F0 登录与 onboarding 设计定稿，首页改为四个 Tab，契约生成改用 swagger_parser） |
 | 对应 PRD | 《跨国 MBTI 情感 AI 电子宠物 PRD v1.6》 |
-| 配套文档 | 《后端 TRD（Go）v1.4》：REST 接口见其第 8 章，WebSocket 协议见其第 9 章，本文以其为准 |
+| 配套文档 | 《后端 TRD（Go）v1.5》：REST 接口见其第 8 章，WebSocket 协议见其第 9 章，本文以其为准 |
 | 技术栈 | Flutter 3.x 稳定版 / Dart 3 |
 | 平台 | iOS 15+、Android 8+（竖屏，手机优先，不适配平板） |
 | 开发模式 | **单人全栈开发**，选型以“一个人能长期维护”为第一约束 |
 
+> **V1.5 变更说明**：对齐后端 TRD v1.5（B4 安全加固），PRD 不变。① 服务端在升级所用 access token 到期时以关闭码 **4401** 断开连接：客户端收到后先刷新 token，再**立即**重连，不走退避（9.2）。前端本来就在 token 剩余不足 60 秒时先刷新再连，所以正常情况下 4401 后的重连在 3 秒内完成，不会出现“正在重连”提示。② 升级请求可能返回 HTTP 429 `RATE_LIMITED`（按 `Retry-After` 等待后重连）或 503 `NOT_READY`（服务重启中，按 `server.restart` 的随机等待处理）（9.2）。③ `room.sub` 每连接每 10 秒最多 10 次，超出会收到 `error{RATE_LIMITED}`；缺口触发的重新订阅要合并，同一房间 1 秒内不重复订阅（第 7 章 reducer 规则 2、5）。
+>
 > **V1.4 变更说明**：对齐 PRD v1.6 与后端 TRD v1.4（B4 WebSocket 协议定稿，详见后端仓库 `docs/superpowers/specs/2026-11-17-b4-realtime-design.md`）。① **reducer 以订阅快照为准**（4.5③、第 7 章）：每次 `room.sub` 服务端都下发完整 `room.snapshot`，客户端用它整体替换房间状态，并把 `last_seq` **设为**快照的 seq（不取较大值，Redis 重启后 seq 会从头开始）；之后丢弃 seq ≤ `last_seq` 的事件，不带 seq 的事件直接应用，成员事件按 `user_id` 幂等；发现缺口或收到 `resync` 时对该房间重新发 `room.sub`，不再拉 `GET /rooms/{id}`（后端 MVP 不实现该接口）（9.2）。② **presence 只有 online / offline**：离线成员的 `PetView` 显示为睡觉（`mood=3`），收到 `presence.update` 立即切换，用户回到 App 时同屋的人立刻看到他的宠物醒来（10.1）；`member.joined` 自带新成员的 presence。③ `room.kicked` 新增 `reason=left`（自己在另一台设备上退出），处理与被移除相同但不提示；新增 `error` 帧与 `room.unsub`（第 7 章）。④ `WS_URL` 改为 `ws://10.0.2.2:8090/api/v1/ws`，与 REST 同一基础路径（19.4）。⑤ 订阅范围写明：连接后订阅自己所有在席房间（自己的 + 已加入的）（6.1）。
 >
 > **V1.3 变更说明**：对齐 PRD v1.5 与后端 TRD v1.3，前端 F0（登录与 onboarding）设计定稿，详见 `docs/superpowers/specs/2026-11-16-f0-login-onboarding-design.md`。① **契约生成改用 `swagger_parser`**（纯 Dart，无需 Java），替代 `openapi-generator` dart-dio（第 3 章、8.2）。② **环境先只建 dev**：暂不建 staging / prod flavor 与多入口，只用一个 `main.dart` + `--dart-define-from-file`；新增 `GOOGLE_SERVER_CLIENT_ID`、`APPLE_LOGIN_ENABLED` 两个键；本地后端端口改为 **8090**（与后端 `.env` 一致）（19.4、19.5）。③ **feature 内按需建层**：本地模型先放在用到它的 `application/`，出现跨 feature 共用时再建 `shared/models/`（第 5 章）。④ **首页底部导航改为四个 Tab：小屋 / 聊天 / 背包 / 我的**，场景与聊天分开，与常见社交 App 一致（11.0 线框、6.2 路由、11.4）。⑤ Onboarding 写入 4 道测试题、每个维度可手动翻转确认、“未满 13 岁”独立说明页（11.1、6.2）；会话状态在小屋阶段之前先用 `unknown / unauthenticated / needsOnboarding / ready` 四态（6.1）。⑥ **Apple 登录延后**：目前没有 Mac 与 Apple 开发者账号，F0 只做按钮与接口层（`APPLE_LOGIN_ENABLED=false`），上架 iOS 前必须补齐（第 20 章、21.1）。⑦ Android `applicationId` 定为 `io.github.jinheng0301.petbridge`，`minSdk 26`；Google 登录用 `google_sign_in` v7，`serverClientId` 为 Web 客户端 ID（第 3 章、15 章前）。⑧ 联调与测试去掉 docker compose，改为本机原生 PostgreSQL + Memurai 与 go-task；worker 尚未实现（19.2、19.5、21.2）。⑨ 背包状态“已满员作废”改为“已作废”（满员与解散都会作废）；错误处理补 `ROOM_NOT_FOUND`、`ONBOARDING_REQUIRED`、`ALREADY_MEMBER` 直接进房（11.3、第 18 章）。⑩ 宠物资源与 `PetView` 改按 `pet_type`（如 `happy_shiba`）命名，不再按 MBTI：后端成员信息只下发 `pet_type`（4.6、第 5 章、10.1、10.2、21.1）。其余章节（WebSocket 客户端、小屋渲染、本地存储、性能与安全）不变。
@@ -527,12 +529,13 @@ disconnected ─► connecting ─► connected ─(收到 hello)─► ready �
 
 | 项 | 策略 |
 | :-- | :-- |
-| 鉴权 | 升级请求头带 `Authorization: Bearer <access>`；token 即将过期（< 60 秒）先刷新再连 |
+| 鉴权 | 升级请求头带 `Authorization: Bearer <access>`；token 即将过期（< 60 秒）先刷新再连；收到关闭码 **4401**（token 到期）先刷新 token 再立即重连，不走退避（v1.5） |
 | 心跳 | 使用连接层 `pingInterval`（25 秒，与服务端 `hello` 下发值一致）；应用层不重复实现心跳 |
 | 重连退避 | 1、2、4、8、16、30 秒，叠加 0–30% 抖动；连接稳定超过 60 秒后重置退避 |
 | 前后台 | 进入后台 30 秒后主动断开以省电；回到前台立即重连并 `room.sub`（带各房间 `last_seq`） |
 | `resync` | 对相应房间重新发 `room.sub`，用新快照覆盖本地状态；消息阶段（F3）另行拉取最近消息（v1.4：不再拉 `GET /rooms/{id}`） |
-| `server.restart` | 随机等待 1–10 秒再重连，避免服务重启时所有客户端同时涌入 |
+| `server.restart` | 随机等待 1–10 秒再重连，避免服务重启时所有客户端同时涌入；升级返回 503 `NOT_READY` 时同样处理（v1.5） |
+| 限流（v1.5） | 升级返回 429 `RATE_LIMITED` 时按 `Retry-After` 等待；`room.sub` 收到 `error{RATE_LIMITED}` 时 1 秒后再订阅；缺口或 `resync` 引起的重新订阅要合并，同一房间 1 秒内不重复发 |
 | 协议版本 | `hello.proto` 高于客户端支持的主版本，或 `hello.min_app_version` 高于当前 App 版本，或 REST 返回 HTTP 426 `UPGRADE_REQUIRED` → 弹出强制更新页（接口约定见后端 TRD 第 8、9 章） |
 | 发送 | 仅 `pet.tap` 等轻量事件走 WS；消息发送与润色走 REST，保证幂等与可重试 |
 | 状态指示 | 断线超过 3 秒才显示“正在重连”提示，避免闪烁 |

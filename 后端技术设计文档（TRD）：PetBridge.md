@@ -2,13 +2,15 @@
 
 | 项目 | 内容 |
 | :-- | :-- |
-| 版本 | v1.4（草案，待自评审；较 v1.3：B4 WebSocket 协议定稿，断线恢复改为每次订阅下发快照，presence 只有在线 / 离线，Redis 故障时本机兜底推送。v1.3 较 v1.2：对齐 PRD v1.5 与前端 TRD v1.3，Google 登录接入真实校验，Apple 登录延后，本地端口统一为 8090。v1.2 较 v1.1：对齐 PRD v1.4，新增房主管理，修正消息表分区方案，补充本地运行说明） |
+| 版本 | v1.5（草案，待自评审；较 v1.4：B4 安全审查后加固 WebSocket：连接在 access token 到期时关闭（4401），连接与订阅限流。v1.4 较 v1.3：B4 WebSocket 协议定稿，断线恢复改为每次订阅下发快照，presence 只有在线 / 离线，Redis 故障时本机兜底推送。v1.3 较 v1.2：对齐 PRD v1.5 与前端 TRD v1.3，Google 登录接入真实校验，Apple 登录延后，本地端口统一为 8090。v1.2 较 v1.1：对齐 PRD v1.4，新增房主管理，修正消息表分区方案，补充本地运行说明） |
 | 对应 PRD | 《跨国 MBTI 情感 AI 电子宠物 PRD v1.6》 |
-| 配套文档 | 《前端 TRD（Flutter）v1.4》：WebSocket 协议、API 调用方式以本文第 8、9 章为准 |
+| 配套文档 | 《前端 TRD（Flutter）v1.5》：WebSocket 协议、API 调用方式以本文第 8、9 章为准 |
 | 语言 / 运行时 | Go 1.26（以 `go.mod` 为准） |
 | 开发模式 | **单人全栈开发**，所有选型以“一个人能长期维护”为第一约束 |
 | 目标区域 | 日本东京区域起步（覆盖 JP / KR / TW 延迟；中国大陆暂不首发） |
 
+> **V1.5 变更说明**：B4 实现后做了安全审查与代码审查，WebSocket 加固如下，对齐前端 TRD v1.5，PRD 不变。① **连接不再比 token 活得久**（7.3、第 9 章）：v1.4 只在升级时校验 token，被盗的 access token 连上后，即使用户登出也能一直收房间消息；现在服务端在该 access token 到期（默认 15 分钟）时以关闭码 **4401** 断开，客户端刷新 token 后立即重连。登出、封号对 WS 的影响因此与 REST 一样，最迟在 access token 到期时生效。② **限流**（7.3、12.1）：升级请求按 IP 每分钟 60 次、按用户每分钟 20 次，超出返回 HTTP 429 `RATE_LIMITED`；每条连接每 10 秒最多 10 次 `room.sub`，超出回 `error{RATE_LIMITED}`；`room_id` 不是 UUID 的直接回 `ROOM_NOT_FOUND`，不查库。③ **其余加固**（7.3）：服务重启开始后新的升级请求返回 HTTP 503 `NOT_READY`；`hello` 保证是第一帧；订阅等待快照期间暂存的事件超过 64 条即以 1008 断开；每个客户端请求背后的数据库与 Redis 操作 5 秒超时；连接的读写心跳协程与 Redis 订阅回调都有 panic 保护，不会拖垮整个进程。
+>
 > **V1.4 变更说明**：对齐 PRD v1.6 与前端 TRD v1.4，配合 B4（WebSocket Hub、presence、事件分发）设计定稿，详见 `docs/superpowers/specs/2026-11-17-b4-realtime-design.md`。① **断线恢复改为“每次订阅都下发快照”**（4.5③、7.3）：`room.sub` 一律返回从数据库生成的完整 `room.snapshot`，早于快照 seq 的事件客户端本来就会丢弃，补发没有收益，所以 B4 不写 Redis Stream `room:{rid}:events`，`last_seq` 字段保留但暂不使用，B5 有了 `message.new` 再评估是否需要重放；`resync` 改为“客户端重新发 `room.sub`”，`GET /rooms/{id}` MVP 不实现（第 8 章）。② **第 9 章协议重写**：WS 路径与其他接口一样在 `/api/v1` 下（`GET /api/v1/ws`）；新增 `room.unsub` 与 `error` 帧；只有发给全房在席成员的状态事件（`member.joined`、`member.left`）带 seq，个人事件与瞬时事件不带；`pet.tap` / `pet.action` 负载定稿，动作差异由前端宠物动画内部实现；`member.joined` 带新成员的 presence；`room.kicked` 新增 `reason=left`，`code.invalidated` 的 reason 补上 `dissolved`。③ **presence 只有 online / offline**（7.3、第 11 章）：离线时前端把宠物画成睡觉；`presence:u:{uid}` 改为 ZSET（成员为连接 id、分数为过期时间），最后一条连接关闭才判定离线，每次上下线都实时广播。④ **Redis 故障时本机兜底**（7.3、12.2）：写 Redis 失败的事件由本进程 Hub 直接推送（不带 seq），presence 退化为进程内计数；Redis 订阅重连后向本机所有连接发 `resync`。⑤ **补齐 B3 两处事件**（7.8）：解散时给房主发每个被移出成员的 `member.left{dissolved}`；主动退出时给退出者本人发 `room.kicked{left}`，让其其他设备同步离开。⑥ 新增环境变量 `MIN_APP_VERSION`（15.4），只用于 `hello`；WS 协议参数（心跳 25 秒、presence 70 秒、每用户 3 条连接等）为代码常量。⑦ 优雅重启改为发 `server.restart` 后立即断开（7.3）。
 >
 > **V1.3 变更说明**：对齐 PRD v1.5 与前端 TRD v1.3，配合前端 F0（登录与 onboarding）设计定稿，无接口变更。① **Google 登录接入真实校验**（7.1、第 5 章 `pkg/idtoken`）：`pkg/idtoken` 新增 Google 验证器——从 Google 的 JWKS（`https://www.googleapis.com/oauth2/v3/certs`，按 `Cache-Control` 缓存）取公钥，用 `golang-jwt` 校验 RS256 签名、`iss`（`accounts.google.com` 或 `https://accounts.google.com`）、`aud == GOOGLE_CLIENT_ID`、`exp`，返回 `sub`；`GOOGLE_CLIENT_ID` 为空时仍返回 501 `PROVIDER_NOT_CONFIGURED`。`GOOGLE_CLIENT_ID` 明确为 Google Cloud 中 **Web 应用类型** OAuth 客户端的 ID（前端 `google_sign_in` 的 `serverClientId` 用同一个值，Android 端另建 Android 客户端，不需要传给后端）。② **Apple 登录延后**：没有 Mac 与 Apple 开发者账号，Apple 继续使用占位验证器，上架 iOS 前补齐。③ 本地端口统一为 **8090**（与 `.env.example` 一致，15.4、15.5）。④ 4.4 公开路由组补上 `POST /auth/login/dev`（仅 local）。⑤ Go 版本按 `go.mod` 改为 1.26。⑥ 15.5 本地命令以 go-task（`task …`）为准，`make` 写法仅作对照；worker 尚未实现。
@@ -575,14 +577,14 @@ ALTER TABLE room_bans ADD CONSTRAINT pk_room_ban PRIMARY KEY (room_id, user_id);
 
 ### 7.3 实时连接与房间事件
 
-- 客户端连接 `GET /api/v1/ws`（升级请求用 `Authorization` 头携带 access token，避免 token 进 URL 日志）。升级前走与 REST 相同的鉴权，未完成 onboarding 返回 403 `ONBOARDING_REQUIRED`；token 只在升级时校验，连接建立后过期不断开（v1.4）。
+- 客户端连接 `GET /api/v1/ws`（升级请求用 `Authorization` 头携带 access token，避免 token 进 URL 日志）。升级前走与 REST 相同的鉴权，未完成 onboarding 返回 403 `ONBOARDING_REQUIRED`。连接在升级所用 access token 到期时以关闭码 4401 断开，客户端刷新 token 后立即重连；登出、封号因此最迟在 access token 到期时对 WS 生效，与 REST 一致（v1.5，取代 v1.4 的“连接建立后过期不断开”）。升级请求按 IP 每分钟 60 次、按用户每分钟 20 次限流，超出返回 429 `RATE_LIMITED`；服务重启开始后新的升级请求返回 503 `NOT_READY`（v1.5）。
 - 连接建立后服务端下发 `hello`（含服务器时间、心跳间隔、`proto`、`min_app_version`），客户端对每个要看的房间发送 `room.sub`。
 - **每次订阅都下发快照（v1.4）**：服务端先登记订阅（此后该房间的事件暂存），再读 `room:{rid}:seq` 得到 S，再从 PostgreSQL 读房间与成员、从 presence 读在线状态，发 `room.snapshot{seq:S}`，最后按序发暂存的事件。快照是唯一可信的状态，客户端用它整体替换房间状态，并把 `last_seq` **设为** S（不取较大值）。非在席成员订阅返回 `error{ROOM_NOT_FOUND}`；每条连接最多订阅 2 个房间。
 - **事件分发**：业务代码调用 `Publisher.Publish(event)`。发给全房在席成员的状态事件（`member.joined`、`member.left`）先 `INCR room:{rid}:seq` 取得 seq；事件写入 Redis 频道 `ws:events`；每个 api 节点订阅该频道，只推给本机上订阅了该房间的目标用户连接。个人事件（`room.kicked`、`code.invalidated`）推给目标用户的所有连接，不需要订阅；服务端收到 `room.kicked` 时同时取消该用户对该房间的订阅。单节点阶段这层看似多余，但它让“加第二台 api”变成零改动。
 - **Redis 故障时本机兜底（v1.4）**：`INCR` 或 `PUBLISH` 任一步失败，事件由本进程的 Hub 直接推送，不带 seq，客户端收到即应用（成员事件按 `user_id` 幂等）。单节点阶段实时功能不中断；多节点时兜底只覆盖本机，其他节点的客户端在下次订阅时由快照修正。Redis 订阅断开后重连成功，向本机所有连接发一次 `resync`，客户端重新订阅拿新快照（Redis 重启后 seq 会从头开始，也由此恢复）。
 - **断线重放**：v1.4 起不做。早于快照 seq 的事件客户端会丢弃，补发没有收益；`room.sub` 的 `last_seq` 保留但暂不使用。B5 有了 `message.new` 再评估是否需要 Redis Stream 重放。
 - **Presence（v1.4）**：只有 `online` / `offline` 两种，前端把离线成员画成宠物在睡觉。`presence:u:{uid}` 为 ZSET（成员是连接 id，分数是过期时间），服务端每 25 秒对每条连接发 WS ping，成功即刷新（过期时间 = 现在 + 70 秒），10 秒无回应则关闭连接。用户在线连接数 0→1 时广播 `online`，降到 0 时广播 `offline`，发给他所有在席房间的其他成员，状态持续实时更新：离线的人回到 App，同屋在线的人立刻看到他的宠物醒来。新成员入房时，`member.joined` 里带上他当前的 presence。Redis 不可用时退化为进程内连接计数。已知局限：进程被强杀时不广播 `offline`，其他人要到下次快照才看到，ZSET 成员 70 秒后自然过期。
-- **连接保护**：单用户最多 3 条并发连接，超出时关闭最旧的一条（关闭码 4001）；读帧上限 4KB；每连接每秒最多 10 个客户端帧；每条连接一个容量 64 的发送队列，队列满或写超时 5 秒即断开（慢客户端）；`pet.tap` 每连接每秒最多 2 次，超出静默丢弃。
+- **连接保护**：单用户最多 3 条并发连接，超出时关闭最旧的一条（关闭码 4001）；读帧上限 4KB；每连接每秒最多 10 个客户端帧；每条连接一个容量 64 的发送队列，队列满或写超时 5 秒即断开（慢客户端）；`pet.tap` 每连接每秒最多 2 次，超出静默丢弃；`room.sub` 每连接每 10 秒最多 10 次，超出回 `error{RATE_LIMITED}`，`room_id` 不是 UUID 的直接回 `ROOM_NOT_FOUND`；订阅等待快照期间暂存的事件超过 64 条即以 1008 断开；每个客户端请求背后的数据库与 Redis 操作 5 秒超时（v1.5）。
 - **优雅重启**：收到 SIGTERM 先向所有连接下发 `server.restart` 帧，随即以 1001 断开全部连接，再关闭 HTTP 服务；客户端随机等待 1–10 秒后重连（v1.4：不再等待 30 秒）。
 
 ### 7.4 消息发送与 AI 信使
@@ -754,8 +756,8 @@ ALTER TABLE room_bans ADD CONSTRAINT pk_room_ban PRIMARY KEY (room_id, user_id);
 
 | 方向 | t | 负载要点 | 带 seq |
 | :-- | :-- | :-- | :-- |
-| S→C | hello | `server_time`、`heartbeat_sec`（25）、`proto`（1）、`min_app_version` | 否 |
-| C→S | room.sub | `room_id`、`last_seq`（可选，v1.4 暂不使用） | — |
+| S→C | hello | 连接后的第一帧（v1.5 保证）：`server_time`、`heartbeat_sec`（25）、`proto`（1）、`min_app_version` | 否 |
+| C→S | room.sub | `room_id`、`last_seq`（可选，v1.4 暂不使用）；每连接每 10 秒最多 10 次（v1.5） | — |
 | C→S | room.unsub | `room_id`（v1.4 新增） | — |
 | S→C | room.snapshot | `room_id`、`seq`（当前房间序号）、`room`：与 `GET /rooms/mine` 单项同结构（`id`、`status`、`member_count`、`capacity`、`is_owner`、`members[]`），每个成员多一个 `presence`（`online` / `offline`） | 否（seq 在 d 里） |
 | S→C | member.joined | `room_id`、`member`（成员信息 + `presence`） | 是 |
@@ -770,12 +772,12 @@ ALTER TABLE room_bans ADD CONSTRAINT pk_room_ban PRIMARY KEY (room_id, user_id);
 | S→C | code.invalidated | `room_id`、`reason`（room_full / dissolved）；发给被作废码的持有者 | 否 |
 | S→C | resync | `room_id`（可选，缺省表示全部房间）；客户端对相应房间重新发 `room.sub` | 否 |
 | S→C | server.restart | 服务重启，请退避重连 | 否 |
-| S→C | error | `ref`（引发错误的客户端帧 id）、`code`：非成员或房间不存在 `ROOM_NOT_FOUND`，帧格式错误、未知类型或超出订阅上限 `VALIDATION_FAILED` | 否 |
+| S→C | error | `ref`（引发错误的客户端帧 id）、`code`：非成员或房间不存在 `ROOM_NOT_FOUND`，帧格式错误、未知类型或超出订阅上限 `VALIDATION_FAILED`，`room.sub` 过于频繁 `RATE_LIMITED`（v1.5） | 否 |
 | 双向 | ping / pong | 使用 WS 控制帧心跳，服务端每 25 秒 ping 一次，应用层不重复实现 | — |
 
 **seq 规则（v1.4）**：只有发给全房在席成员的状态事件带 seq，同一房间所有订阅者看到的 seq 序列一致。客户端收到快照后把 `last_seq` 设为快照的 seq；之后丢弃 seq ≤ `last_seq` 的事件；不带 seq 的事件直接应用；成员事件按 `user_id` 幂等处理（快照与紧随其后的暂存事件可能重复描述同一变化）；发现 seq 缺口或收到 `resync`，对该房间重新发 `room.sub`。Redis 故障时 `member.*` 也可能不带 seq。
 
-**关闭码**：1001 服务重启；1008 刷帧超限；1009 帧超过 4KB；4001 同一用户连接数超限，被新连接替换。
+**关闭码**：1001 服务重启；1008 刷帧超限、慢客户端或订阅积压；1009 帧超过 4KB；4001 同一用户连接数超限，被新连接替换；**4401 access token 已到期，刷新后立即重连**（v1.5）。
 
 版本策略：`hello` 中带 `proto` 版本号，向后兼容的新增字段不升版本；不兼容变更升主版本；hello 同时下发 min\_app\_version（App 最低版本号，来自环境变量 `MIN_APP_VERSION`），REST 在客户端版本低于该值时返回 HTTP 426 与 UPGRADE\_REQUIRED，客户端据此展示强制更新页。
 
@@ -841,7 +843,7 @@ ALTER TABLE room_bans ADD CONSTRAINT pk_room_ban PRIMARY KEY (room_id, user_id);
 | 登录 | 同一 IP 每分钟 10 次 |
 | 发消息 | 每用户每分钟 20 条、每日 1000 条 |
 | 润色 | 见 10.2 配额 |
-| WebSocket | 每用户最多 3 条连接；每连接每秒最多 10 帧 |
+| WebSocket | 每用户最多 3 条连接；每连接每秒最多 10 帧；升级请求按 IP 每分钟 60 次、按用户每分钟 20 次；`room.sub` 每连接每 10 秒 10 次（v1.5） |
 | 全局 | 网关层总 QPS 上限，超出返回 503 + `Retry-After`，宁可部分用户稍后重试，也要保住核心链路 |
 
 ### 12.2 降级矩阵
