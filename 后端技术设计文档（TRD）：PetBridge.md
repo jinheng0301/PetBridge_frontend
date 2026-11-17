@@ -2,13 +2,15 @@
 
 | 项目 | 内容 |
 | :-- | :-- |
-| 版本 | v1.3（草案，待自评审；较 v1.2：对齐 PRD v1.5 与前端 TRD v1.3，Google 登录接入真实校验，Apple 登录延后，本地端口统一为 8090。v1.2 较 v1.1：对齐 PRD v1.4，新增房主管理，修正消息表分区方案，补充本地运行说明） |
-| 对应 PRD | 《跨国 MBTI 情感 AI 电子宠物 PRD v1.5》 |
-| 配套文档 | 《前端 TRD（Flutter）v1.3》：WebSocket 协议、API 调用方式以本文第 8、9 章为准 |
+| 版本 | v1.4（草案，待自评审；较 v1.3：B4 WebSocket 协议定稿，断线恢复改为每次订阅下发快照，presence 只有在线 / 离线，Redis 故障时本机兜底推送。v1.3 较 v1.2：对齐 PRD v1.5 与前端 TRD v1.3，Google 登录接入真实校验，Apple 登录延后，本地端口统一为 8090。v1.2 较 v1.1：对齐 PRD v1.4，新增房主管理，修正消息表分区方案，补充本地运行说明） |
+| 对应 PRD | 《跨国 MBTI 情感 AI 电子宠物 PRD v1.6》 |
+| 配套文档 | 《前端 TRD（Flutter）v1.4》：WebSocket 协议、API 调用方式以本文第 8、9 章为准 |
 | 语言 / 运行时 | Go 1.26（以 `go.mod` 为准） |
 | 开发模式 | **单人全栈开发**，所有选型以“一个人能长期维护”为第一约束 |
 | 目标区域 | 日本东京区域起步（覆盖 JP / KR / TW 延迟；中国大陆暂不首发） |
 
+> **V1.4 变更说明**：对齐 PRD v1.6 与前端 TRD v1.4，配合 B4（WebSocket Hub、presence、事件分发）设计定稿，详见 `docs/superpowers/specs/2026-11-17-b4-realtime-design.md`。① **断线恢复改为“每次订阅都下发快照”**（4.5③、7.3）：`room.sub` 一律返回从数据库生成的完整 `room.snapshot`，早于快照 seq 的事件客户端本来就会丢弃，补发没有收益，所以 B4 不写 Redis Stream `room:{rid}:events`，`last_seq` 字段保留但暂不使用，B5 有了 `message.new` 再评估是否需要重放；`resync` 改为“客户端重新发 `room.sub`”，`GET /rooms/{id}` MVP 不实现（第 8 章）。② **第 9 章协议重写**：WS 路径与其他接口一样在 `/api/v1` 下（`GET /api/v1/ws`）；新增 `room.unsub` 与 `error` 帧；只有发给全房在席成员的状态事件（`member.joined`、`member.left`）带 seq，个人事件与瞬时事件不带；`pet.tap` / `pet.action` 负载定稿，动作差异由前端宠物动画内部实现；`member.joined` 带新成员的 presence；`room.kicked` 新增 `reason=left`，`code.invalidated` 的 reason 补上 `dissolved`。③ **presence 只有 online / offline**（7.3、第 11 章）：离线时前端把宠物画成睡觉；`presence:u:{uid}` 改为 ZSET（成员为连接 id、分数为过期时间），最后一条连接关闭才判定离线，每次上下线都实时广播。④ **Redis 故障时本机兜底**（7.3、12.2）：写 Redis 失败的事件由本进程 Hub 直接推送（不带 seq），presence 退化为进程内计数；Redis 订阅重连后向本机所有连接发 `resync`。⑤ **补齐 B3 两处事件**（7.8）：解散时给房主发每个被移出成员的 `member.left{dissolved}`；主动退出时给退出者本人发 `room.kicked{left}`，让其其他设备同步离开。⑥ 新增环境变量 `MIN_APP_VERSION`（15.4），只用于 `hello`；WS 协议参数（心跳 25 秒、presence 70 秒、每用户 3 条连接等）为代码常量。⑦ 优雅重启改为发 `server.restart` 后立即断开（7.3）。
+>
 > **V1.3 变更说明**：对齐 PRD v1.5 与前端 TRD v1.3，配合前端 F0（登录与 onboarding）设计定稿，无接口变更。① **Google 登录接入真实校验**（7.1、第 5 章 `pkg/idtoken`）：`pkg/idtoken` 新增 Google 验证器——从 Google 的 JWKS（`https://www.googleapis.com/oauth2/v3/certs`，按 `Cache-Control` 缓存）取公钥，用 `golang-jwt` 校验 RS256 签名、`iss`（`accounts.google.com` 或 `https://accounts.google.com`）、`aud == GOOGLE_CLIENT_ID`、`exp`，返回 `sub`；`GOOGLE_CLIENT_ID` 为空时仍返回 501 `PROVIDER_NOT_CONFIGURED`。`GOOGLE_CLIENT_ID` 明确为 Google Cloud 中 **Web 应用类型** OAuth 客户端的 ID（前端 `google_sign_in` 的 `serverClientId` 用同一个值，Android 端另建 Android 客户端，不需要传给后端）。② **Apple 登录延后**：没有 Mac 与 Apple 开发者账号，Apple 继续使用占位验证器，上架 iOS 前补齐。③ 本地端口统一为 **8090**（与 `.env.example` 一致，15.4、15.5）。④ 4.4 公开路由组补上 `POST /auth/login/dev`（仅 local）。⑤ Go 版本按 `go.mod` 改为 1.26。⑥ 15.5 本地命令以 go-task（`task …`）为准，`make` 写法仅作对照；worker 尚未实现。
 >
 > **（2026-11-14 结构调整，无接口变更）** 第 4 章“总体架构”扩写为 4.1～4.6：新增 mermaid 架构总图、分层与依赖方向、路由分组与鉴权、三条关键链路时序图、子系统解耦说明；第 5 章“项目目录结构”改为 `handler / service / repository / model / middleware / task / platform / pkg` 的经典分层（api 与 worker 共用 service、repository、model，仅入口层不同）。原按业务域分包（`internal/auth`、`internal/invite` 等）的结构作废；已实现代码需按新结构迁移。
@@ -300,22 +302,23 @@ sequenceDiagram
     participant WH as ws_handler
     participant Hub as hub_service
     participant Pres as presence_service
-    participant Redis as Redis（Stream / Pub/Sub）
+    participant Redis as Redis（seq / Pub/Sub / presence）
+    participant PG as PostgreSQL
 
-    C->>WH: GET /ws（Authorization 头）
-    WH->>Hub: 注册连接（单用户 ≤3 条）
+    C->>WH: GET /api/v1/ws（Authorization 头）
+    WH->>Hub: 注册连接（单用户 ≤3 条，超出踢掉最旧的）
+    Hub->>Pres: 该用户在线连接数 0→1 时广播 presence.update（online）
     Hub-->>C: hello（服务器时间 · 心跳间隔 · proto · min_app_version）
     C->>Hub: room.sub {room_id, last_seq}
-    Hub->>Redis: 读 Stream 补发 last_seq 之后的事件
-    alt 缺口过大
-        Hub-->>C: resync（客户端改走 REST 全量拉取）
-    else 可补
-        Hub-->>C: room.snapshot + 补发事件
+    Hub->>Hub: 先登记订阅，之后到达的该房间事件暂存
+    Hub->>Redis: 读 room:{rid}:seq 得到 S
+    Hub->>PG: 读房间与成员（同时校验在席）
+    Hub-->>C: room.snapshot{seq:S, 成员 + presence}，再发暂存事件
+    loop 每 25 秒
+        Hub->>C: WS ping，成功则刷新 presence:u:{id}（70s）
     end
-    loop 心跳
-        C->>Pres: ping → 刷新 presence:u:{id}（TTL 70s）
-    end
-    Redis-->>Hub: ws:events 订阅，只分发给本机上的目标用户连接
+    Redis-->>Hub: ws:events 订阅，只分发给本机上订阅了该房间的目标用户连接
+    Note over Hub,Redis: 写 Redis 失败 → 本机直接推送（不带 seq）；订阅重连 → 向本机连接发 resync
 ```
 
 ### 4.6 子系统解耦说明
@@ -379,7 +382,7 @@ petbridge/
 │   │   ├── push_service.go            # 推送策略（时机、合并、免打扰）
 │   │   ├── hub_service.go             # WS Hub：本机连接池、订阅 ws:events、分发
 │   │   ├── presence_service.go        # presence 刷新与状态广播
-│   │   ├── event_publisher.go         # Publisher：写 ws:events 频道 + 房间事件 Stream
+│   │   ├── event_publisher.go         # Publisher：房间 seq、写 ws:events 频道、Redis 故障时本机兜底
 │   │   └── app_config_service.go      # app_config 读取（进程内缓存 30 秒）
 │   ├── repository/                    # 数据访问层（pgx + sqlc），唯一访问 PostgreSQL 的地方
 │   │   ├── tx.go                      # TxManager：WithTx，保证全局加锁顺序
@@ -572,13 +575,15 @@ ALTER TABLE room_bans ADD CONSTRAINT pk_room_ban PRIMARY KEY (room_id, user_id);
 
 ### 7.3 实时连接与房间事件
 
-- 客户端连接 `GET /ws`（升级请求用 `Authorization` 头携带 access token，避免 token 进 URL 日志）。
-- 连接建立后服务端下发 `hello`（含服务器时间、心跳间隔），客户端发送 `room.sub`；服务端回 `room.snapshot`（成员、座位、presence、最近事件序号）。
-- **事件分发**：业务代码调用 `Publisher.Publish(event)`，事件写入 Redis 频道 `ws:events`；每个 api 节点订阅该频道，只推给本机上属于目标用户的连接。单节点阶段这层看似多余，但它让“加第二台 api”变成零改动。
-- **断线重放**：每个房间有单调递增序号 `room_seq`（Redis `INCR`），最近 500 条事件存入 Redis Stream，保留 24 小时。客户端重连时带 `last_seq`，服务端能补就补，缺口过大则下发 `resync`，客户端改走 REST 全量拉取。
-- **Presence**：连接存活期间每次心跳刷新 `presence:u:{id}`（TTL 70 秒）；状态变化（在线、离线、打瞌睡）广播给同房成员。
-- **连接保护**：单用户最多 3 条并发连接；慢客户端（写缓冲堆积、写超时 5 秒）主动断开；读消息大小上限 4KB。
-- **优雅重启**：收到 SIGTERM 先下发 `server.restart` 帧，30 秒内断开所有连接，客户端按退避重连。
+- 客户端连接 `GET /api/v1/ws`（升级请求用 `Authorization` 头携带 access token，避免 token 进 URL 日志）。升级前走与 REST 相同的鉴权，未完成 onboarding 返回 403 `ONBOARDING_REQUIRED`；token 只在升级时校验，连接建立后过期不断开（v1.4）。
+- 连接建立后服务端下发 `hello`（含服务器时间、心跳间隔、`proto`、`min_app_version`），客户端对每个要看的房间发送 `room.sub`。
+- **每次订阅都下发快照（v1.4）**：服务端先登记订阅（此后该房间的事件暂存），再读 `room:{rid}:seq` 得到 S，再从 PostgreSQL 读房间与成员、从 presence 读在线状态，发 `room.snapshot{seq:S}`，最后按序发暂存的事件。快照是唯一可信的状态，客户端用它整体替换房间状态，并把 `last_seq` **设为** S（不取较大值）。非在席成员订阅返回 `error{ROOM_NOT_FOUND}`；每条连接最多订阅 2 个房间。
+- **事件分发**：业务代码调用 `Publisher.Publish(event)`。发给全房在席成员的状态事件（`member.joined`、`member.left`）先 `INCR room:{rid}:seq` 取得 seq；事件写入 Redis 频道 `ws:events`；每个 api 节点订阅该频道，只推给本机上订阅了该房间的目标用户连接。个人事件（`room.kicked`、`code.invalidated`）推给目标用户的所有连接，不需要订阅；服务端收到 `room.kicked` 时同时取消该用户对该房间的订阅。单节点阶段这层看似多余，但它让“加第二台 api”变成零改动。
+- **Redis 故障时本机兜底（v1.4）**：`INCR` 或 `PUBLISH` 任一步失败，事件由本进程的 Hub 直接推送，不带 seq，客户端收到即应用（成员事件按 `user_id` 幂等）。单节点阶段实时功能不中断；多节点时兜底只覆盖本机，其他节点的客户端在下次订阅时由快照修正。Redis 订阅断开后重连成功，向本机所有连接发一次 `resync`，客户端重新订阅拿新快照（Redis 重启后 seq 会从头开始，也由此恢复）。
+- **断线重放**：v1.4 起不做。早于快照 seq 的事件客户端会丢弃，补发没有收益；`room.sub` 的 `last_seq` 保留但暂不使用。B5 有了 `message.new` 再评估是否需要 Redis Stream 重放。
+- **Presence（v1.4）**：只有 `online` / `offline` 两种，前端把离线成员画成宠物在睡觉。`presence:u:{uid}` 为 ZSET（成员是连接 id，分数是过期时间），服务端每 25 秒对每条连接发 WS ping，成功即刷新（过期时间 = 现在 + 70 秒），10 秒无回应则关闭连接。用户在线连接数 0→1 时广播 `online`，降到 0 时广播 `offline`，发给他所有在席房间的其他成员，状态持续实时更新：离线的人回到 App，同屋在线的人立刻看到他的宠物醒来。新成员入房时，`member.joined` 里带上他当前的 presence。Redis 不可用时退化为进程内连接计数。已知局限：进程被强杀时不广播 `offline`，其他人要到下次快照才看到，ZSET 成员 70 秒后自然过期。
+- **连接保护**：单用户最多 3 条并发连接，超出时关闭最旧的一条（关闭码 4001）；读帧上限 4KB；每连接每秒最多 10 个客户端帧；每条连接一个容量 64 的发送队列，队列满或写超时 5 秒即断开（慢客户端）；`pet.tap` 每连接每秒最多 2 次，超出静默丢弃。
+- **优雅重启**：收到 SIGTERM 先向所有连接下发 `server.restart` 帧，随即以 1001 断开全部连接，再关闭 HTTP 服务；客户端随机等待 1–10 秒后重连（v1.4：不再等待 30 秒）。
 
 ### 7.4 消息发送与 AI 信使
 
@@ -652,7 +657,8 @@ ALTER TABLE room_bans ADD CONSTRAINT pk_room_ban PRIMARY KEY (room_id, user_id);
 3. UPDATE room_members SET left_at=now(), left_reason='dissolved'
       WHERE room_id=$r AND user_id <> owner_id AND left_at IS NULL
 4. UPDATE rooms SET member_count=1, status='open' WHERE id=$r
-5. COMMIT 后：向每位被移出的成员发 room.kicked（reason 为 dissolved），不加入黑名单
+5. COMMIT 后：向每位被移出的成员发 room.kicked（reason 为 dissolved），向房主发每位被移出成员的
+   member.left{reason:"dissolved"}（v1.4），向被作废码的持有者发 code.invalidated{reason:"dissolved"}；不加入黑名单
 ```
 
 解散不拉黑：这些成员日后拿到新码仍可再次加入。解散后房间只剩房主，与注册时的初始状态一致。
@@ -670,7 +676,7 @@ ALTER TABLE room_bans ADD CONSTRAINT pk_room_ban PRIMARY KEY (room_id, user_id);
 
 任一条件不满足返回 `CODE_ISSUE_LIMIT`，`error.details.reason` 取 `room_full` / `enough_unused` / `daily_limit` / `lifetime_limit`，前端据此展示不同文案。
 
-**成员退出** `POST /rooms/{id}/leave`：仅限“所加入的他人小屋”。房主对自己的小屋调用返回 `OWNER_CANNOT_LEAVE`（应使用解散）。事务内置 `left_reason='left'`、`member_count - 1`、满员则恢复 `open`；不拉黑，已作废的码不恢复。**幂等规则（B3b 定稿）**：曾经在席、现已不在席的人（主动退出、被移除、被解散）再次调用一律返回成功（204），所以被移除者与主动退出者看到的结果完全一致，不会暴露"被移除"；从没进过该房间的人，或房间不存在，返回 `ROOM_NOT_FOUND`。房主类操作（移除、解散、补码）对在席的非房主返回 `NOT_ROOM_OWNER`，对其他人返回 `ROOM_NOT_FOUND`。入房、移除、解散、补码、退出的事务遇到死锁或序列化失败（`40P01`/`40001`）时整体重试一次。
+**成员退出** `POST /rooms/{id}/leave`：仅限“所加入的他人小屋”。房主对自己的小屋调用返回 `OWNER_CANNOT_LEAVE`（应使用解散）。事务内置 `left_reason='left'`、`member_count - 1`、满员则恢复 `open`；不拉黑，已作废的码不恢复。COMMIT 后向房内其余成员发 `member.left{reason:"left"}`，并向退出者本人发 `room.kicked{reason:"left"}`，让其其他设备同步离开（v1.4）。**幂等规则（B3b 定稿）**：曾经在席、现已不在席的人（主动退出、被移除、被解散）再次调用一律返回成功（204），所以被移除者与主动退出者看到的结果完全一致，不会暴露"被移除"；从没进过该房间的人，或房间不存在，返回 `ROOM_NOT_FOUND`。房主类操作（移除、解散、补码）对在席的非房主返回 `NOT_ROOM_OWNER`，对其他人返回 `ROOM_NOT_FOUND`。入房、移除、解散、补码、退出的事务遇到死锁或序列化失败（`40P01`/`40001`）时整体重试一次。
 
 **测试要求**：踢人与入房并发（最后一个席位）不超员；dissolve 与 join 并发不死锁；补码并发不超过“空位数”和每日上限；被移除者用同房间新码入房一律得到 CODE_INVALID。
 
@@ -692,7 +698,7 @@ ALTER TABLE room_bans ADD CONSTRAINT pk_room_ban PRIMARY KEY (room_id, user_id);
 |  | GET /codes/{code}/share-card | 分享卡片所需数据（宠物、码、人数进度），海报图由客户端渲染 |
 | 房间 | POST /rooms/join | 见 7.2 |
 |  | GET /rooms/mine | 我所在的房间（自己的 + 已加入的） |
-|  | GET /rooms/{id}；POST /rooms/{id}/leave | 详情与退出（仅限他人小屋，见 7.8） |
+|  | GET /rooms/{id}；POST /rooms/{id}/leave | 详情与退出（仅限他人小屋，见 7.8）。v1.4：`GET /rooms/{id}` MVP 不实现，房间详情由 WS `room.snapshot` 提供 |
 |  | DELETE /rooms/{id}/members/{user\_id} | 房主移除成员，见 7.8 |
 |  | POST /rooms/{id}/dissolve | 房主解散，见 7.8 |
 |  | POST /rooms/{id}/codes | 房主自助补码，见 7.8 |
@@ -744,26 +750,34 @@ ALTER TABLE room_bans ADD CONSTRAINT pk_room_ban PRIMARY KEY (room_id, user_id);
 
 ## 9. WebSocket 协议
 
-帧格式为 JSON：`{ t: 事件类型, id: 帧ID, seq: 房间序号(可选), d: 负载 }`。
+路径 `GET /api/v1/ws`（与 REST 同一基础路径，v1.4）。帧格式为 JSON：`{ t: 事件类型, id: 帧ID(可选), seq: 房间序号(可选), d: 负载 }`。客户端帧的 `id` 由客户端生成，服务端在 `error` 帧里原样回传；服务端帧不带 `id`。
 
-| 方向 | t | 负载要点 |
-| :-- | :-- | :-- |
-| S→C | hello | 服务器时间、心跳间隔（25 秒）、协议版本 proto、min\_app\_version |
-| C→S | room.sub | room\_id、last\_seq |
-| S→C | room.snapshot | 成员列表（宠物、昵称、母语国旗、座位）、presence、当前 seq |
-| S→C | member.joined / member.left | 成员信息；`member.left` 另带 `reason`（left / kicked / dissolved） |
-| S→C | room.kicked | 仅发给被移除者：room\_id、reason（kicked / dissolved）；客户端收到后退出该房间页并刷新房间列表 |
-| S→C | presence.update | user\_id、状态 |
-| C→S / S→C | pet.tap / pet.action | 轻触宠物与对应的性格动作（MBTI 决定动作 id） |
-| S→C | message.new | 发送者宠物、原文、基础译文、delivery\_id、是否已润色 |
-| S→C | message.polished | delivery\_id、润色文本 |
-| S→C | checkin.updated / decor.unlocked | 能量、装扮 |
-| S→C | code.invalidated | 房间已满导致某码失效 |
-| S→C | resync | 客户端需全量刷新 |
-| S→C | server.restart | 服务重启，请退避重连 |
-| 双向 | ping / pong | 使用 WS 控制帧心跳，应用层不重复实现 |
+| 方向 | t | 负载要点 | 带 seq |
+| :-- | :-- | :-- | :-- |
+| S→C | hello | `server_time`、`heartbeat_sec`（25）、`proto`（1）、`min_app_version` | 否 |
+| C→S | room.sub | `room_id`、`last_seq`（可选，v1.4 暂不使用） | — |
+| C→S | room.unsub | `room_id`（v1.4 新增） | — |
+| S→C | room.snapshot | `room_id`、`seq`（当前房间序号）、`room`：与 `GET /rooms/mine` 单项同结构（`id`、`status`、`member_count`、`capacity`、`is_owner`、`members[]`），每个成员多一个 `presence`（`online` / `offline`） | 否（seq 在 d 里） |
+| S→C | member.joined | `room_id`、`member`（成员信息 + `presence`） | 是 |
+| S→C | member.left | `room_id`、`user_id`、`reason`（left / kicked / dissolved） | 是 |
+| S→C | room.kicked | 仅发给离开者本人：`room_id`、`reason`（kicked / dissolved / left）；客户端收到后退出该房间页并刷新房间列表，`left` 不提示 | 否 |
+| S→C | presence.update | `room_id`、`user_id`、`status`（online / offline） | 否 |
+| C→S | pet.tap | `room_id`、`target_user_id`（须为该房间其他成员） | — |
+| S→C | pet.action | `room_id`、`from_user_id`、`target_user_id`、`action`（目前固定为 `tap`，各宠物的具体动作由前端动画实现）；发给除发起者外的全部成员 | 否 |
+| S→C | message.new | 发送者宠物、原文、基础译文、delivery\_id、是否已润色（B5） | 待 B5 定 |
+| S→C | message.polished | delivery\_id、润色文本（B5） | 待 B5 定 |
+| S→C | checkin.updated / decor.unlocked | 能量、装扮（B6） | 待 B6 定 |
+| S→C | code.invalidated | `room_id`、`reason`（room_full / dissolved）；发给被作废码的持有者 | 否 |
+| S→C | resync | `room_id`（可选，缺省表示全部房间）；客户端对相应房间重新发 `room.sub` | 否 |
+| S→C | server.restart | 服务重启，请退避重连 | 否 |
+| S→C | error | `ref`（引发错误的客户端帧 id）、`code`：非成员或房间不存在 `ROOM_NOT_FOUND`，帧格式错误、未知类型或超出订阅上限 `VALIDATION_FAILED` | 否 |
+| 双向 | ping / pong | 使用 WS 控制帧心跳，服务端每 25 秒 ping 一次，应用层不重复实现 | — |
 
-版本策略：`hello` 中带 `proto` 版本号，向后兼容的新增字段不升版本；不兼容变更升主版本；hello 同时下发 min\_app\_version（App 最低版本号），REST 在客户端版本低于该值时返回 HTTP 426 与 UPGRADE\_REQUIRED，客户端据此展示强制更新页。
+**seq 规则（v1.4）**：只有发给全房在席成员的状态事件带 seq，同一房间所有订阅者看到的 seq 序列一致。客户端收到快照后把 `last_seq` 设为快照的 seq；之后丢弃 seq ≤ `last_seq` 的事件；不带 seq 的事件直接应用；成员事件按 `user_id` 幂等处理（快照与紧随其后的暂存事件可能重复描述同一变化）；发现 seq 缺口或收到 `resync`，对该房间重新发 `room.sub`。Redis 故障时 `member.*` 也可能不带 seq。
+
+**关闭码**：1001 服务重启；1008 刷帧超限；1009 帧超过 4KB；4001 同一用户连接数超限，被新连接替换。
+
+版本策略：`hello` 中带 `proto` 版本号，向后兼容的新增字段不升版本；不兼容变更升主版本；hello 同时下发 min\_app\_version（App 最低版本号，来自环境变量 `MIN_APP_VERSION`），REST 在客户端版本低于该值时返回 HTTP 426 与 UPGRADE\_REQUIRED，客户端据此展示强制更新页。
 
 ---
 
@@ -802,9 +816,9 @@ ALTER TABLE room_bans ADD CONSTRAINT pk_room_ban PRIMARY KEY (room_id, user_id);
 
 | 键 | 类型 | 用途 | TTL |
 | :-- | :-- | :-- | :-- |
-| `presence:u:{uid}` | string | 在线状态 | 70 秒，心跳刷新 |
+| `presence:u:{uid}` | zset | 在线状态：成员为连接 id，分数为过期时间；未过期成员数 > 0 即在线（v1.4） | 70 秒，心跳刷新 |
 | `room:{rid}:seq` | counter | 房间事件序号 | 无 |
-| `room:{rid}:events` | stream | 断线重放，最多 500 条 | 24 小时 |
+| `room:{rid}:events` | stream | 断线重放，最多 500 条（v1.4：B4 不使用，B5 再评估） | 24 小时 |
 | `ws:events` | pub/sub | 跨节点事件分发 | — |
 | `rl:join:u:{uid}`、`rl:join:ip:{ip}` | 令牌桶 / 计数 | 验证码输入限流 | 滑动窗口 |
 | `cd:join:u:{uid}` | string | 输错冷却标记 | 30 分钟 |
@@ -836,7 +850,7 @@ ALTER TABLE room_bans ADD CONSTRAINT pk_room_ban PRIMARY KEY (room_id, user_id);
 | :-- | :-- | :-- |
 | 主 LLM 超时/熔断 | 翻译变慢 | 切备用供应商 → 机翻 → 原文 + 未翻译标记，用户可手动重试 |
 | AI 日预算耗尽 | — | 关闭润色，保留基础翻译与短语 |
-| Redis 故障 | 限流与缓存失效 | 限流改用进程内令牌桶（偏严）；缓存直通；presence 暂时显示为未知；**消息收发不受影响** |
+| Redis 故障 | 限流与缓存失效，跨节点事件分发中断 | 限流改用进程内令牌桶（偏严）；缓存直通；WS 事件由本机 Hub 直接推送（不带 seq），presence 改用进程内连接计数，单节点下实时功能不受影响；Redis 恢复后向本机连接发 `resync`（v1.4）；**消息收发不受影响** |
 | 队列积压 | 译文延迟 | 先发原文卡片（标记翻译中），译文到达后用 `message.polished` 同类事件补发 |
 | 数据库慢 | 全面变慢 | 只读路径加超时；拒绝非核心写入（打卡、装扮）并提示稍后再试 |
 | 推送通道故障 | 无推送 | 不影响应用内消息，记录失败，重试 3 次后放弃 |
@@ -909,6 +923,7 @@ APP_ENV=local                  # 必填：local | staging | production
 APP_HOST=127.0.0.1             # local 默认仅本机；其余环境默认 0.0.0.0
 APP_PORT=8090
 LOG_LEVEL=debug                # debug | info | warn
+MIN_APP_VERSION=0.0.0          # WS hello 下发的 App 最低版本（v1.4）
 
 # ===== 数据库 / 缓存（必填）=====
 DATABASE_URL=postgres://petbridge:petbridge@localhost:5432/petbridge?sslmode=disable
@@ -1059,7 +1074,7 @@ volumes:
 **手动验证流程（人工冒烟）**
 
 1. 用开发登录给 A、B 各拿一个 token。
-2. 用 `wscat -c ws://localhost:8090/ws -H "Authorization: Bearer <token>"` 模拟两个客户端订阅同一小屋。
+2. 用 `wscat -c ws://localhost:8090/api/v1/ws -H "Authorization: Bearer <token>"` 模拟两个客户端订阅同一小屋。
 3. B 使用 `DEVA2345` 入房，A 的连接应收到 `member.joined`，B 收到奖励验证码。
 4. A 发一条消息，B 的连接应收到 `message.new`，含原文与基础译文。
 5. 停掉 Redis：消息收发仍应正常，限流退化为进程内。
@@ -1100,7 +1115,7 @@ volumes:
 | B1 | 仓库骨架、CI、OpenAPI 初稿、数据库迁移、配置与日志 | 能部署的空服务 |
 | B2 | 登录（Apple/Google）、token、onboarding、宠物映射 | 前端可注册 |
 | B3 | 验证码生成、入房事务、奖励发放、限流冷却（含登录限流）、房主踢人/解散/自助补码/退出（7.8）、并发测试；分 B3a（入房主路径）与 B3b（房主管理）两段交付 | **核心机制跑通** |
-| B4 | WS Hub、presence、事件分发、断线重放 | 小屋实时同步 |
+| B4 | WS Hub、presence（在线 / 离线）、事件分发与 Redis 故障兜底、订阅快照、`pet.tap`；断线重放改为每次订阅下发快照（v1.4） | 小屋实时同步 |
 | B5 | 消息收发、短语模板、AI 网关（缓存/熔断/降级/配额） | 跨语言消息可用 |
 | B6 | 内容审核、举报屏蔽、未成年人规则、打卡与装扮（房主解散已提前到 B3） | 合规与养成 |
 | B7 | 推送、Widget 快照、分享卡片数据、账号删除 | 功能补齐 |
