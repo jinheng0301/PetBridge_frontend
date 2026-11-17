@@ -2,15 +2,13 @@
 
 | 项目 | 内容 |
 | :-- | :-- |
-| 版本 | v1.4（草案，待自评审；较 v1.3：对齐后端 B4 的 WebSocket 协议，reducer 改为以订阅快照为准，presence 只有在线 / 离线、离线显示为睡觉。v1.3 较 v1.2：对齐 PRD v1.5 与后端 TRD v1.3，F0 登录与 onboarding 设计定稿，首页改为四个 Tab，契约生成改用 swagger_parser） |
-| 对应 PRD | 《跨国 MBTI 情感 AI 电子宠物 PRD v1.6》 |
-| 配套文档 | 《后端 TRD（Go）v1.4》：REST 接口见其第 8 章，WebSocket 协议见其第 9 章，本文以其为准 |
+| 版本 | v1.3（草案，待自评审；较 v1.2：对齐 PRD v1.5 与后端 TRD v1.3，F0 登录与 onboarding 设计定稿，首页改为四个 Tab，契约生成改用 swagger_parser） |
+| 对应 PRD | 《跨国 MBTI 情感 AI 电子宠物 PRD v1.5》 |
+| 配套文档 | 《后端 TRD（Go）v1.3》：REST 接口见其第 8 章，WebSocket 协议见其第 9 章，本文以其为准 |
 | 技术栈 | Flutter 3.x 稳定版 / Dart 3 |
 | 平台 | iOS 15+、Android 8+（竖屏，手机优先，不适配平板） |
 | 开发模式 | **单人全栈开发**，选型以“一个人能长期维护”为第一约束 |
 
-> **V1.4 变更说明**：对齐 PRD v1.6 与后端 TRD v1.4（B4 WebSocket 协议定稿，详见后端仓库 `docs/superpowers/specs/2026-11-17-b4-realtime-design.md`）。① **reducer 以订阅快照为准**（4.5③、第 7 章）：每次 `room.sub` 服务端都下发完整 `room.snapshot`，客户端用它整体替换房间状态，并把 `last_seq` **设为**快照的 seq（不取较大值，Redis 重启后 seq 会从头开始）；之后丢弃 seq ≤ `last_seq` 的事件，不带 seq 的事件直接应用，成员事件按 `user_id` 幂等；发现缺口或收到 `resync` 时对该房间重新发 `room.sub`，不再拉 `GET /rooms/{id}`（后端 MVP 不实现该接口）（9.2）。② **presence 只有 online / offline**：离线成员的 `PetView` 显示为睡觉（`mood=3`），收到 `presence.update` 立即切换，用户回到 App 时同屋的人立刻看到他的宠物醒来（10.1）；`member.joined` 自带新成员的 presence。③ `room.kicked` 新增 `reason=left`（自己在另一台设备上退出），处理与被移除相同但不提示；新增 `error` 帧与 `room.unsub`（第 7 章）。④ `WS_URL` 改为 `ws://10.0.2.2:8090/api/v1/ws`，与 REST 同一基础路径（19.4）。⑤ 订阅范围写明：连接后订阅自己所有在席房间（自己的 + 已加入的）（6.1）。
->
 > **V1.3 变更说明**：对齐 PRD v1.5 与后端 TRD v1.3，前端 F0（登录与 onboarding）设计定稿，详见 `docs/superpowers/specs/2026-11-16-f0-login-onboarding-design.md`。① **契约生成改用 `swagger_parser`**（纯 Dart，无需 Java），替代 `openapi-generator` dart-dio（第 3 章、8.2）。② **环境先只建 dev**：暂不建 staging / prod flavor 与多入口，只用一个 `main.dart` + `--dart-define-from-file`；新增 `GOOGLE_SERVER_CLIENT_ID`、`APPLE_LOGIN_ENABLED` 两个键；本地后端端口改为 **8090**（与后端 `.env` 一致）（19.4、19.5）。③ **feature 内按需建层**：本地模型先放在用到它的 `application/`，出现跨 feature 共用时再建 `shared/models/`（第 5 章）。④ **首页底部导航改为四个 Tab：小屋 / 聊天 / 背包 / 我的**，场景与聊天分开，与常见社交 App 一致（11.0 线框、6.2 路由、11.4）。⑤ Onboarding 写入 4 道测试题、每个维度可手动翻转确认、“未满 13 岁”独立说明页（11.1、6.2）；会话状态在小屋阶段之前先用 `unknown / unauthenticated / needsOnboarding / ready` 四态（6.1）。⑥ **Apple 登录延后**：目前没有 Mac 与 Apple 开发者账号，F0 只做按钮与接口层（`APPLE_LOGIN_ENABLED=false`），上架 iOS 前必须补齐（第 20 章、21.1）。⑦ Android `applicationId` 定为 `io.github.jinheng0301.petbridge`，`minSdk 26`；Google 登录用 `google_sign_in` v7，`serverClientId` 为 Web 客户端 ID（第 3 章、15 章前）。⑧ 联调与测试去掉 docker compose，改为本机原生 PostgreSQL + Memurai 与 go-task；worker 尚未实现（19.2、19.5、21.2）。⑨ 背包状态“已满员作废”改为“已作废”（满员与解散都会作废）；错误处理补 `ROOM_NOT_FOUND`、`ONBOARDING_REQUIRED`、`ALREADY_MEMBER` 直接进房（11.3、第 18 章）。⑩ 宠物资源与 `PetView` 改按 `pet_type`（如 `happy_shiba`）命名，不再按 MBTI：后端成员信息只下发 `pet_type`（4.6、第 5 章、10.1、10.2、21.1）。其余章节（WebSocket 客户端、小屋渲染、本地存储、性能与安全）不变。
 >
 > **（2026-11-14 结构调整，无功能变更）** 第 4 章“总体架构”扩写为 4.1～4.6：新增 mermaid 总览图、分层职责与依赖规则、MVVM 对应、三条关键链路时序图（启动与会话判定 / 发送消息 / WS 事件入站）、子系统解耦说明；第 5 章“项目目录结构”改为 feature-first 且 feature 内按 `data / application / presentation / models` 分层，新增 `config/`、`shared/`（通用组件与共用模型）、`app/router`、`app/event_reducer`，并给出与常见前端分层的对照表；新增 11.0“界面总览与线框大纲”。`core/config/env.dart` 调整为 `config/env.dart`（19.4 同步）。
@@ -275,20 +273,15 @@ sequenceDiagram
     participant Rooms as roomsProvider
     participant Sess as sessionProvider
 
-    WS->>Red: events（状态事件带 seq）
-    alt room.snapshot
-        Red->>RoomC: 整体替换房间状态 · last_seq = 快照 seq
-    end
-    Red->>Red: seq ≤ last_seq 丢弃；无 seq 直接应用；缺口 < 20 先缓冲，超时仍缺口或收到 resync → 重新 room.sub
-    alt member.joined / member.left / presence.update / checkin.updated / decor.unlocked
+    WS->>Red: events（带 seq）
+    Red->>Red: seq 重复或更小则丢弃；缺口 < 20 先缓冲；超时仍缺口 → resync
+    alt member.joined / presence.update / checkin.updated / decor.unlocked
         Red->>RoomC: 更新成员、presence、能量、装扮
         Red->>Rooms: member_count 变化
         Rooms->>Sess: 重新派生 solo / inRoom
     else message.new / message.polished
         Red->>ChatC: 写入或更新消息
-    else pet.action
-        Red->>RoomC: 在对应座位播放互动动画
-    else room.kicked（不依赖 seq，收到即处理；reason=left 时不提示）
+    else room.kicked（不依赖 seq，收到即处理）
         Red->>Rooms: 移除该房间 · 取消订阅 · 清本地缓存与 last_seq
         Rooms->>Sess: 可能退回 solo
     else 未知事件类型
@@ -432,7 +425,7 @@ unauthenticated ──登录成功──► needsOnboarding ──完成──�
 - **回到 `solo`**：自己退出他人小屋、被房主移除、房主解散，且自己的小屋也只剩自己一人时。
 - `solo`：只显示个人页与单只宠物，小屋入口置灰并提示“输入验证码解锁”，与 PRD 的单人状态一致。
 - `inRoom`：首页展示小屋场景；自己的小屋与已加入的小屋可切换【假设最多 2 间】。
-- **WebSocket 在完成 onboarding 后即连接，`solo` 状态也连接**，并订阅自己所有在席房间（自己的小屋 + 已加入的小屋，v1.4 写明），这样别人加入时能实时收到 `member.joined` 并从 `solo` 切换到 `inRoom`。App 回到前台时额外调用一次 `GET /rooms/mine` 校正，防止错过事件。
+- **WebSocket 在完成 onboarding 后即连接，`solo` 状态也连接**，并订阅自己的小屋，这样别人加入时能实时收到 `member.joined` 并从 `solo` 切换到 `inRoom`。App 回到前台时额外调用一次 `GET /rooms/mine` 校正，防止错过事件。
 - `go_router` 的 `redirect` 只读取 `sessionProvider`，保证页面不会在不合法状态下被打开。
 - **F0 阶段**（小屋功能之前）先用四态：`unknown`（启动中）/ `unauthenticated` / `needsOnboarding` / `ready`；`ready` 在小屋阶段再细分为 `solo` / `inRoom`。
 
@@ -479,15 +472,11 @@ unauthenticated ──登录成功──► needsOnboarding ──完成──�
 
 **事件 reducer 规则**（`RoomEventReducer`，纯函数，必须有单元测试）：
 
-1. 收到 `room.snapshot`：用快照**整体替换**该房间状态（成员、座位、presence），并把 `last_seq` **设为**快照的 `seq`，不取较大值（Redis 重启后服务端 seq 会从头开始）（v1.4）。
-2. 带 `seq` 的事件（目前是 `member.joined`、`member.left`）：`seq ≤ last_seq` 直接丢弃，否则应用并更新 `last_seq`。缺口小于 20 时先缓冲、短暂等待；超时仍有缺口，对该房间重新发 `room.sub` 拿新快照（v1.4：不再拉 `GET /rooms/{id}`）。
-3. 不带 `seq` 的事件（`presence.update`、`pet.action`、`room.kicked`、`code.invalidated`，以及服务端 Redis 故障时的 `member.*`）收到即应用，不改 `last_seq`（v1.4）。
-4. 成员事件按 `user_id` **幂等**：`member.joined` 是“有则覆盖、无则加入”，`member.left` 是“有则删除、无则忽略”。快照与紧随其后的事件可能重复描述同一变化，必须幂等（v1.4）。
-5. 收到 `resync`：对 `room_id` 指定的房间（缺省为全部已订阅房间）重新发 `room.sub`（v1.4）。
-6. 不认识的事件类型**忽略而不是报错**，保证向前兼容。
-7. 每次 `last_seq` 变化写入 prefs（节流，最多每秒一次）。
-8. 收到 `room.kicked`（被房主移除、房间被解散，或自己在另一台设备上退出 `reason=left`）：取消该房间订阅，从 `roomsProvider` 移除，清除该房间的本地消息缓存与 `last_seq`，并重新计算会话状态（可能退回 `solo`）；该事件不依赖 `seq`，收到即处理。`left` 不弹提示，其余只提示“你已离开该小屋”。
-9. 收到 `error` 帧：按 `ref` 找到对应的客户端帧；`room.sub` 得到 `ROOM_NOT_FOUND` 时，按房间已不存在处理（同规则 8，但不提示）（v1.4）。
+1. 按 `seq` 递增应用；重复或更小的 `seq` 直接丢弃。
+2. 缺口小于 20 时先缓冲、短暂等待补发；超时仍有缺口则触发 `resync`（重新拉取全量快照）。
+3. 不认识的事件类型**忽略而不是报错**，保证向前兼容。
+4. 每应用一条事件，更新该房间的 `last_seq` 并写入 prefs（节流，最多每秒一次）。
+5. 收到 `room.kicked`（被房主移除或房间被解散）：取消该房间订阅，从 `roomsProvider` 移除，清除该房间的本地消息缓存与 `last_seq`，并重新计算会话状态（可能退回 `solo`）；该事件不依赖 `seq`，收到即处理。
 
 ---
 
@@ -531,7 +520,7 @@ disconnected ─► connecting ─► connected ─(收到 hello)─► ready �
 | 心跳 | 使用连接层 `pingInterval`（25 秒，与服务端 `hello` 下发值一致）；应用层不重复实现心跳 |
 | 重连退避 | 1、2、4、8、16、30 秒，叠加 0–30% 抖动；连接稳定超过 60 秒后重置退避 |
 | 前后台 | 进入后台 30 秒后主动断开以省电；回到前台立即重连并 `room.sub`（带各房间 `last_seq`） |
-| `resync` | 对相应房间重新发 `room.sub`，用新快照覆盖本地状态；消息阶段（F3）另行拉取最近消息（v1.4：不再拉 `GET /rooms/{id}`） |
+| `resync` | 使旧快照失效，重新拉取 `GET /rooms/{id}` 与最近消息，覆盖本地状态 |
 | `server.restart` | 随机等待 1–10 秒再重连，避免服务重启时所有客户端同时涌入 |
 | 协议版本 | `hello.proto` 高于客户端支持的主版本，或 `hello.min_app_version` 高于当前 App 版本，或 REST 返回 HTTP 426 `UPGRADE_REQUIRED` → 弹出强制更新页（接口约定见后端 TRD 第 8、9 章） |
 | 发送 | 仅 `pet.tap` 等轻量事件走 WS；消息发送与润色走 REST，保证幂等与可重试 |
@@ -557,8 +546,7 @@ RoomScene（固定比例容器，RepaintBoundary）
 ```
 
 - 座位坐标用**相对比例**定义，适配不同屏幕宽高比；座位 1（房主）在中间偏前。
-- 点击宠物：本地**立即播放**互动动画（乐观），同时通过 WS 发送 `pet.tap{room_id, target_user_id}`；收到他人的 `pet.action` 时在 `target_user_id` 的座位播放（服务端不会把 `pet.action` 发回给发起者）。
-- 在线状态（v1.4）：成员 `presence` 为 `offline` 时 `PetView` 的 `mood=3`（睡觉），`online` 时回到待机；收到 `presence.update` 立即切换，所以用户回到 App 时同屋的人马上看到他的宠物醒来。
+- 点击宠物：本地**立即播放**互动动画（乐观），同时通过 WS 发送 `pet.tap`；收到他人的 `pet.action` 时在对应座位播放。
 
 ### 10.2 宠物动画统一接口（解耦美术与代码）
 
@@ -1026,7 +1014,7 @@ F0 只有 `env/dev_android.json` 与 `env/local.json`，键随功能逐步加入
 }
 ```
 
-后续阶段再加入 `WS_URL`（`ws://10.0.2.2:8090/api/v1/ws`，v1.4 起与 REST 同一基础路径）、`SHARE_BASE_URL`、`SENTRY_DSN`、`ANALYTICS_ENABLED`。
+后续阶段再加入 `WS_URL`（`ws://10.0.2.2:8090/ws`）、`SHARE_BASE_URL`、`SENTRY_DSN`、`ANALYTICS_ENABLED`。
 
 | 键 | 含义 |
 | :-- | :-- |
@@ -1093,7 +1081,7 @@ flutter run -d <真机ID> --dart-define-from-file=env/local.json
 | :-- | :-- | :-- | :-- |
 | W1–2 | B1 骨架、B2 登录与 onboarding | F0 项目骨架、主题、i18n、网络层、契约生成、登录页（Google + 开发登录；Apple 只做按钮与接口层，v1.3 起延后），onboarding 全流程提前到此阶段 | 能登录并创建用户 |
 | W3–4 | B3 验证码与入房事务 | F1 onboarding 全流程、占位宠物、验证码输入、背包 | **核心机制跑通（M1）** |
-| W5–6 | B4 WS 与事件分发（订阅快照、presence 在线 / 离线、`pet.tap`） | F2 WsClient、reducer、小屋场景与座位、presence（离线显示为睡觉） | 多人实时可见（M2） |
+| W5–6 | B4 WS 与事件分发 | F2 WsClient、reducer、小屋场景与座位、presence | 多人实时可见（M2） |
 | W7–8 | B5 消息与 AI 网关 | F3 聊天、信使卡片、短语、outbox | **跨语言消息可用（M3）** |
 | W9–10 | B6 审核、举报、打卡装扮 | F4 打卡、装扮、举报屏蔽、设置、账号删除、分享海报 | 功能完整的内测版（M4） |
 | W11–12 | B7 推送、Widget 快照 | F5 推送、深链、**Widget（iOS + Android）** | 外部依赖对接完成 |
