@@ -20,7 +20,7 @@
 - UI 只认 `error.code`，**不显示服务端 `message`**；每个 code 对应 ARB 的 `err_<CODE>`，缺失时回落 `err_UNKNOWN`。
 - 客户端只做格式预校验，业务结论以服务端为准。
 - 五种语言 `en`（源）、`zh_Hans`、`zh_Hant`、`ja`、`ko`；`ja`、`ko`、`zh_Hant` 为 AI 初译，ARB 中 `@@x-reviewed: false`。
-- **分阶段提交推送**：每个任务测试通过后按建议信息提交，并推送到 `jinheng main`（涉及后端的任务两个仓库都推）。
+- **分阶段提交推送**：Task 1–4 每个任务测试通过后按建议信息提交，并推送到 `jinheng main`（涉及后端的任务两个仓库都推）。**自 Task 5 起（2026-11-17 调整）**：Task 5–9 一次做完，不逐任务提交；全部完成后整体交用户审查，通过后再按任务、按阶段拆成多个提交，推送 `jinheng main`。
 - 后端改动遵守后端仓库现有风格（手写 pgx、`go test ./...`、`task` 命令）。
 
 ## Review Focus
