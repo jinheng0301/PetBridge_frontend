@@ -1,12 +1,28 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:petbridge/app/app.dart';
+import 'package:petbridge/core/storage/prefs_store.dart';
+import 'package:petbridge/core/storage/secure_store.dart';
+import 'package:petbridge/features/auth/presentation/login_page.dart';
+
+import '../helpers/fakes.dart';
 
 void main() {
-  testWidgets('app boots with en locale', (tester) async {
-    await tester.pumpWidget(const ProviderScope(child: PetBridgeApp()));
+  testWidgets('app boots with en locale and lands on login without tokens', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          secureStoreProvider.overrideWithValue(MemorySecureStore()),
+          prefsStoreProvider.overrideWithValue(stubPrefs()),
+        ],
+        child: const PetBridgeApp(),
+      ),
+    );
     await tester.pumpAndSettle();
 
+    expect(find.byType(LoginPage), findsOneWidget);
     expect(find.text('PetBridge'), findsWidgets);
   });
 }

@@ -87,5 +87,13 @@
   "onb_age_adult": "18 歳以上",
   "onb_submit": "完了",
   "onb_too_young_title": "申し訳ありません。まだ PetBridge をご利用いただけません",
-  "onb_too_young_body": "PetBridge は 13 歳以上の方を対象としています。大きくなったらまた来てくださいね！"
+  "onb_too_young_body": "PetBridge は 13 歳以上の方を対象としています。大きくなったらまた来てくださいね！",
+  "home_tab_room": "ルーム",
+  "home_tab_chat": "チャット",
+  "home_tab_bag": "バッグ",
+  "home_tab_me": "マイページ",
+  "home_coming_soon": "近日公開",
+  "me_nickname": "ニックネーム",
+  "me_mbti": "MBTI",
+  "me_pet": "ペット"
 }

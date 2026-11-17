@@ -273,6 +273,30 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get onb_too_young_body => 'PetBridge 仅面向 13 岁及以上的用户。期待你长大后再来！';
+
+  @override
+  String get home_tab_room => '小屋';
+
+  @override
+  String get home_tab_chat => '聊天';
+
+  @override
+  String get home_tab_bag => '背包';
+
+  @override
+  String get home_tab_me => '我的';
+
+  @override
+  String get home_coming_soon => '即将开放';
+
+  @override
+  String get me_nickname => '昵称';
+
+  @override
+  String get me_mbti => 'MBTI';
+
+  @override
+  String get me_pet => '宠物';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -543,6 +567,30 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get onb_too_young_body => 'PetBridge 仅面向 13 岁及以上的用户。期待你长大后再来！';
+
+  @override
+  String get home_tab_room => '小屋';
+
+  @override
+  String get home_tab_chat => '聊天';
+
+  @override
+  String get home_tab_bag => '背包';
+
+  @override
+  String get home_tab_me => '我的';
+
+  @override
+  String get home_coming_soon => '即将开放';
+
+  @override
+  String get me_nickname => '昵称';
+
+  @override
+  String get me_mbti => 'MBTI';
+
+  @override
+  String get me_pet => '宠物';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -813,4 +861,28 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get onb_too_young_body => 'PetBridge 僅面向 13 歲及以上的使用者。期待你長大後再來！';
+
+  @override
+  String get home_tab_room => '小屋';
+
+  @override
+  String get home_tab_chat => '聊天';
+
+  @override
+  String get home_tab_bag => '背包';
+
+  @override
+  String get home_tab_me => '我的';
+
+  @override
+  String get home_coming_soon => '即將開放';
+
+  @override
+  String get me_nickname => '暱稱';
+
+  @override
+  String get me_mbti => 'MBTI';
+
+  @override
+  String get me_pet => '寵物';
 }

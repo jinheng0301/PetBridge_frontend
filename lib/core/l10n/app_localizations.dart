@@ -625,6 +625,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'PetBridge is for people aged 13 and over. We hope to see you when you\'re older!'**
   String get onb_too_young_body;
+
+  /// Home tab 1: the shared room.
+  ///
+  /// In en, this message translates to:
+  /// **'Room'**
+  String get home_tab_room;
+
+  /// Home tab 2: chat.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat'**
+  String get home_tab_chat;
+
+  /// Home tab 3: backpack / inventory.
+  ///
+  /// In en, this message translates to:
+  /// **'Backpack'**
+  String get home_tab_bag;
+
+  /// Home tab 4: my profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Me'**
+  String get home_tab_me;
+
+  /// Placeholder text on tabs that are not built yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get home_coming_soon;
+
+  /// Me tab row label: nickname.
+  ///
+  /// In en, this message translates to:
+  /// **'Nickname'**
+  String get me_nickname;
+
+  /// Me tab row label: MBTI type.
+  ///
+  /// In en, this message translates to:
+  /// **'MBTI'**
+  String get me_mbti;
+
+  /// Me tab row label: pet.
+  ///
+  /// In en, this message translates to:
+  /// **'Pet'**
+  String get me_pet;
 }
 
 class _AppLocalizationsDelegate

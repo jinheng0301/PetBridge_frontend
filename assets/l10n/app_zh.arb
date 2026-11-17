@@ -86,5 +86,13 @@
   "onb_age_adult": "18 岁及以上",
   "onb_submit": "完成",
   "onb_too_young_title": "抱歉，你暂时还不能使用 PetBridge",
-  "onb_too_young_body": "PetBridge 仅面向 13 岁及以上的用户。期待你长大后再来！"
+  "onb_too_young_body": "PetBridge 仅面向 13 岁及以上的用户。期待你长大后再来！",
+  "home_tab_room": "小屋",
+  "home_tab_chat": "聊天",
+  "home_tab_bag": "背包",
+  "home_tab_me": "我的",
+  "home_coming_soon": "即将开放",
+  "me_nickname": "昵称",
+  "me_mbti": "MBTI",
+  "me_pet": "宠物"
 }

@@ -1,6 +1,9 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:petbridge/app/router/app_router.dart';
 import 'package:petbridge/app/theme/app_theme.dart';
 import 'package:petbridge/core/l10n/app_localizations.dart';
+import 'package:petbridge/features/onboarding/application/ui_locale.dart';
 
 /// Localization delegates for the app. The material and cupertino ones
 /// come from `material_ui` / `cupertino_ui`; gen-l10n's default list uses
@@ -11,21 +14,21 @@ const List<LocalizationsDelegate<dynamic>> appLocalizationsDelegates = [
   ...GlobalMaterialLocalizations.delegates,
 ];
 
-/// Root widget. Routing is wired in once the onboarding and home pages
-/// exist; until then a placeholder home.
-class PetBridgeApp extends StatelessWidget {
+/// Root widget: router, theme and the UI language.
+class PetBridgeApp extends ConsumerWidget {
   const new({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+  Widget build(BuildContext context, WidgetRef ref) {
+    return MaterialApp.router(
+      routerConfig: ref.watch(routerProvider),
+      locale: ref.watch(uiLocaleProvider),
       onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
       localizationsDelegates: appLocalizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       builder: (context, child) => _ClampTextScale(child: child!),
-      home: const _PlaceholderHome(),
     );
   }
 }
@@ -47,22 +50,6 @@ class _ClampTextScale extends StatelessWidget {
         ),
       ),
       child: child,
-    );
-  }
-}
-
-class _PlaceholderHome extends StatelessWidget {
-  const new();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Text(
-          AppLocalizations.of(context).appTitle,
-          style: Theme.of(context).textTheme.headlineMedium,
-        ),
-      ),
     );
   }
 }

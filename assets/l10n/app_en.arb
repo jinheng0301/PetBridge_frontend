@@ -363,5 +363,37 @@
   "onb_too_young_body": "PetBridge is for people aged 13 and over. We hope to see you when you're older!",
   "@onb_too_young_body": {
     "description": "Explains the age limit to users under 13."
+  },
+  "home_tab_room": "Room",
+  "@home_tab_room": {
+    "description": "Home tab 1: the shared room."
+  },
+  "home_tab_chat": "Chat",
+  "@home_tab_chat": {
+    "description": "Home tab 2: chat."
+  },
+  "home_tab_bag": "Backpack",
+  "@home_tab_bag": {
+    "description": "Home tab 3: backpack / inventory."
+  },
+  "home_tab_me": "Me",
+  "@home_tab_me": {
+    "description": "Home tab 4: my profile."
+  },
+  "home_coming_soon": "Coming soon",
+  "@home_coming_soon": {
+    "description": "Placeholder text on tabs that are not built yet."
+  },
+  "me_nickname": "Nickname",
+  "@me_nickname": {
+    "description": "Me tab row label: nickname."
+  },
+  "me_mbti": "MBTI",
+  "@me_mbti": {
+    "description": "Me tab row label: MBTI type."
+  },
+  "me_pet": "Pet",
+  "@me_pet": {
+    "description": "Me tab row label: pet."
   }
 }

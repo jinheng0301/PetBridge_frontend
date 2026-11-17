@@ -304,4 +304,28 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get onb_too_young_body =>
       'PetBridge is for people aged 13 and over. We hope to see you when you\'re older!';
+
+  @override
+  String get home_tab_room => 'Room';
+
+  @override
+  String get home_tab_chat => 'Chat';
+
+  @override
+  String get home_tab_bag => 'Backpack';
+
+  @override
+  String get home_tab_me => 'Me';
+
+  @override
+  String get home_coming_soon => 'Coming soon';
+
+  @override
+  String get me_nickname => 'Nickname';
+
+  @override
+  String get me_mbti => 'MBTI';
+
+  @override
+  String get me_pet => 'Pet';
 }

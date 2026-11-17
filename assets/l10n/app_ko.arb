@@ -87,5 +87,13 @@
   "onb_age_adult": "18세 이상",
   "onb_submit": "완료",
   "onb_too_young_title": "죄송해요, 아직 PetBridge를 이용할 수 없어요",
-  "onb_too_young_body": "PetBridge는 13세 이상만 이용할 수 있어요. 나중에 다시 만나요!"
+  "onb_too_young_body": "PetBridge는 13세 이상만 이용할 수 있어요. 나중에 다시 만나요!",
+  "home_tab_room": "하우스",
+  "home_tab_chat": "채팅",
+  "home_tab_bag": "가방",
+  "home_tab_me": "MY",
+  "home_coming_soon": "곧 열려요",
+  "me_nickname": "닉네임",
+  "me_mbti": "MBTI",
+  "me_pet": "펫"
 }

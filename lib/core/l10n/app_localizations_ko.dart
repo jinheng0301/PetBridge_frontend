@@ -277,4 +277,28 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get onb_too_young_body => 'PetBridge는 13세 이상만 이용할 수 있어요. 나중에 다시 만나요!';
+
+  @override
+  String get home_tab_room => '하우스';
+
+  @override
+  String get home_tab_chat => '채팅';
+
+  @override
+  String get home_tab_bag => '가방';
+
+  @override
+  String get home_tab_me => 'MY';
+
+  @override
+  String get home_coming_soon => '곧 열려요';
+
+  @override
+  String get me_nickname => '닉네임';
+
+  @override
+  String get me_mbti => 'MBTI';
+
+  @override
+  String get me_pet => '펫';
 }
