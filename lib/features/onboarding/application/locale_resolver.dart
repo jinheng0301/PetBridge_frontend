@@ -21,3 +21,20 @@ Locale resolveAppLocale(Locale system) => switch (system.languageCode) {
   },
   _ => _en,
 };
+
+/// The five app languages as BCP-47 tags, in picker order. These are also
+/// the backend's `native_lang` values.
+const List<String> kAppLanguageTags = ['en', 'zh-Hans', 'zh-Hant', 'ja', 'ko'];
+
+/// The BCP-47 tag of an app locale, e.g. `zh-Hant`.
+String localeTag(Locale l) =>
+    l.scriptCode == null ? l.languageCode : '${l.languageCode}-${l.scriptCode}';
+
+/// The app locale for one of [kAppLanguageTags]; unknown tags become `en`.
+Locale localeFromTag(String tag) => switch (tag) {
+  'zh-Hans' => _zhHans,
+  'zh-Hant' => _zhHant,
+  'ja' => _ja,
+  'ko' => _ko,
+  _ => _en,
+};

@@ -194,4 +194,84 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get login_dev_submit => 'ログイン';
+
+  @override
+  String onb_progress(int step, int total) {
+    return 'ステップ $step / $total';
+  }
+
+  @override
+  String get onb_lang_title => 'あなたの言語は？';
+
+  @override
+  String get onb_lang_hint => 'アプリの表示に使われ、友だちのメッセージもこの言語に翻訳されます。';
+
+  @override
+  String get onb_mbti_title => 'あなたの MBTI タイプは？';
+
+  @override
+  String get onb_mbti_not_sure => 'わからない — かんたんなテストを受ける';
+
+  @override
+  String onb_quiz_progress(int n, int total) {
+    return '質問 $n / $total';
+  }
+
+  @override
+  String get onb_quiz_result_title => 'あなたのタイプ';
+
+  @override
+  String get onb_quiz_result_hint => 'しっくりこない？文字をタップすると切り替えられます。';
+
+  @override
+  String get onb_quiz_result_confirm => 'このタイプにする';
+
+  @override
+  String get onb_reveal_title => 'あなたのペットです';
+
+  @override
+  String get onb_profile_title => 'あなたについて';
+
+  @override
+  String get onb_nickname_label => 'ニックネーム';
+
+  @override
+  String get onb_nickname_hint => '1〜20 文字';
+
+  @override
+  String get onb_nickname_err_empty => 'ニックネームを入力してください。';
+
+  @override
+  String get onb_nickname_err_too_long => 'ニックネームは 20 文字までです。';
+
+  @override
+  String get onb_nickname_err_invalid => 'ニックネームに使えない文字が含まれています。';
+
+  @override
+  String get onb_nickname_err_server => 'このニックネームは使えません。別のものをお試しください。';
+
+  @override
+  String get onb_field_invalid => 'この項目を確認してください。';
+
+  @override
+  String get onb_age_label => '年齢';
+
+  @override
+  String get onb_age_under13 => '13 歳未満';
+
+  @override
+  String get onb_age_teen => '13〜17 歳';
+
+  @override
+  String get onb_age_adult => '18 歳以上';
+
+  @override
+  String get onb_submit => '完了';
+
+  @override
+  String get onb_too_young_title => '申し訳ありません。まだ PetBridge をご利用いただけません';
+
+  @override
+  String get onb_too_young_body =>
+      'PetBridge は 13 歳以上の方を対象としています。大きくなったらまた来てくださいね！';
 }

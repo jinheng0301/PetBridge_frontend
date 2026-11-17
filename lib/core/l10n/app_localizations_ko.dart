@@ -198,4 +198,83 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get login_dev_submit => '로그인';
+
+  @override
+  String onb_progress(int step, int total) {
+    return '$total단계 중 $step단계';
+  }
+
+  @override
+  String get onb_lang_title => '사용하는 언어는 무엇인가요?';
+
+  @override
+  String get onb_lang_hint => '앱에 이 언어가 사용되고, 친구의 메시지도 이 언어로 번역돼요.';
+
+  @override
+  String get onb_mbti_title => '당신의 MBTI 유형은?';
+
+  @override
+  String get onb_mbti_not_sure => '잘 모르겠어요 — 간단한 테스트 하기';
+
+  @override
+  String onb_quiz_progress(int n, int total) {
+    return '$total개 중 $n번째 질문';
+  }
+
+  @override
+  String get onb_quiz_result_title => '당신의 유형';
+
+  @override
+  String get onb_quiz_result_hint => '잘 맞지 않나요? 글자를 탭하면 바꿀 수 있어요.';
+
+  @override
+  String get onb_quiz_result_confirm => '이 유형으로 할게요';
+
+  @override
+  String get onb_reveal_title => '나의 펫을 만나 보세요';
+
+  @override
+  String get onb_profile_title => '나에 대해';
+
+  @override
+  String get onb_nickname_label => '닉네임';
+
+  @override
+  String get onb_nickname_hint => '1~20자';
+
+  @override
+  String get onb_nickname_err_empty => '닉네임을 입력해 주세요.';
+
+  @override
+  String get onb_nickname_err_too_long => '닉네임은 최대 20자까지 가능해요.';
+
+  @override
+  String get onb_nickname_err_invalid => '닉네임에 사용할 수 없는 문자가 있어요.';
+
+  @override
+  String get onb_nickname_err_server => '이 닉네임은 사용할 수 없어요. 다른 닉네임을 입력해 주세요.';
+
+  @override
+  String get onb_field_invalid => '이 항목을 확인해 주세요.';
+
+  @override
+  String get onb_age_label => '나이';
+
+  @override
+  String get onb_age_under13 => '13세 미만';
+
+  @override
+  String get onb_age_teen => '13~17세';
+
+  @override
+  String get onb_age_adult => '18세 이상';
+
+  @override
+  String get onb_submit => '완료';
+
+  @override
+  String get onb_too_young_title => '죄송해요, 아직 PetBridge를 이용할 수 없어요';
+
+  @override
+  String get onb_too_young_body => 'PetBridge는 13세 이상만 이용할 수 있어요. 나중에 다시 만나요!';
 }

@@ -219,4 +219,89 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get login_dev_submit => 'Log in';
+
+  @override
+  String onb_progress(int step, int total) {
+    return 'Step $step of $total';
+  }
+
+  @override
+  String get onb_lang_title => 'What\'s your language?';
+
+  @override
+  String get onb_lang_hint =>
+      'The app will use it, and your friends\' messages will be translated into it.';
+
+  @override
+  String get onb_mbti_title => 'What\'s your MBTI type?';
+
+  @override
+  String get onb_mbti_not_sure => 'I\'m not sure — take a quick quiz';
+
+  @override
+  String onb_quiz_progress(int n, int total) {
+    return 'Question $n of $total';
+  }
+
+  @override
+  String get onb_quiz_result_title => 'Your type';
+
+  @override
+  String get onb_quiz_result_hint =>
+      'Doesn\'t feel right? Tap a letter to switch it.';
+
+  @override
+  String get onb_quiz_result_confirm => 'Use this type';
+
+  @override
+  String get onb_reveal_title => 'Meet your pet';
+
+  @override
+  String get onb_profile_title => 'About you';
+
+  @override
+  String get onb_nickname_label => 'Nickname';
+
+  @override
+  String get onb_nickname_hint => '1–20 characters';
+
+  @override
+  String get onb_nickname_err_empty => 'Please enter a nickname.';
+
+  @override
+  String get onb_nickname_err_too_long =>
+      'Nickname can be at most 20 characters.';
+
+  @override
+  String get onb_nickname_err_invalid =>
+      'Nickname contains characters that are not allowed.';
+
+  @override
+  String get onb_nickname_err_server =>
+      'This nickname can\'t be used. Please try another one.';
+
+  @override
+  String get onb_field_invalid => 'Please check this.';
+
+  @override
+  String get onb_age_label => 'Age';
+
+  @override
+  String get onb_age_under13 => 'Under 13';
+
+  @override
+  String get onb_age_teen => '13–17';
+
+  @override
+  String get onb_age_adult => '18 or older';
+
+  @override
+  String get onb_submit => 'Finish';
+
+  @override
+  String get onb_too_young_title => 'Sorry, you can\'t use PetBridge yet';
+
+  @override
+  String get onb_too_young_body =>
+      'PetBridge is for people aged 13 and over. We hope to see you when you\'re older!';
 }

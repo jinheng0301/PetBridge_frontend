@@ -194,6 +194,85 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get login_dev_submit => '登录';
+
+  @override
+  String onb_progress(int step, int total) {
+    return '第 $step 步，共 $total 步';
+  }
+
+  @override
+  String get onb_lang_title => '你的语言是？';
+
+  @override
+  String get onb_lang_hint => '应用将使用这个语言，朋友发来的消息也会翻译成它。';
+
+  @override
+  String get onb_mbti_title => '你的 MBTI 是？';
+
+  @override
+  String get onb_mbti_not_sure => '我不确定，做个小测试';
+
+  @override
+  String onb_quiz_progress(int n, int total) {
+    return '第 $n 题，共 $total 题';
+  }
+
+  @override
+  String get onb_quiz_result_title => '你的类型';
+
+  @override
+  String get onb_quiz_result_hint => '觉得不像？点一下字母就能换成另一边。';
+
+  @override
+  String get onb_quiz_result_confirm => '就用这个';
+
+  @override
+  String get onb_reveal_title => '认识你的宠物';
+
+  @override
+  String get onb_profile_title => '关于你';
+
+  @override
+  String get onb_nickname_label => '昵称';
+
+  @override
+  String get onb_nickname_hint => '1–20 个字';
+
+  @override
+  String get onb_nickname_err_empty => '请输入昵称。';
+
+  @override
+  String get onb_nickname_err_too_long => '昵称最多 20 个字。';
+
+  @override
+  String get onb_nickname_err_invalid => '昵称含有不允许的字符。';
+
+  @override
+  String get onb_nickname_err_server => '这个昵称不能使用，请换一个。';
+
+  @override
+  String get onb_field_invalid => '请检查这一项。';
+
+  @override
+  String get onb_age_label => '年龄';
+
+  @override
+  String get onb_age_under13 => '未满 13 岁';
+
+  @override
+  String get onb_age_teen => '13–17 岁';
+
+  @override
+  String get onb_age_adult => '18 岁及以上';
+
+  @override
+  String get onb_submit => '完成';
+
+  @override
+  String get onb_too_young_title => '抱歉，你暂时还不能使用 PetBridge';
+
+  @override
+  String get onb_too_young_body => 'PetBridge 仅面向 13 岁及以上的用户。期待你长大后再来！';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -385,6 +464,85 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get login_dev_submit => '登录';
+
+  @override
+  String onb_progress(int step, int total) {
+    return '第 $step 步，共 $total 步';
+  }
+
+  @override
+  String get onb_lang_title => '你的语言是？';
+
+  @override
+  String get onb_lang_hint => '应用将使用这个语言，朋友发来的消息也会翻译成它。';
+
+  @override
+  String get onb_mbti_title => '你的 MBTI 是？';
+
+  @override
+  String get onb_mbti_not_sure => '我不确定，做个小测试';
+
+  @override
+  String onb_quiz_progress(int n, int total) {
+    return '第 $n 题，共 $total 题';
+  }
+
+  @override
+  String get onb_quiz_result_title => '你的类型';
+
+  @override
+  String get onb_quiz_result_hint => '觉得不像？点一下字母就能换成另一边。';
+
+  @override
+  String get onb_quiz_result_confirm => '就用这个';
+
+  @override
+  String get onb_reveal_title => '认识你的宠物';
+
+  @override
+  String get onb_profile_title => '关于你';
+
+  @override
+  String get onb_nickname_label => '昵称';
+
+  @override
+  String get onb_nickname_hint => '1–20 个字';
+
+  @override
+  String get onb_nickname_err_empty => '请输入昵称。';
+
+  @override
+  String get onb_nickname_err_too_long => '昵称最多 20 个字。';
+
+  @override
+  String get onb_nickname_err_invalid => '昵称含有不允许的字符。';
+
+  @override
+  String get onb_nickname_err_server => '这个昵称不能使用，请换一个。';
+
+  @override
+  String get onb_field_invalid => '请检查这一项。';
+
+  @override
+  String get onb_age_label => '年龄';
+
+  @override
+  String get onb_age_under13 => '未满 13 岁';
+
+  @override
+  String get onb_age_teen => '13–17 岁';
+
+  @override
+  String get onb_age_adult => '18 岁及以上';
+
+  @override
+  String get onb_submit => '完成';
+
+  @override
+  String get onb_too_young_title => '抱歉，你暂时还不能使用 PetBridge';
+
+  @override
+  String get onb_too_young_body => 'PetBridge 仅面向 13 岁及以上的用户。期待你长大后再来！';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -576,4 +734,83 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get login_dev_submit => '登入';
+
+  @override
+  String onb_progress(int step, int total) {
+    return '第 $step 步，共 $total 步';
+  }
+
+  @override
+  String get onb_lang_title => '你的語言是？';
+
+  @override
+  String get onb_lang_hint => '應用程式將使用這個語言，朋友傳來的訊息也會翻譯成它。';
+
+  @override
+  String get onb_mbti_title => '你的 MBTI 是？';
+
+  @override
+  String get onb_mbti_not_sure => '我不確定，做個小測驗';
+
+  @override
+  String onb_quiz_progress(int n, int total) {
+    return '第 $n 題，共 $total 題';
+  }
+
+  @override
+  String get onb_quiz_result_title => '你的類型';
+
+  @override
+  String get onb_quiz_result_hint => '覺得不像？點一下字母就能換成另一邊。';
+
+  @override
+  String get onb_quiz_result_confirm => '就用這個';
+
+  @override
+  String get onb_reveal_title => '認識你的寵物';
+
+  @override
+  String get onb_profile_title => '關於你';
+
+  @override
+  String get onb_nickname_label => '暱稱';
+
+  @override
+  String get onb_nickname_hint => '1–20 個字';
+
+  @override
+  String get onb_nickname_err_empty => '請輸入暱稱。';
+
+  @override
+  String get onb_nickname_err_too_long => '暱稱最多 20 個字。';
+
+  @override
+  String get onb_nickname_err_invalid => '暱稱含有不允許的字元。';
+
+  @override
+  String get onb_nickname_err_server => '這個暱稱不能使用，請換一個。';
+
+  @override
+  String get onb_field_invalid => '請檢查這一項。';
+
+  @override
+  String get onb_age_label => '年齡';
+
+  @override
+  String get onb_age_under13 => '未滿 13 歲';
+
+  @override
+  String get onb_age_teen => '13–17 歲';
+
+  @override
+  String get onb_age_adult => '18 歲及以上';
+
+  @override
+  String get onb_submit => '完成';
+
+  @override
+  String get onb_too_young_title => '抱歉，你暫時還不能使用 PetBridge';
+
+  @override
+  String get onb_too_young_body => 'PetBridge 僅面向 13 歲及以上的使用者。期待你長大後再來！';
 }

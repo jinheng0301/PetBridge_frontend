@@ -475,6 +475,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Log in'**
   String get login_dev_submit;
+
+  /// Onboarding app bar: current step of total.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {step} of {total}'**
+  String onb_progress(int step, int total);
+
+  /// Onboarding step 1 title: pick your language.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s your language?'**
+  String get onb_lang_title;
+
+  /// Explains that the chosen language is used for the UI and translations.
+  ///
+  /// In en, this message translates to:
+  /// **'The app will use it, and your friends\' messages will be translated into it.'**
+  String get onb_lang_hint;
+
+  /// Onboarding step 2 title: pick your MBTI type.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s your MBTI type?'**
+  String get onb_mbti_title;
+
+  /// Link to the 4-question quiz for users who do not know their type.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'m not sure — take a quick quiz'**
+  String get onb_mbti_not_sure;
+
+  /// Quiz page title: question n of total.
+  ///
+  /// In en, this message translates to:
+  /// **'Question {n} of {total}'**
+  String onb_quiz_progress(int n, int total);
+
+  /// Quiz result page title.
+  ///
+  /// In en, this message translates to:
+  /// **'Your type'**
+  String get onb_quiz_result_title;
+
+  /// Tells the user they can tap a letter to flip it.
+  ///
+  /// In en, this message translates to:
+  /// **'Doesn\'t feel right? Tap a letter to switch it.'**
+  String get onb_quiz_result_hint;
+
+  /// Confirms the quiz result as the MBTI type.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this type'**
+  String get onb_quiz_result_confirm;
+
+  /// Onboarding step 3 title: the pet for your type.
+  ///
+  /// In en, this message translates to:
+  /// **'Meet your pet'**
+  String get onb_reveal_title;
+
+  /// Onboarding step 4 title: nickname and age.
+  ///
+  /// In en, this message translates to:
+  /// **'About you'**
+  String get onb_profile_title;
+
+  /// Nickname field label.
+  ///
+  /// In en, this message translates to:
+  /// **'Nickname'**
+  String get onb_nickname_label;
+
+  /// Helper text under the nickname field.
+  ///
+  /// In en, this message translates to:
+  /// **'1–20 characters'**
+  String get onb_nickname_hint;
+
+  /// Nickname is empty after trimming.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a nickname.'**
+  String get onb_nickname_err_empty;
+
+  /// Nickname is over 20 characters.
+  ///
+  /// In en, this message translates to:
+  /// **'Nickname can be at most 20 characters.'**
+  String get onb_nickname_err_too_long;
+
+  /// Nickname has control characters.
+  ///
+  /// In en, this message translates to:
+  /// **'Nickname contains characters that are not allowed.'**
+  String get onb_nickname_err_invalid;
+
+  /// Server rejected the nickname (VALIDATION_FAILED on nickname).
+  ///
+  /// In en, this message translates to:
+  /// **'This nickname can\'t be used. Please try another one.'**
+  String get onb_nickname_err_server;
+
+  /// Server rejected this field (VALIDATION_FAILED).
+  ///
+  /// In en, this message translates to:
+  /// **'Please check this.'**
+  String get onb_field_invalid;
+
+  /// Age section label.
+  ///
+  /// In en, this message translates to:
+  /// **'Age'**
+  String get onb_age_label;
+
+  /// Age choice: under 13.
+  ///
+  /// In en, this message translates to:
+  /// **'Under 13'**
+  String get onb_age_under13;
+
+  /// Age choice: 13 to 17.
+  ///
+  /// In en, this message translates to:
+  /// **'13–17'**
+  String get onb_age_teen;
+
+  /// Age choice: 18 or older.
+  ///
+  /// In en, this message translates to:
+  /// **'18 or older'**
+  String get onb_age_adult;
+
+  /// Submits onboarding.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish'**
+  String get onb_submit;
+
+  /// Title of the page for users under 13.
+  ///
+  /// In en, this message translates to:
+  /// **'Sorry, you can\'t use PetBridge yet'**
+  String get onb_too_young_title;
+
+  /// Explains the age limit to users under 13.
+  ///
+  /// In en, this message translates to:
+  /// **'PetBridge is for people aged 13 and over. We hope to see you when you\'re older!'**
+  String get onb_too_young_body;
 }
 
 class _AppLocalizationsDelegate

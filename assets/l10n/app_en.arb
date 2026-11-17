@@ -247,5 +247,121 @@
   "login_dev_submit": "Log in",
   "@login_dev_submit": {
     "description": "Button that logs in with the developer email."
+  },
+  "onb_progress": "Step {step} of {total}",
+  "@onb_progress": {
+    "description": "Onboarding app bar: current step of total.",
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "onb_lang_title": "What's your language?",
+  "@onb_lang_title": {
+    "description": "Onboarding step 1 title: pick your language."
+  },
+  "onb_lang_hint": "The app will use it, and your friends' messages will be translated into it.",
+  "@onb_lang_hint": {
+    "description": "Explains that the chosen language is used for the UI and translations."
+  },
+  "onb_mbti_title": "What's your MBTI type?",
+  "@onb_mbti_title": {
+    "description": "Onboarding step 2 title: pick your MBTI type."
+  },
+  "onb_mbti_not_sure": "I'm not sure — take a quick quiz",
+  "@onb_mbti_not_sure": {
+    "description": "Link to the 4-question quiz for users who do not know their type."
+  },
+  "onb_quiz_progress": "Question {n} of {total}",
+  "@onb_quiz_progress": {
+    "description": "Quiz page title: question n of total.",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "onb_quiz_result_title": "Your type",
+  "@onb_quiz_result_title": {
+    "description": "Quiz result page title."
+  },
+  "onb_quiz_result_hint": "Doesn't feel right? Tap a letter to switch it.",
+  "@onb_quiz_result_hint": {
+    "description": "Tells the user they can tap a letter to flip it."
+  },
+  "onb_quiz_result_confirm": "Use this type",
+  "@onb_quiz_result_confirm": {
+    "description": "Confirms the quiz result as the MBTI type."
+  },
+  "onb_reveal_title": "Meet your pet",
+  "@onb_reveal_title": {
+    "description": "Onboarding step 3 title: the pet for your type."
+  },
+  "onb_profile_title": "About you",
+  "@onb_profile_title": {
+    "description": "Onboarding step 4 title: nickname and age."
+  },
+  "onb_nickname_label": "Nickname",
+  "@onb_nickname_label": {
+    "description": "Nickname field label."
+  },
+  "onb_nickname_hint": "1–20 characters",
+  "@onb_nickname_hint": {
+    "description": "Helper text under the nickname field."
+  },
+  "onb_nickname_err_empty": "Please enter a nickname.",
+  "@onb_nickname_err_empty": {
+    "description": "Nickname is empty after trimming."
+  },
+  "onb_nickname_err_too_long": "Nickname can be at most 20 characters.",
+  "@onb_nickname_err_too_long": {
+    "description": "Nickname is over 20 characters."
+  },
+  "onb_nickname_err_invalid": "Nickname contains characters that are not allowed.",
+  "@onb_nickname_err_invalid": {
+    "description": "Nickname has control characters."
+  },
+  "onb_nickname_err_server": "This nickname can't be used. Please try another one.",
+  "@onb_nickname_err_server": {
+    "description": "Server rejected the nickname (VALIDATION_FAILED on nickname)."
+  },
+  "onb_field_invalid": "Please check this.",
+  "@onb_field_invalid": {
+    "description": "Server rejected this field (VALIDATION_FAILED)."
+  },
+  "onb_age_label": "Age",
+  "@onb_age_label": {
+    "description": "Age section label."
+  },
+  "onb_age_under13": "Under 13",
+  "@onb_age_under13": {
+    "description": "Age choice: under 13."
+  },
+  "onb_age_teen": "13–17",
+  "@onb_age_teen": {
+    "description": "Age choice: 13 to 17."
+  },
+  "onb_age_adult": "18 or older",
+  "@onb_age_adult": {
+    "description": "Age choice: 18 or older."
+  },
+  "onb_submit": "Finish",
+  "@onb_submit": {
+    "description": "Submits onboarding."
+  },
+  "onb_too_young_title": "Sorry, you can't use PetBridge yet",
+  "@onb_too_young_title": {
+    "description": "Title of the page for users under 13."
+  },
+  "onb_too_young_body": "PetBridge is for people aged 13 and over. We hope to see you when you're older!",
+  "@onb_too_young_body": {
+    "description": "Explains the age limit to users under 13."
   }
 }
