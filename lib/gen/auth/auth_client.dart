@@ -127,7 +127,7 @@ abstract class AuthClient {
 
   /// Sign in with Google
   ///
-  /// Not available yet; returns 501 PROVIDER_NOT_CONFIGURED until real verification is wired up.
+  /// Verifies a Google ID token against Google's signing keys. Returns 501 PROVIDER_NOT_CONFIGURED when GOOGLE_CLIENT_ID is not set, and 503 NOT_READY when Google's keys cannot be fetched (retry later; this is not a rejected login).
   @POST('/api/v1/auth/login/google')
   @Headers({'Content-Type': 'application/json'})
   Future<LoginDevResponse200> loginGoogle({
@@ -165,7 +165,7 @@ abstract class AuthClient {
 
   /// Rotate the refresh token
   ///
-  /// Returns a new access token and a new refresh token; the old refresh token stops working. Presenting an already-used refresh token revokes the whole token family (REFRESH_REUSED). Clients should refresh with a single in-flight request.
+  /// Returns a new access token and a new refresh token; the old refresh token stops working. Presenting an already-used refresh token revokes the whole token family (REFRESH_REUSED), except within 60 seconds of its rotation while the family still holds a live token: that is treated as a client retrying a rotation whose response it lost, and returns a new pair (every other token of the family stops working). Clients should refresh with a single in-flight request, and keep their tokens on network errors and 5xx.
   @POST('/api/v1/auth/refresh')
   @Headers({'Content-Type': 'application/json'})
   Future<LoginDevResponse200> refreshToken({
