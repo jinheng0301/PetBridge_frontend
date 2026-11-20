@@ -2,13 +2,15 @@
 
 | 项目 | 内容 |
 | :-- | :-- |
-| 版本 | v1.5（草案，待自评审；较 v1.4：对齐后端 TRD v1.5 的 WebSocket 加固：处理关闭码 4401、升级 429 / 503 与 `room.sub` 限流。v1.4 较 v1.3：对齐后端 B4 的 WebSocket 协议，reducer 改为以订阅快照为准，presence 只有在线 / 离线、离线显示为睡觉。v1.3 较 v1.2：对齐 PRD v1.5 与后端 TRD v1.3，F0 登录与 onboarding 设计定稿，首页改为四个 Tab，契约生成改用 swagger_parser） |
+| 版本 | v1.6（草案，待自评审；较 v1.5：F0 联调后补齐实现细节：界面语言的取值顺序、启动时网络失败可重试、Google 取消与无账号不报错、设备时区回落、可空枚举的契约写法。v1.5 较 v1.4：对齐后端 TRD v1.5 的 WebSocket 加固：处理关闭码 4401、升级 429 / 503 与 `room.sub` 限流。v1.4 较 v1.3：对齐后端 B4 的 WebSocket 协议，reducer 改为以订阅快照为准，presence 只有在线 / 离线、离线显示为睡觉。v1.3 较 v1.2：对齐 PRD v1.5 与后端 TRD v1.3，F0 登录与 onboarding 设计定稿，首页改为四个 Tab，契约生成改用 swagger_parser） |
 | 对应 PRD | 《跨国 MBTI 情感 AI 电子宠物 PRD v1.6》 |
-| 配套文档 | 《后端 TRD（Go）v1.5》：REST 接口见其第 8 章，WebSocket 协议见其第 9 章，本文以其为准 |
+| 配套文档 | 《后端 TRD（Go）v1.6》：REST 接口见其第 8 章，WebSocket 协议见其第 9 章，本文以其为准 |
 | 技术栈 | Flutter 3.x 稳定版 / Dart 3 |
 | 平台 | iOS 15+、Android 8+（竖屏，手机优先，不适配平板） |
 | 开发模式 | **单人全栈开发**，选型以“一个人能长期维护”为第一约束 |
 
+> **V1.6 变更说明**：F0 在模拟器上端到端联调后，补齐实现中定下的细节，与后端 TRD v1.6 同步，PRD 不变。① **界面语言的取值顺序**：本地保存的选择 → `/me` 的 `native_lang` → 系统语言；退出登录清除本地选择、回到系统语言，再次登录按 `native_lang` 恢复（11.1、第 13 章）。② **启动时恢复会话**：拉 `/me` 遇到网络错误或 5xx 时保留令牌，启动页显示错误文案与“重试”；其他失败（如刷新令牌失效）清除令牌、回登录页（6.1、6.2）。③ **Google 登录**：用户取消或设备上没有 Google 账号时静默留在登录页，不显示错误；其他失败显示 `err_GOOGLE_SIGN_IN_FAILED`（6.2）。④ 设备返回的时区不是 IANA 名（如模拟器的 `GMT`）时，onboarding 提交 `UTC`（11.1）。⑤ Onboarding 进度条共 5 步，测试与结果页算第 3 步，直接选 MBTI 时跳过第 3 步（11.1）。⑥ 契约约定：openapi 3.0.3 中可空的枚举字段必须把 `null` 写进枚举值，否则生成的模型解析不了未 onboarding 用户的 `/me`（8.2）。⑦ 界面组件库 `material_ui` 的本地化需用它自己的 `GlobalMaterialLocalizations.delegates`，不能用 `gen-l10n` 默认带的 `flutter_localizations` 代理，否则非英文下顶部栏报错（第 13 章）。
+>
 > **V1.5 变更说明**：对齐后端 TRD v1.5（B4 安全加固），PRD 不变。① 服务端在升级所用 access token 到期时以关闭码 **4401** 断开连接：客户端收到后先刷新 token，再**立即**重连，不走退避（9.2）。前端本来就在 token 剩余不足 60 秒时先刷新再连，所以正常情况下 4401 后的重连在 3 秒内完成，不会出现“正在重连”提示。② 升级请求可能返回 HTTP 429 `RATE_LIMITED`（按 `Retry-After` 等待后重连）或 503 `NOT_READY`（服务重启中，按 `server.restart` 的随机等待处理）（9.2）。③ `room.sub` 每连接每 10 秒最多 10 次，超出会收到 `error{RATE_LIMITED}`；缺口触发的重新订阅要合并，同一房间 1 秒内不重复订阅（第 7 章 reducer 规则 2、5）。
 >
 > **V1.4 变更说明**：对齐 PRD v1.6 与后端 TRD v1.4（B4 WebSocket 协议定稿，详见后端仓库 `docs/superpowers/specs/2026-11-17-b4-realtime-design.md`）。① **reducer 以订阅快照为准**（4.5③、第 7 章）：每次 `room.sub` 服务端都下发完整 `room.snapshot`，客户端用它整体替换房间状态，并把 `last_seq` **设为**快照的 seq（不取较大值，Redis 重启后 seq 会从头开始）；之后丢弃 seq ≤ `last_seq` 的事件，不带 seq 的事件直接应用，成员事件按 `user_id` 幂等；发现缺口或收到 `resync` 时对该房间重新发 `room.sub`，不再拉 `GET /rooms/{id}`（后端 MVP 不实现该接口）（9.2）。② **presence 只有 online / offline**：离线成员的 `PetView` 显示为睡觉（`mood=3`），收到 `presence.update` 立即切换，用户回到 App 时同屋的人立刻看到他的宠物醒来（10.1）；`member.joined` 自带新成员的 presence。③ `room.kicked` 新增 `reason=left`（自己在另一台设备上退出），处理与被移除相同但不提示；新增 `error` 帧与 `room.unsub`（第 7 章）。④ `WS_URL` 改为 `ws://10.0.2.2:8090/api/v1/ws`，与 REST 同一基础路径（19.4）。⑤ 订阅范围写明：连接后订阅自己所有在席房间（自己的 + 已加入的）（6.1）。
@@ -437,13 +439,14 @@ unauthenticated ──登录成功──► needsOnboarding ──完成──�
 - **WebSocket 在完成 onboarding 后即连接，`solo` 状态也连接**，并订阅自己所有在席房间（自己的小屋 + 已加入的小屋，v1.4 写明），这样别人加入时能实时收到 `member.joined` 并从 `solo` 切换到 `inRoom`。App 回到前台时额外调用一次 `GET /rooms/mine` 校正，防止错过事件。
 - `go_router` 的 `redirect` 只读取 `sessionProvider`，保证页面不会在不合法状态下被打开。
 - **F0 阶段**（小屋功能之前）先用四态：`unknown`（启动中）/ `unauthenticated` / `needsOnboarding` / `ready`；`ready` 在小屋阶段再细分为 `solo` / `inRoom`。
+- **启动恢复会话**（v1.6）：有令牌时拉 `/me`；网络错误或 5xx 时保留令牌、停在 `unknown` 并带上错误，启动页显示错误文案与“重试”；其他失败（如刷新令牌失效）清除令牌，进入 `unauthenticated`。
 
 ### 6.2 路由表
 
 | 路径 | 页面 | 说明 |
 | :-- | :-- | :-- |
-| `/splash` | 启动页 | 读令牌、拉 `/me`、决定去向 |
-| `/login` | 登录 | Apple / Google |
+| `/splash` | 启动页 | 读令牌、拉 `/me`、决定去向；网络失败时显示“重试”（v1.6） |
+| `/login` | 登录 | Apple / Google；用户取消或设备上没有 Google 账号时静默留在本页，其他失败显示 `err_GOOGLE_SIGN_IN_FAILED`（v1.6） |
 | `/onboarding/lang` | 语言选择 | 默认跟随系统语言 |
 | `/onboarding/mbti` | MBTI 选择 | 16 型网格；“不确定”进入测试 |
 | `/onboarding/quiz` | 极简测试 | 见 11.1 |
@@ -511,6 +514,7 @@ unauthenticated ──登录成功──► needsOnboarding ──完成──�
 - 错误码映射到本地化文案：`err.CODE_INVALID`、`err.ROOM_FULL` 等，文案放 ARB，**不显示服务端 `message`**。
 - `request_id` 随错误上报到 Sentry，便于和后端日志对上。
 - 契约生成：用 `swagger_parser` 从后端仓库的 `api/openapi.yaml` 生成 `lib/gen/`（`dart run swagger_parser` + `build_runner`），CI 中校验生成结果无差异。
+- 可空枚举（v1.6）：openapi 3.0.3 里 `nullable: true` 的枚举字段必须把 `null` 写进 `enum` 列表（如 Profile 的 `native_lang`、`age_band`），否则生成的模型遇到 `null` 解析失败，未 onboarding 用户的 `/me` 会报错；`contract_decode_test` 覆盖这种情况。
 - F0 只启用 `AuthInterceptor`、`ErrorMapInterceptor`、`LogInterceptor`；`IdempotencyInterceptor` 与 `RetryInterceptor` 随入房 / 发消息阶段加入。
 
 ---
@@ -767,7 +771,8 @@ flowchart LR
 
 ### 11.1 Onboarding
 
-1. 语言：默认取系统语言，五选一。界面语言与“母语（翻译目标语言）”默认相同，设置里可分开【假设】。
+1. 语言：默认取系统语言，五选一，选中即切换界面语言并保存在本地。界面语言与“母语（翻译目标语言）”默认相同，设置里可分开【假设】。界面语言取值顺序（v1.6）：本地保存的选择 → `/me` 的 `native_lang` → 系统语言；退出登录清除本地选择，再次登录按 `native_lang` 恢复。
+   进度条（v1.6）：共 5 步，语言 1、MBTI 2、测试与结果 3、揭晓 4、昵称与年龄 5；直接选 MBTI 时跳过第 3 步。
 2. MBTI：16 型网格直选（F0 先不做四维滑块）；底部“我不确定”进入测试。
 3. 极简测试：**4 题（每个 MBTI 维度 1 题，每题二选一）**，PRD v1.4 已同步；客户端本地计分，只提交结果。结果页显示 4 个字母，每个维度可点击翻转后再确认（PRD F1.3“可手动二次确认”），确认后回到 MBTI 页并选中结果。题目（v1.3 定稿，文案进 ARB）：
 
@@ -779,7 +784,7 @@ flowchart LR
    | J / P | 出去旅行，你通常… | 提前排好行程（J） | 到了再看心情（P） |
 
 4. 宠物揭晓：出生动画 + 该宠物的性格介绍（五语种文案，16 × 5 共 80 条，进 ARB）。揭晓在提交之前，宠物由客户端按 MBTI 本地查 `pet_type`（与后端 `internal/service/pet.go` 映射一致，单测核对 16 个 slug 与 openapi 枚举相同）；资源按 `pet_type` 命名。F0 用占位宠物。
-5. 昵称与年龄：昵称去首尾空格后 1–20 字、无控制字符（敏感词由服务端判定）；年龄三选一：未满 13 岁 / 13–17 岁 / 18 岁以上。选“未满 13 岁”进入 `/onboarding/too-young` 说明页，只提供“退出登录”，不提交；13–17 岁给出提示（私聊关闭等限制）。提交的 `tz` 取设备 IANA 时区。
+5. 昵称与年龄：昵称去首尾空格后 1–20 字、无控制字符（敏感词由服务端判定）；年龄三选一：未满 13 岁 / 13–17 岁 / 18 岁以上。选“未满 13 岁”进入 `/onboarding/too-young` 说明页，只提供“退出登录”，不提交；13–17 岁给出提示（私聊关闭等限制）。提交的 `tz` 取设备 IANA 时区；设备返回的不是 IANA 名（不含 `/`，如模拟器的 `GMT`）时提交 `UTC`（v1.6）。
 6. 完成后调用 `POST /me/onboarding`（幂等，失败可原样重试）。
 7. **权限不在首启就弹**：推送权限延迟到“首次加入小屋或首次分享验证码”之后，用一个应用内说明弹窗做预授权。
 
@@ -857,6 +862,7 @@ flowchart LR
 | :-- | :-- |
 | 语言 | `ja`、`ko`、`zh-Hant`（台湾）、`zh-Hans`（简体）、`en`；用 `Locale.fromSubtags` 区分简繁，避免字形串用 |
 | 文案 | ARB 文件 + `gen-l10n`；key 按功能分组：`onb.*`、`room.*`、`err.*`、`pet.*` |
+| 组件本地化 | 界面组件来自 `material_ui`，本地化代理用 `AppLocalizations.delegate` + `material_ui` 的 `GlobalMaterialLocalizations.delegates`，不用 `gen-l10n` 默认带的 `flutter_localizations` 代理（后者 `material_ui` 读不到，非英文下顶部栏报错）（v1.6） |
 | 宠物文案 | 16 型 × 5 语言 = 80 条性格介绍，与专属打招呼文案一起放 `pet.*` |
 | 错误码 | 每个后端 `code` 对应 `err.{CODE}`，缺失时回落到通用文案 |
 | 复数与日期 | 使用 `intl` 的 ICU 复数；日期按用户时区与 Locale 格式化 |

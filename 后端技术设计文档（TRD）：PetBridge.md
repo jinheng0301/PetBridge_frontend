@@ -2,13 +2,15 @@
 
 | 项目 | 内容 |
 | :-- | :-- |
-| 版本 | v1.5（草案，待自评审；较 v1.4：B4 安全审查后加固 WebSocket：连接在 access token 到期时关闭（4401），连接与订阅限流。v1.4 较 v1.3：B4 WebSocket 协议定稿，断线恢复改为每次订阅下发快照，presence 只有在线 / 离线，Redis 故障时本机兜底推送。v1.3 较 v1.2：对齐 PRD v1.5 与前端 TRD v1.3，Google 登录接入真实校验，Apple 登录延后，本地端口统一为 8090。v1.2 较 v1.1：对齐 PRD v1.4，新增房主管理，修正消息表分区方案，补充本地运行说明） |
+| 版本 | v1.6（草案，待自评审；较 v1.5：F0 联调后修正契约中可空枚举的写法，补充本机集成测试须串行运行。v1.5 较 v1.4：B4 安全审查后加固 WebSocket：连接在 access token 到期时关闭（4401），连接与订阅限流。v1.4 较 v1.3：B4 WebSocket 协议定稿，断线恢复改为每次订阅下发快照，presence 只有在线 / 离线，Redis 故障时本机兜底推送。v1.3 较 v1.2：对齐 PRD v1.5 与前端 TRD v1.3，Google 登录接入真实校验，Apple 登录延后，本地端口统一为 8090。v1.2 较 v1.1：对齐 PRD v1.4，新增房主管理，修正消息表分区方案，补充本地运行说明） |
 | 对应 PRD | 《跨国 MBTI 情感 AI 电子宠物 PRD v1.6》 |
-| 配套文档 | 《前端 TRD（Flutter）v1.5》：WebSocket 协议、API 调用方式以本文第 8、9 章为准 |
+| 配套文档 | 《前端 TRD（Flutter）v1.6》：WebSocket 协议、API 调用方式以本文第 8、9 章为准 |
 | 语言 / 运行时 | Go 1.26（以 `go.mod` 为准） |
 | 开发模式 | **单人全栈开发**，所有选型以“一个人能长期维护”为第一约束 |
 | 目标区域 | 日本东京区域起步（覆盖 JP / KR / TW 延迟；中国大陆暂不首发） |
 
+> **V1.6 变更说明**：前端 F0 在模拟器上端到端联调时发现的问题，对齐前端 TRD v1.6，PRD 不变，接口行为不变。① **契约修正**（第 8 章）：`api/openapi.yaml` 是 OAS 3.0.3，`nullable: true` 的枚举字段必须把 `null` 写进 `enum` 列表；原先 Profile 的 `native_lang`、`age_band` 没写，未 onboarding 用户的 `GET /me` 返回 `null` 时，按契约生成的前端模型解析失败。现两个字段的枚举值都加上 `null`。② **本机集成测试串行运行**（15.5）：各包的集成测试共用同一个本机测试库，并行跑会互相清数据，`make test-int` 须用 `go test -p 1 ./...`（`Taskfile.yml` 的 `test-int` 已如此）。
+>
 > **V1.5 变更说明**：B4 实现后做了安全审查与代码审查，WebSocket 加固如下，对齐前端 TRD v1.5，PRD 不变。① **连接不再比 token 活得久**（7.3、第 9 章）：v1.4 只在升级时校验 token，被盗的 access token 连上后，即使用户登出也能一直收房间消息；现在服务端在该 access token 到期（默认 15 分钟）时以关闭码 **4401** 断开，客户端刷新 token 后立即重连。登出、封号对 WS 的影响因此与 REST 一样，最迟在 access token 到期时生效。② **限流**（7.3、12.1）：升级请求按 IP 每分钟 60 次、按用户每分钟 20 次，超出返回 HTTP 429 `RATE_LIMITED`；每条连接每 10 秒最多 10 次 `room.sub`，超出回 `error{RATE_LIMITED}`；`room_id` 不是 UUID 的直接回 `ROOM_NOT_FOUND`，不查库。③ **其余加固**（7.3）：服务重启开始后新的升级请求返回 HTTP 503 `NOT_READY`；`hello` 保证是第一帧；订阅等待快照期间暂存的事件超过 64 条即以 1008 断开；每个客户端请求背后的数据库与 Redis 操作 5 秒超时；连接的读写心跳协程与 Redis 订阅回调都有 panic 保护，不会拖垮整个进程。
 >
 > **V1.4 变更说明**：对齐 PRD v1.6 与前端 TRD v1.4，配合 B4（WebSocket Hub、presence、事件分发）设计定稿，详见 `docs/superpowers/specs/2026-11-17-b4-realtime-design.md`。① **断线恢复改为“每次订阅都下发快照”**（4.5③、7.3）：`room.sub` 一律返回从数据库生成的完整 `room.snapshot`，早于快照 seq 的事件客户端本来就会丢弃，补发没有收益，所以 B4 不写 Redis Stream `room:{rid}:events`，`last_seq` 字段保留但暂不使用，B5 有了 `message.new` 再评估是否需要重放；`resync` 改为“客户端重新发 `room.sub`”，`GET /rooms/{id}` MVP 不实现（第 8 章）。② **第 9 章协议重写**：WS 路径与其他接口一样在 `/api/v1` 下（`GET /api/v1/ws`）；新增 `room.unsub` 与 `error` 帧；只有发给全房在席成员的状态事件（`member.joined`、`member.left`）带 seq，个人事件与瞬时事件不带；`pet.tap` / `pet.action` 负载定稿，动作差异由前端宠物动画内部实现；`member.joined` 带新成员的 presence；`room.kicked` 新增 `reason=left`，`code.invalidated` 的 reason 补上 `dissolved`。③ **presence 只有 online / offline**（7.3、第 11 章）：离线时前端把宠物画成睡觉；`presence:u:{uid}` 改为 ZSET（成员为连接 id、分数为过期时间），最后一条连接关闭才判定离线，每次上下线都实时广播。④ **Redis 故障时本机兜底**（7.3、12.2）：写 Redis 失败的事件由本进程 Hub 直接推送（不带 seq），presence 退化为进程内计数；Redis 订阅重连后向本机所有连接发 `resync`。⑤ **补齐 B3 两处事件**（7.8）：解散时给房主发每个被移出成员的 `member.left{dissolved}`；主动退出时给退出者本人发 `room.kicked{left}`，让其其他设备同步离开。⑥ 新增环境变量 `MIN_APP_VERSION`（15.4），只用于 `hello`；WS 协议参数（心跳 25 秒、presence 70 秒、每用户 3 条连接等）为代码常量。⑦ 优雅重启改为发 `server.restart` 后立即断开（7.3）。
@@ -688,6 +690,8 @@ ALTER TABLE room_bans ADD CONSTRAINT pk_room_ban PRIMARY KEY (room_id, user_id);
 
 基础路径 `/api/v1`，JSON，UTF-8。成功返回 `{ data }`，失败返回 `{ error: { code, message, request_id } }`。`message` 仅供调试，客户端依据 `code` 做多语言展示。
 
+**契约写法（v1.6）**：`api/openapi.yaml` 为 OAS 3.0.3，`nullable: true` 的枚举字段必须把 `null` 写进 `enum` 列表（如 Profile 的 `native_lang: [ja, ko, zh-Hant, zh-Hans, en, null]`、`age_band: [13_17, 18_plus, null]`），否则按契约生成的客户端会拒绝 `null`。
+
 | 分组 | 方法与路径 | 说明 |
 | :-- | :-- | :-- |
 | 认证 | POST /auth/login/apple、/auth/login/google | 换取 token；手机号登录列为 P1【假设】 |
@@ -1044,7 +1048,7 @@ volumes:
 | `make seed` | 写入测试数据（见下） |
 | `make dev` | 用 air 热重载启动 api；另开终端 `make worker` 启动 worker |
 | `make test` | 单元测试 |
-| `make test-int` | 集成测试（testcontainers，需要 Docker），含验证码并发测试 |
+| `make test-int` | 集成测试（testcontainers，需要 Docker），含验证码并发测试；连本机测试库时各包共用一个库，须 `go test -p 1 ./...` 串行运行（v1.6） |
 | `make smoke` | 冒烟脚本：登录 → onboarding → 入房 → 发消息 |
 | `make load` | k6 本地小规模压测 |
 | `make down` / `make reset` | 停止依赖 / 停止并清空数据卷 |
