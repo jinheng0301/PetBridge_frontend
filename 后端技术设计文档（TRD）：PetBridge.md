@@ -2,13 +2,15 @@
 
 | 项目 | 内容 |
 | :-- | :-- |
-| 版本 | v1.7（草案，待自评审；较 v1.6：新增 10.3 MBTI 语气重构逻辑，润色只按接收方 MBTI 调整，失败回退基础译文。v1.6 较 v1.5：F0 联调后修正契约中可空枚举的写法，补充本机集成测试须串行运行。v1.5 较 v1.4：B4 安全审查后加固 WebSocket：连接在 access token 到期时关闭（4401），连接与订阅限流。v1.4 较 v1.3：B4 WebSocket 协议定稿，断线恢复改为每次订阅下发快照，presence 只有在线 / 离线，Redis 故障时本机兜底推送。v1.3 较 v1.2：对齐 PRD v1.5 与前端 TRD v1.3，Google 登录接入真实校验，Apple 登录延后，本地端口统一为 8090。v1.2 较 v1.1：对齐 PRD v1.4，新增房主管理，修正消息表分区方案，补充本地运行说明） |
+| 版本 | v1.8（草案，待自评审；较 v1.7：refresh token 轮换加 60 秒重试宽限，Google 公钥拉取失败返回 503，`ROOM_CAPACITY` 生效，presence 补发进程崩溃后的离线。v1.7 较 v1.6：新增 10.3 MBTI 语气重构逻辑，润色只按接收方 MBTI 调整，失败回退基础译文。v1.6 较 v1.5：F0 联调后修正契约中可空枚举的写法，补充本机集成测试须串行运行。v1.5 较 v1.4：B4 安全审查后加固 WebSocket：连接在 access token 到期时关闭（4401），连接与订阅限流。v1.4 较 v1.3：B4 WebSocket 协议定稿，断线恢复改为每次订阅下发快照，presence 只有在线 / 离线，Redis 故障时本机兜底推送。v1.3 较 v1.2：对齐 PRD v1.5 与前端 TRD v1.3，Google 登录接入真实校验，Apple 登录延后，本地端口统一为 8090。v1.2 较 v1.1：对齐 PRD v1.4，新增房主管理，修正消息表分区方案，补充本地运行说明） |
 | 对应 PRD | 《跨国 MBTI 情感 AI 电子宠物 PRD v1.7》 |
-| 配套文档 | 《前端 TRD（Flutter）v1.7》：WebSocket 协议、API 调用方式以本文第 8、9 章为准 |
+| 配套文档 | 《前端 TRD（Flutter）v1.8》：WebSocket 协议、API 调用方式以本文第 8、9 章为准 |
 | 语言 / 运行时 | Go 1.26（以 `go.mod` 为准） |
 | 开发模式 | **单人全栈开发**，所有选型以“一个人能长期维护”为第一约束 |
 | 目标区域 | 日本东京区域起步（覆盖 JP / KR / TW 延迟；中国大陆暂不首发） |
 
+> **V1.8 变更说明**：前后端代码审查发现的问题，对齐前端 TRD v1.8，PRD 不变。① **refresh token 重试宽限**（7.1、第 13 章）：轮换后的旧 refresh token 在 **60 秒内**再次出现、且所在 token 族里仍有可用 token 时，视为客户端没收到或没存下上一次轮换的响应（超时、存储写一半时 App 被杀），返回一对新 token，并吊销该族其余所有可用 token，保证同一族始终只有一个可用 token；超过 60 秒、或该族已登出/已被判定盗用，仍按重放处理（吊销整族，`REFRESH_REUSED`）。并发用同一个旧 token 刷新时按行锁排队，每个请求都成功，最后一个留下。② **Google 公钥拉取失败返回 503 `NOT_READY`**（7.1、第 8 章）：此前 JWKS 下载失败和签名错误一样回 401，客户端会当成“登录被拒”；现在区分开，前端提示“服务暂时不可用，请稍后重试”。③ **`ROOM_CAPACITY` 生效**（7.1、15.4）：此前该变量只写在配置里，代码从未读取，房间容量始终是建表默认值 5。现在 onboarding 新建小屋时使用它，取值 2–5（`room_members.seat_no` 只有 1–5 号座位），超出范围启动即报错；只影响之后新建的小屋。分配座位时按房间自己的容量取座位号，不再写死 5。④ **注册邀请码的过期时间截到微秒**（7.1）：与奖励码、补码一致，首次 onboarding 的响应与之后幂等重放返回的 `expires_at` 完全相同。⑤ **进程崩溃后补发离线**（7.3、第 11 章）：v1.4 的已知局限是节点被强杀时不广播 `offline`。现在每个节点每 35 秒（presence TTL 的一半）扫描一次 `presence:u:*`，清掉已过期的连接；谁清掉了某用户最后一条连接，谁就向他的室友广播 `offline`（一次清理只有一个节点能删到，所以只广播一次）。为此 `presence:u:{uid}` 键本身的 TTL 改为 140 秒（成员仍是 70 秒），查询在线状态时不再顺手清理过期成员。Redis 不可用时不扫描。
+>
 > **V1.7 变更说明**：对齐 PRD v1.7 与前端 TRD v1.7，补上 AI 信使中最核心、此前只有原则没有规则的部分：MBTI 语气重构。① **新增 10.3 MBTI 语气重构逻辑**：MBTI 四个维度各对应一个语气旋钮（E/I 表达能量、S/N 具体度、T/F 情感温度、J/P 结构感），16 型是四个旋钮的组合，提示词由 8 个维度片段拼成，不为每一型单独写规则；写明能改与不能改的范围、两档润色强度、五种目标语言的礼貌规则（优先于旋钮）、示例、程序校验、提示词结构、评测门槛。② **润色只按接收方 MBTI 调整**【假设】：PRD v1.6 8.1 写的“发送方 MBTI + 关系语境”MVP 不使用，与 10.2 原有的“润色缓存只按接收者 MBTI 分 16 档”一致，PRD 8.1 同步修改。③ **MVP 只开放“轻”档**【假设】，“标准”档由 `app_config` 开关控制、默认关闭；润色缓存键加入档位（10.2）。④ **程序校验不通过即回退基础译文**（10.3.7）：数字、时间、链接等不一致、长度超限或新增 emoji 时丢弃润色结果，`deliveries.polish_status = fallback`，`message.polished` 带 `polish_status`，前端显示“未润色”（第 9 章、7.4）。⑤ 极短文本不调用模型（10.3.1）。⑥ 18.1、18.2 补充对应假设与风险。
 >
 > **V1.6 变更说明**：前端 F0 在模拟器上端到端联调时发现的问题，对齐前端 TRD v1.6，PRD 不变，接口行为不变。① **契约修正**（第 8 章）：`api/openapi.yaml` 是 OAS 3.0.3，`nullable: true` 的枚举字段必须把 `null` 写进 `enum` 列表；原先 Profile 的 `native_lang`、`age_band` 没写，未 onboarding 用户的 `GET /me` 返回 `null` 时，按契约生成的前端模型解析失败。现两个字段的枚举值都加上 `null`。② **本机集成测试串行运行**（15.5）：各包的集成测试共用同一个本机测试库，并行跑会互相清数据，`make test-int` 须用 `go test -p 1 ./...`（`Taskfile.yml` 的 `test-int` 已如此）。
@@ -514,9 +516,10 @@ ALTER TABLE room_bans ADD CONSTRAINT pk_room_ban PRIMARY KEY (room_id, user_id);
 ### 7.1 注册与 onboarding
 
 1. 客户端用 Apple / Google 登录，把 ID Token 交给 `POST /auth/login/apple|google`，后端校验后创建或找到用户，返回 access + refresh token。
-   - **Google 校验**（v1.3）：`pkg/idtoken` 的 Google 验证器从 `https://www.googleapis.com/oauth2/v3/certs` 取 JWKS（按响应的 `Cache-Control` 缓存，遇到未知 `kid` 时刷新一次），用 `golang-jwt` 校验 RS256 签名、`iss ∈ {accounts.google.com, https://accounts.google.com}`、`aud == GOOGLE_CLIENT_ID`（Web 应用类型 OAuth 客户端 ID）、`exp`，以 `sub` 作为 `auth_identities` 的主体。`GOOGLE_CLIENT_ID` 为空时不启用，返回 501 `PROVIDER_NOT_CONFIGURED`。单测用本地生成的 RSA 密钥与假 JWKS 服务器，不依赖外网。
+   - **Google 校验**（v1.3）：`pkg/idtoken` 的 Google 验证器从 `https://www.googleapis.com/oauth2/v3/certs` 取 JWKS（按响应的 `Cache-Control` 缓存，遇到未知 `kid` 时刷新一次），用 `golang-jwt` 校验 RS256 签名、`iss ∈ {accounts.google.com, https://accounts.google.com}`、`aud == GOOGLE_CLIENT_ID`（Web 应用类型 OAuth 客户端 ID）、`exp`，以 `sub` 作为 `auth_identities` 的主体。`GOOGLE_CLIENT_ID` 为空时不启用，返回 501 `PROVIDER_NOT_CONFIGURED`。拉取 JWKS 失败（Google 侧故障、网络不通）返回 503 `NOT_READY`，不当作 token 无效（v1.8）。单测用本地生成的 RSA 密钥与假 JWKS 服务器，不依赖外网。
    - **Apple 校验**：延后（没有 Mac 与 Apple 开发者账号），继续使用占位验证器；上架 iOS 前补齐。
-2. 新用户调用 `POST /me/onboarding`（母语、MBTI、昵称、年龄区间、时区）。**一个事务内**完成：写 users → 按映射表写 pet\_type → 创建 rooms（owner=自己，member\_count=1）→ 写 room\_members（seat 1）→ 生成 1 个 signup 验证码绑定该房间。
+   - **refresh 轮换与重试宽限**（v1.8）：`POST /auth/refresh` 每次都把旧 token 作废、发一对新的（同一 token 族）。作废的旧 token 再次出现时：若距它被轮换不超过 60 秒，且该族仍有可用 token，视为客户端重试（上一次的响应没收到或没存下），吊销该族其余可用 token 后发一对新的；否则视为盗用，吊销整族并返回 `REFRESH_REUSED`。登出会吊销整族，所以登出后旧 token 不会落入宽限。
+2. 新用户调用 `POST /me/onboarding`（母语、MBTI、昵称、年龄区间、时区）。**一个事务内**完成：写 users → 按映射表写 pet\_type → 创建 rooms（owner=自己，member\_count=1，capacity=`ROOM_CAPACITY`（v1.8））→ 写 room\_members（seat 1）→ 生成 1 个 signup 验证码绑定该房间。
 3. 极简测试在**客户端本地**计分，只把结果 MBTI 传给后端，后端不存题库。
 4. 接口幂等：已完成 onboarding 的用户再次调用，直接返回现有结果。
 
@@ -587,7 +590,7 @@ ALTER TABLE room_bans ADD CONSTRAINT pk_room_ban PRIMARY KEY (room_id, user_id);
 - **事件分发**：业务代码调用 `Publisher.Publish(event)`。发给全房在席成员的状态事件（`member.joined`、`member.left`）先 `INCR room:{rid}:seq` 取得 seq；事件写入 Redis 频道 `ws:events`；每个 api 节点订阅该频道，只推给本机上订阅了该房间的目标用户连接。个人事件（`room.kicked`、`code.invalidated`）推给目标用户的所有连接，不需要订阅；服务端收到 `room.kicked` 时同时取消该用户对该房间的订阅。单节点阶段这层看似多余，但它让“加第二台 api”变成零改动。
 - **Redis 故障时本机兜底（v1.4）**：`INCR` 或 `PUBLISH` 任一步失败，事件由本进程的 Hub 直接推送，不带 seq，客户端收到即应用（成员事件按 `user_id` 幂等）。单节点阶段实时功能不中断；多节点时兜底只覆盖本机，其他节点的客户端在下次订阅时由快照修正。Redis 订阅断开后重连成功，向本机所有连接发一次 `resync`，客户端重新订阅拿新快照（Redis 重启后 seq 会从头开始，也由此恢复）。
 - **断线重放**：v1.4 起不做。早于快照 seq 的事件客户端会丢弃，补发没有收益；`room.sub` 的 `last_seq` 保留但暂不使用。B5 有了 `message.new` 再评估是否需要 Redis Stream 重放。
-- **Presence（v1.4）**：只有 `online` / `offline` 两种，前端把离线成员画成宠物在睡觉。`presence:u:{uid}` 为 ZSET（成员是连接 id，分数是过期时间），服务端每 25 秒对每条连接发 WS ping，成功即刷新（过期时间 = 现在 + 70 秒），10 秒无回应则关闭连接。用户在线连接数 0→1 时广播 `online`，降到 0 时广播 `offline`，发给他所有在席房间的其他成员，状态持续实时更新：离线的人回到 App，同屋在线的人立刻看到他的宠物醒来。新成员入房时，`member.joined` 里带上他当前的 presence。Redis 不可用时退化为进程内连接计数。已知局限：进程被强杀时不广播 `offline`，其他人要到下次快照才看到，ZSET 成员 70 秒后自然过期。
+- **Presence（v1.4）**：只有 `online` / `offline` 两种，前端把离线成员画成宠物在睡觉。`presence:u:{uid}` 为 ZSET（成员是连接 id，分数是过期时间），服务端每 25 秒对每条连接发 WS ping，成功即刷新（过期时间 = 现在 + 70 秒），10 秒无回应则关闭连接。用户在线连接数 0→1 时广播 `online`，降到 0 时广播 `offline`，发给他所有在席房间的其他成员，状态持续实时更新：离线的人回到 App，同屋在线的人立刻看到他的宠物醒来。新成员入房时，`member.joined` 里带上他当前的 presence。Redis 不可用时退化为进程内连接计数。进程被强杀时，它持有的连接不会走正常的关闭流程：其他节点每 35 秒扫描一次 `presence:u:*`，清掉过期成员，清掉某用户最后一条连接的那个节点负责广播 `offline`（v1.8，取代 v1.4 的“已知局限：不广播 offline”）。键本身保留 140 秒（成员的两倍），保证扫描时还看得到过期成员；查询在线状态只计数、不清理，清理只由连接关闭和扫描来做。Redis 不可用时不扫描。
 - **连接保护**：单用户最多 3 条并发连接，超出时关闭最旧的一条（关闭码 4001）；读帧上限 4KB；每连接每秒最多 10 个客户端帧；每条连接一个容量 64 的发送队列，队列满或写超时 5 秒即断开（慢客户端）；`pet.tap` 每连接每秒最多 2 次，超出静默丢弃；`room.sub` 每连接每 10 秒最多 10 次，超出回 `error{RATE_LIMITED}`，`room_id` 不是 UUID 的直接回 `ROOM_NOT_FOUND`；订阅等待快照期间暂存的事件超过 64 条即以 1008 断开；每个客户端请求背后的数据库与 Redis 操作 5 秒超时（v1.5）。
 - **优雅重启**：收到 SIGTERM 先向所有连接下发 `server.restart` 帧，随即以 1001 断开全部连接，再关闭 HTTP 服务；客户端随机等待 1–10 秒后重连（v1.4：不再等待 30 秒）。
 
@@ -728,6 +731,7 @@ ALTER TABLE room_bans ADD CONSTRAINT pk_room_ban PRIMARY KEY (room_id, user_id);
 | ROOM_NOT_FOUND | 404 | 房间不存在，或调用者在该房间没有座位（不区分） |
 | OWNER_CANNOT_LEAVE | 409 | 房主应使用解散 |
 | CODE_ISSUE_LIMIT（`reason`：`room_full` / `enough_unused` / `daily_limit` / `lifetime_limit`） | 409 | |
+| NOT_READY | 503 | 服务重启中，或登录提供方（Google 公钥）暂时不可达（v1.8），稍后重试 |
 | 安全 | POST /reports；POST /blocks；DELETE /blocks/{user\_id} | 举报与屏蔽 |
 | 设备 | PUT /devices/current | 登记推送 token、语言、时区 |
 | Widget | GET /widget/snapshot | 见 7.6 |
@@ -952,7 +956,7 @@ MVP 的礼貌等级固定如上；PRD 8.2 提到的“用户可设置敬语等�
 
 | 键 | 类型 | 用途 | TTL |
 | :-- | :-- | :-- | :-- |
-| `presence:u:{uid}` | zset | 在线状态：成员为连接 id，分数为过期时间；未过期成员数 > 0 即在线（v1.4） | 70 秒，心跳刷新 |
+| `presence:u:{uid}` | zset | 在线状态：成员为连接 id，分数为过期时间；未过期成员数 > 0 即在线（v1.4） | 成员 70 秒，心跳刷新；键 140 秒，留给离线扫描（v1.8） |
 | `room:{rid}:seq` | counter | 房间事件序号 | 无 |
 | `room:{rid}:events` | stream | 断线重放，最多 500 条（v1.4：B4 不使用，B5 再评估） | 24 小时 |
 | `ws:events` | pub/sub | 跨节点事件分发 | — |
@@ -999,7 +1003,7 @@ MVP 的礼貌等级固定如上；PRD 8.2 提到的“用户可设置敬语等�
 
 | 事项 | 实现 |
 | :-- | :-- |
-| 令牌 | access token 15 分钟；refresh token 30 天，每次使用轮换，检测到旧 token 重放则吊销整条链；refresh 只存哈希 |
+| 令牌 | access token 15 分钟；refresh token 30 天，每次使用轮换，检测到旧 token 重放则吊销整条链（轮换后 60 秒内、族内仍有可用 token 的视为客户端重试，发新 token 并吊销族内其余 token，v1.8）；refresh 只存哈希 |
 | 传输 | 全程 TLS；证书由 Caddy 自动续期 |
 | 敏感数据 | 数据库与磁盘启用静态加密（云厂商能力）；密钥、供应商 API Key 走环境变量/密钥服务，不进仓库、不进日志 |
 | 日志脱敏 | 日志中不记录消息正文与译文，只记长度、语言、耗时 |
@@ -1096,7 +1100,7 @@ S3_SECRET_KEY=minioadmin
 SENTRY_DSN=
 
 # ===== 业务默认值（运行后以 app_config 表为准，可热改）=====
-ROOM_CAPACITY=5
+ROOM_CAPACITY=5                 # 每间小屋座位数（含房主），2-5；只影响之后新建的小屋（v1.8 起真正生效）
 CODE_TTL_DAYS=7
 REWARD_CODE_COUNT=3
 REWARD_CODE_LIFETIME_CAP=20     # 口径：每用户除种子码外所有来源累计获得的码数

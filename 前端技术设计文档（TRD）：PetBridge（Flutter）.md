@@ -2,13 +2,15 @@
 
 | 项目 | 内容 |
 | :-- | :-- |
-| 版本 | v1.7（草案，待自评审；较 v1.6：对齐后端 TRD v1.7 的 MBTI 语气重构规则，信使卡片处理润色回退（“未润色”）。v1.6 较 v1.5：F0 联调后补齐实现细节：界面语言的取值顺序、启动时网络失败可重试、Google 取消与无账号不报错、设备时区回落、可空枚举的契约写法。v1.5 较 v1.4：对齐后端 TRD v1.5 的 WebSocket 加固：处理关闭码 4401、升级 429 / 503 与 `room.sub` 限流。v1.4 较 v1.3：对齐后端 B4 的 WebSocket 协议，reducer 改为以订阅快照为准，presence 只有在线 / 离线、离线显示为睡觉。v1.3 较 v1.2：对齐 PRD v1.5 与后端 TRD v1.3，F0 登录与 onboarding 设计定稿，首页改为四个 Tab，契约生成改用 swagger_parser） |
+| 版本 | v1.8（草案，待自评审；较 v1.7：刷新 token 失败只在服务端拒绝时登出，两个 token 存在同一个键里一次写入，新增 `NOT_READY` 文案。v1.7 较 v1.6：对齐后端 TRD v1.7 的 MBTI 语气重构规则，信使卡片处理润色回退（“未润色”）。v1.6 较 v1.5：F0 联调后补齐实现细节：界面语言的取值顺序、启动时网络失败可重试、Google 取消与无账号不报错、设备时区回落、可空枚举的契约写法。v1.5 较 v1.4：对齐后端 TRD v1.5 的 WebSocket 加固：处理关闭码 4401、升级 429 / 503 与 `room.sub` 限流。v1.4 较 v1.3：对齐后端 B4 的 WebSocket 协议，reducer 改为以订阅快照为准，presence 只有在线 / 离线、离线显示为睡觉。v1.3 较 v1.2：对齐 PRD v1.5 与后端 TRD v1.3，F0 登录与 onboarding 设计定稿，首页改为四个 Tab，契约生成改用 swagger_parser） |
 | 对应 PRD | 《跨国 MBTI 情感 AI 电子宠物 PRD v1.7》 |
-| 配套文档 | 《后端 TRD（Go）v1.7》：REST 接口见其第 8 章，WebSocket 协议见其第 9 章，本文以其为准 |
+| 配套文档 | 《后端 TRD（Go）v1.8》：REST 接口见其第 8 章，WebSocket 协议见其第 9 章，本文以其为准 |
 | 技术栈 | Flutter 3.x 稳定版 / Dart 3 |
 | 平台 | iOS 15+、Android 8+（竖屏，手机优先，不适配平板） |
 | 开发模式 | **单人全栈开发**，选型以“一个人能长期维护”为第一约束 |
 
+> **V1.8 变更说明**：前后端代码审查发现的问题，对齐后端 TRD v1.8，PRD 不变。① **网络不好不再被登出**（8.1）：v1.7 的 `AuthInterceptor` 只要刷新失败就清空 token 并回到登录页，地铁里刷新超时或服务端回 5xx 都会把用户踢下线。现在只有服务端明确拒绝（400 / 401 / 403：`REFRESH_INVALID`、`REFRESH_REUSED`、`ACCOUNT_DISABLED` 等）才结束会话；网络错误与 5xx 保留 token，原请求以这次刷新的失败（如 `NETWORK`）报错，下一个请求或用户重试时再刷新。启动恢复会话时因此显示“可重试”，不会误回登录页。② **两个 token 一次写入**（8.1、第 12 章）：v1.7 分两次写 access 与 refresh，中间被杀会留下“新 access + 已作废的 refresh”，下次刷新被后端当成重放、整族吊销。现在两者以 JSON 存在同一个键 `auth_tokens` 里；旧版本的两个键在第一次读取时迁移并删除。配合后端 v1.8 的 60 秒重试宽限，刷新响应在路上丢失也不再导致登出。③ **新增 `err_NOT_READY` 文案**（8.2）：后端在服务重启或 Google 公钥暂时不可达时返回 503 `NOT_READY`，界面提示“服务暂时不可用，请稍后重试”，不再落到通用错误文案。
+>
 > **V1.7 变更说明**：对齐 PRD v1.7 与后端 TRD v1.7（新增 10.3 MBTI 语气重构逻辑）。语气怎么改完全由服务端决定，前端不实现任何 MBTI 改写规则，也不在界面上展示接收方的 MBTI。前端只有一处变化：`message.polished` 新增 `polish_status`（`done` / `fallback`）；`fallback` 表示润色结果没通过服务端校验，润色文本为空，信使卡片继续显示基础译文，“AI 润色译文”一栏标“未润色”且不再显示“让 AI 润色”按钮（11.4、第 18 章）。MVP 只有“轻”档润色，输入栏的“AI 润色”开关不变，不需要档位选择。
 >
 > **V1.6 变更说明**：F0 在模拟器上端到端联调后，补齐实现中定下的细节，与后端 TRD v1.6 同步，PRD 不变。① **界面语言的取值顺序**：本地保存的选择 → `/me` 的 `native_lang` → 系统语言；退出登录清除本地选择、回到系统语言，再次登录按 `native_lang` 恢复（11.1、第 13 章）。② **启动时恢复会话**：拉 `/me` 遇到网络错误或 5xx 时保留令牌，启动页显示错误文案与“重试”；其他失败（如刷新令牌失效）清除令牌、回登录页（6.1、6.2）。③ **Google 登录**：用户取消或设备上没有 Google 账号时静默留在登录页，不显示错误；其他失败显示 `err_GOOGLE_SIGN_IN_FAILED`（6.2）。④ 设备返回的时区不是 IANA 名（如模拟器的 `GMT`）时，onboarding 提交 `UTC`（11.1）。⑤ Onboarding 进度条共 5 步，测试与结果页算第 3 步，直接选 MBTI 时跳过第 3 步（11.1）。⑥ 契约约定：openapi 3.0.3 中可空的枚举字段必须把 `null` 写进枚举值，否则生成的模型解析不了未 onboarding 用户的 `/me`（8.2）。⑦ 界面组件库 `material_ui` 的本地化需用它自己的 `GlobalMaterialLocalizations.delegates`，不能用 `gen-l10n` 默认带的 `flutter_localizations` 代理，否则非英文下顶部栏报错（第 13 章）。
@@ -504,7 +506,7 @@ unauthenticated ──登录成功──► needsOnboarding ──完成──�
 
 | 拦截器 | 职责 |
 | :-- | :-- |
-| `AuthInterceptor` | 附加 access token；收到 401 时**单飞刷新**：多个并发请求共享同一次 refresh，成功后重放，失败则登出并回到登录页 |
+| `AuthInterceptor` | 附加 access token；收到 401 时**单飞刷新**：多个并发请求共享同一次 refresh，成功后重放。服务端拒绝刷新（400 / 401 / 403）时清空 token、登出并回到登录页；网络错误或 5xx 时保留 token，原请求以该失败（如 `NETWORK`）报错，之后再刷新（v1.8） |
 | `IdempotencyInterceptor` | 对 `POST /rooms/join`、`/rooms/{id}/messages` 等写请求带 `Idempotency-Key` / `client_msg_id`；**重试时复用同一个键**，由 controller 生成、拦截器透传 |
 | `RetryInterceptor` | 仅对网络错误、5xx、带幂等键的请求重试，最多 2 次，指数退避 + 抖动；4xx 业务错误不重试 |
 | `ErrorMapInterceptor` | 把 `{error:{code}}` 映射为 `AppFailure(code, retryAfter?)`，UI 只认 `code` |
@@ -513,7 +515,7 @@ unauthenticated ──登录成功──► needsOnboarding ──完成──�
 ### 8.2 约定
 
 - 超时：连接 5 秒、接收 10 秒；润色相关请求单独放宽到 12 秒（服务端 6 秒超时 + 排队）。
-- 错误码映射到本地化文案：`err.CODE_INVALID`、`err.ROOM_FULL` 等，文案放 ARB，**不显示服务端 `message`**。
+- 错误码映射到本地化文案：`err.CODE_INVALID`、`err.ROOM_FULL` 等，文案放 ARB，**不显示服务端 `message`**。503 `NOT_READY`（服务重启、登录提供方暂时不可达）显示 `err_NOT_READY`“服务暂时不可用，请稍后重试”（v1.8）。
 - `request_id` 随错误上报到 Sentry，便于和后端日志对上。
 - 契约生成：用 `swagger_parser` 从后端仓库的 `api/openapi.yaml` 生成 `lib/gen/`（`dart run swagger_parser` + `build_runner`），CI 中校验生成结果无差异。
 - 可空枚举（v1.6）：openapi 3.0.3 里 `nullable: true` 的枚举字段必须把 `null` 写进 `enum` 列表（如 Profile 的 `native_lang`、`age_band`），否则生成的模型遇到 `null` 解析失败，未 onboarding 用户的 `/me` 会报错；`contract_decode_test` 覆盖这种情况。
@@ -841,7 +843,7 @@ flowchart LR
 
 | 存储 | 内容 | 说明 |
 | :-- | :-- | :-- |
-| `flutter_secure_storage` | access / refresh token | Keychain / Keystore，卸载重装不保证保留 |
+| `flutter_secure_storage` | access / refresh token | 两者以 JSON 存在同一个键 `auth_tokens`，一次写入，不会只写一半（v1.8；旧版的 `access_token` / `refresh_token` 两个键首次读取时迁移）。Keychain / Keystore，卸载重装不保证保留 |
 | `shared_preferences` | UI 语言、推送开关、Widget 隐私模式、各房间 `last_seq`、onboarding 完成标记、短语模板版本 | 轻量键值 |
 | `drift`（SQLite） | `messages_cache`、`outbox`、`phrases_cache` | 见下 |
 
