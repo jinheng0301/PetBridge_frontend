@@ -19,6 +19,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get err_NETWORK => 'サーバーに接続できません。通信環境を確認して、もう一度お試しください。';
 
   @override
+  String get err_NOT_READY => 'サービスが一時的に利用できません。しばらくしてからもう一度お試しください。';
+
+  @override
   String get err_VALIDATION_FAILED => '入力内容に誤りがあります。確認して、もう一度お試しください。';
 
   @override

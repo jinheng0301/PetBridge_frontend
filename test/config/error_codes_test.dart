@@ -14,6 +14,10 @@ void main() {
 
   test('known code uses its own text', () {
     expect(localizedError(l, const AppFailure('NETWORK')), l.err_NETWORK);
+    expect(
+      localizedError(l, const AppFailure('NOT_READY', status: 503)),
+      l.err_NOT_READY,
+    );
   });
 
   test('unknown code falls back to err_UNKNOWN', () {

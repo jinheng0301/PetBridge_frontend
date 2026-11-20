@@ -4,6 +4,7 @@
   "appTitle": "PetBridge",
   "err_UNKNOWN": "問題が発生しました。もう一度お試しください。",
   "err_NETWORK": "サーバーに接続できません。通信環境を確認して、もう一度お試しください。",
+  "err_NOT_READY": "サービスが一時的に利用できません。しばらくしてからもう一度お試しください。",
   "err_VALIDATION_FAILED": "入力内容に誤りがあります。確認して、もう一度お試しください。",
   "err_PROVIDER_NOT_CONFIGURED": "このログイン方法は現在ご利用いただけません。",
   "err_ACCOUNT_DISABLED": "このアカウントは無効になっています。",

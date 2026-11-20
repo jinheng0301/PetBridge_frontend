@@ -20,6 +20,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Can\'t reach the server. Check your connection and try again.';
 
   @override
+  String get err_NOT_READY =>
+      'The service is temporarily unavailable. Please try again in a moment.';
+
+  @override
   String get err_VALIDATION_FAILED =>
       'Some of the information isn\'t valid. Please check and try again.';
 

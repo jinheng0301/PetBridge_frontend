@@ -122,6 +122,12 @@ abstract class AppLocalizations {
   /// **'Can\'t reach the server. Check your connection and try again.'**
   String get err_NETWORK;
 
+  /// 503 NOT_READY: the server or a login provider is briefly unavailable; retrying later works.
+  ///
+  /// In en, this message translates to:
+  /// **'The service is temporarily unavailable. Please try again in a moment.'**
+  String get err_NOT_READY;
+
   /// Server rejected the submitted fields.
   ///
   /// In en, this message translates to:

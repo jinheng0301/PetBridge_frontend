@@ -19,6 +19,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get err_NETWORK => '서버에 연결할 수 없습니다. 네트워크를 확인한 후 다시 시도해 주세요.';
 
   @override
+  String get err_NOT_READY => '서비스를 일시적으로 사용할 수 없습니다. 잠시 후 다시 시도해 주세요.';
+
+  @override
   String get err_VALIDATION_FAILED => '일부 정보가 올바르지 않습니다. 확인 후 다시 시도해 주세요.';
 
   @override

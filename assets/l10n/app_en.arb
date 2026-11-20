@@ -12,6 +12,10 @@
   "@err_NETWORK": {
     "description": "No connection, DNS failure or timeout."
   },
+  "err_NOT_READY": "The service is temporarily unavailable. Please try again in a moment.",
+  "@err_NOT_READY": {
+    "description": "503 NOT_READY: the server or a login provider is briefly unavailable; retrying later works."
+  },
   "err_VALIDATION_FAILED": "Some of the information isn't valid. Please check and try again.",
   "@err_VALIDATION_FAILED": {
     "description": "Server rejected the submitted fields."

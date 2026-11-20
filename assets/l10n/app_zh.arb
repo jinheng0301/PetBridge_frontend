@@ -3,6 +3,7 @@
   "appTitle": "PetBridge",
   "err_UNKNOWN": "出了点问题，请重试。",
   "err_NETWORK": "无法连接服务器，请检查网络后重试。",
+  "err_NOT_READY": "服务暂时不可用，请稍后重试。",
   "err_VALIDATION_FAILED": "部分信息无效，请检查后重试。",
   "err_PROVIDER_NOT_CONFIGURED": "该登录方式暂不可用。",
   "err_ACCOUNT_DISABLED": "该账号已被停用。",

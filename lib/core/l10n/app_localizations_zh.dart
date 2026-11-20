@@ -19,6 +19,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get err_NETWORK => '无法连接服务器，请检查网络后重试。';
 
   @override
+  String get err_NOT_READY => '服务暂时不可用，请稍后重试。';
+
+  @override
   String get err_VALIDATION_FAILED => '部分信息无效，请检查后重试。';
 
   @override
@@ -313,6 +316,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get err_NETWORK => '无法连接服务器，请检查网络后重试。';
 
   @override
+  String get err_NOT_READY => '服务暂时不可用，请稍后重试。';
+
+  @override
   String get err_VALIDATION_FAILED => '部分信息无效，请检查后重试。';
 
   @override
@@ -605,6 +611,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get err_NETWORK => '無法連線到伺服器，請檢查網路後重試。';
+
+  @override
+  String get err_NOT_READY => '服務暫時無法使用，請稍後重試。';
 
   @override
   String get err_VALIDATION_FAILED => '部分資訊無效，請檢查後重試。';

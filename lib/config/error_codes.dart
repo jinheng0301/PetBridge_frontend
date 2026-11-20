@@ -8,6 +8,7 @@ String errorL10nKey(String code) => 'err_$code';
 /// the server's `message` is never shown.
 String localizedError(AppLocalizations l, AppFailure f) => switch (f.code) {
   'NETWORK' => l.err_NETWORK,
+  'NOT_READY' => l.err_NOT_READY,
   'VALIDATION_FAILED' => l.err_VALIDATION_FAILED,
   'PROVIDER_NOT_CONFIGURED' => l.err_PROVIDER_NOT_CONFIGURED,
   'ACCOUNT_DISABLED' => l.err_ACCOUNT_DISABLED,
