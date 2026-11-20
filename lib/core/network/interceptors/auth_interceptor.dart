@@ -1,13 +1,17 @@
 import 'package:dio/dio.dart';
+import 'package:petbridge/core/network/app_failure.dart';
 import 'package:petbridge/core/storage/secure_store.dart';
 
 typedef RefreshFn = Future<TokenPair> Function(String refreshToken);
 
 /// Adds the bearer token and, on 401, refreshes once and replays.
 ///
-/// Concurrent 401s share one refresh (single flight). If the refresh fails
-/// the tokens are cleared and `onSessionExpired` runs once; the original
-/// request then fails with its 401.
+/// Concurrent 401s share one refresh (single flight). If the server rejects
+/// the refresh (400/401/403: invalid, reused, account disabled) the tokens
+/// are cleared and `onSessionExpired` runs once; the original request then
+/// fails with its 401. Any other refresh failure (no network, timeout, 5xx)
+/// keeps the tokens and fails the request with that failure (e.g.
+/// `NETWORK`), so the next request or a retry refreshes again.
 class AuthInterceptor extends Interceptor {
   new({
     required this._store,
@@ -57,8 +61,10 @@ class AuthInterceptor extends Interceptor {
     final TokenPair fresh;
     try {
       fresh = await _freshTokens(sentWith: o.headers[_header]);
-    } on Object {
-      handler.next(err);
+    } on Object catch (e) {
+      handler.next(
+        _endsSession(e) ? err : err.copyWith(error: AppFailure.from(e)),
+      );
       return;
     }
 
@@ -82,7 +88,9 @@ class AuthInterceptor extends Interceptor {
     if (inflight != null) return await inflight;
 
     final current = await _store.read();
-    if (current == null) throw StateError('no refresh token');
+    if (current == null) {
+      throw const AppFailure(AppFailure.unauthorized, status: 401);
+    }
     if (sentWith != null && sentWith != 'Bearer ${current.access}') {
       return current;
     }
@@ -94,12 +102,31 @@ class AuthInterceptor extends Interceptor {
       final tokens = await _refresh(refreshToken);
       await _store.write(tokens);
       return tokens;
-    } on Object {
-      await _store.clear();
-      _onSessionExpired();
+    } on Object catch (e) {
+      if (_endsSession(e)) {
+        await _store.clear();
+        _onSessionExpired();
+      }
       rethrow;
     } finally {
       _inflight = null;
     }
+  }
+
+  /// Codes the refresh endpoint answers when the session cannot continue.
+  static const Set<String> _sessionEndingCodes = {
+    AppFailure.unauthorized,
+    'REFRESH_INVALID',
+    'REFRESH_REUSED',
+    'ACCOUNT_DISABLED',
+    'VALIDATION_FAILED',
+  };
+
+  /// Whether a refresh failure means the server rejected the session, as
+  /// opposed to it not being reachable right now.
+  static bool _endsSession(Object e) {
+    final f = AppFailure.from(e);
+    return _sessionEndingCodes.contains(f.code) ||
+        const {400, 401, 403}.contains(f.status);
   }
 }

@@ -120,6 +120,49 @@ void main() {
     expect(expired, 1);
   });
 
+  test('a rejected refresh (401 REFRESH_INVALID) ends the session', () async {
+    build((_) async {
+      throw const AppFailure('REFRESH_INVALID', status: 401);
+    });
+
+    await expectLater(
+      dio.get<Object?>('/api/v1/me'),
+      throwsA(isA<DioException>()),
+    );
+    expect(store.tokens, isNull);
+    expect(expired, 1);
+  });
+
+  for (final (name, failure) in [
+    ('no network', const AppFailure(AppFailure.network)),
+    ('a 5xx', const AppFailure('INTERNAL', status: 500)),
+  ]) {
+    test('$name during refresh keeps the tokens and reports it', () async {
+      build((_) async {
+        refreshCalls++;
+        throw failure;
+      });
+
+      await expectLater(
+        dio.get<Object?>('/api/v1/me'),
+        throwsA(
+          isA<DioException>().having(
+            (e) => AppFailure.from(e).code,
+            'code',
+            failure.code,
+          ),
+        ),
+      );
+      expect(store.clears, 0);
+      expect(store.tokens?.refresh, 'r-old');
+      expect(expired, 0);
+
+      // The next 401 tries the refresh again.
+      await expectLater(dio.get<Object?>('/api/v1/me'), throwsA(anything));
+      expect(refreshCalls, 2);
+    });
+  }
+
   test('does not refresh for /auth/refresh itself', () async {
     build((_) async {
       refreshCalls++;

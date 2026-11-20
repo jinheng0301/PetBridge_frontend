@@ -25,6 +25,9 @@ class AppFailure implements Exception {
   /// The error could not be understood.
   static const unknown = 'UNKNOWN';
 
+  /// The access token was missing or rejected (backend `UNAUTHORIZED`).
+  static const unauthorized = 'UNAUTHORIZED';
+
   final String code;
   final int? status;
   final String? requestId;
