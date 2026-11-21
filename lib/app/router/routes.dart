@@ -18,6 +18,9 @@ abstract final class Routes {
   static const homeMe = '/home/me';
 
   static const join = '/join';
+  static const share = '/share';
+
+  static String sharePath(String code) => '$share/$code';
 }
 
 /// Where [s] sends a user who is at [location], or `null` to stay.
@@ -31,7 +34,10 @@ String? redirectFor(Session s, String location) {
       Routes.onbLang,
     ),
     SessionReady() => only(
-      location == Routes.home || location.startsWith('${Routes.home}/'),
+      location == Routes.home ||
+          location.startsWith('${Routes.home}/') ||
+          location == Routes.join ||
+          location.startsWith('${Routes.share}/'),
       Routes.home,
     ),
   };

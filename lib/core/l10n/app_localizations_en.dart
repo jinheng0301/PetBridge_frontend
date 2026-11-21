@@ -404,4 +404,42 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get room_join_button => 'Enter a code';
+
+  @override
+  String get join_title => 'Enter invite code';
+
+  @override
+  String get join_hint => 'Enter the 8-character code a friend shared with you';
+
+  @override
+  String get join_paste => 'Paste';
+
+  @override
+  String get join_submit => 'Join room';
+
+  @override
+  String join_retry_in(String time) {
+    return 'Too many tries. Try again in $time';
+  }
+
+  @override
+  String get join_go_room => 'Go to room';
+
+  @override
+  String get join_success_title => 'Welcome in!';
+
+  @override
+  String join_success_body(String room) {
+    return 'You joined $room';
+  }
+
+  @override
+  String get join_reward_title => 'A gift for you';
+
+  @override
+  String get join_reward_body =>
+      'Share it with friends so they can move into your room';
+
+  @override
+  String get join_share => 'Share';
 }

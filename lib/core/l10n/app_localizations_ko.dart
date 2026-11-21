@@ -370,4 +370,41 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get room_join_button => '코드 입력';
+
+  @override
+  String get join_title => '초대 코드 입력';
+
+  @override
+  String get join_hint => '친구가 공유한 8자리 코드를 입력하세요';
+
+  @override
+  String get join_paste => '붙여넣기';
+
+  @override
+  String get join_submit => '방 들어가기';
+
+  @override
+  String join_retry_in(String time) {
+    return '시도 횟수가 너무 많아요. $time 후에 다시 시도하세요';
+  }
+
+  @override
+  String get join_go_room => '방 보러 가기';
+
+  @override
+  String get join_success_title => '환영해요!';
+
+  @override
+  String join_success_body(String room) {
+    return '$room에 들어갔어요';
+  }
+
+  @override
+  String get join_reward_title => '선물이 도착했어요';
+
+  @override
+  String get join_reward_body => '친구에게 공유해서 내 방에 초대해 보세요';
+
+  @override
+  String get join_share => '공유하기';
 }

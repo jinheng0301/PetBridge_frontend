@@ -61,4 +61,20 @@ void main() {
     expect(redirectFor(const SessionReady(done), Routes.home), isNull);
     expect(redirectFor(const SessionReady(done), Routes.homeMe), isNull);
   });
+
+  test('ready on /join or /share/<code> -> null', () {
+    expect(redirectFor(const SessionReady(done), Routes.join), isNull);
+    expect(
+      redirectFor(const SessionReady(done), Routes.sharePath('ABCD2345')),
+      isNull,
+    );
+    expect(redirectFor(const SessionReady(done), '/joined'), Routes.home);
+  });
+
+  test('needsOnboarding on /join -> /onboarding/lang', () {
+    expect(
+      redirectFor(const SessionNeedsOnboarding(fresh), Routes.join),
+      Routes.onbLang,
+    );
+  });
 }

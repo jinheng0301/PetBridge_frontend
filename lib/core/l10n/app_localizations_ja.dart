@@ -367,4 +367,41 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get room_join_button => '招待コードを入力';
+
+  @override
+  String get join_title => '招待コードを入力';
+
+  @override
+  String get join_hint => '友だちから届いた8文字のコードを入力してください';
+
+  @override
+  String get join_paste => '貼り付け';
+
+  @override
+  String get join_submit => 'ルームに参加';
+
+  @override
+  String join_retry_in(String time) {
+    return '試行回数が多すぎます。$time 後にもう一度お試しください';
+  }
+
+  @override
+  String get join_go_room => 'ルームを見に行く';
+
+  @override
+  String get join_success_title => 'ようこそ！';
+
+  @override
+  String join_success_body(String room) {
+    return '$roomに参加しました';
+  }
+
+  @override
+  String get join_reward_title => 'プレゼントが届きました';
+
+  @override
+  String get join_reward_body => '友だちにシェアして、あなたのルームに招待しよう';
+
+  @override
+  String get join_share => 'シェアする';
 }

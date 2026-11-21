@@ -366,6 +366,43 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get room_join_button => '输入验证码';
+
+  @override
+  String get join_title => '输入验证码';
+
+  @override
+  String get join_hint => '输入朋友分享给你的 8 位验证码';
+
+  @override
+  String get join_paste => '粘贴';
+
+  @override
+  String get join_submit => '加入小屋';
+
+  @override
+  String join_retry_in(String time) {
+    return '尝试次数过多，请 $time 后再试';
+  }
+
+  @override
+  String get join_go_room => '去小屋看看';
+
+  @override
+  String get join_success_title => '欢迎入住！';
+
+  @override
+  String join_success_body(String room) {
+    return '你加入了$room';
+  }
+
+  @override
+  String get join_reward_title => '送你一份礼物';
+
+  @override
+  String get join_reward_body => '分享给朋友，让他们住进你的小屋';
+
+  @override
+  String get join_share => '去分享';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -729,6 +766,43 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get room_join_button => '输入验证码';
+
+  @override
+  String get join_title => '输入验证码';
+
+  @override
+  String get join_hint => '输入朋友分享给你的 8 位验证码';
+
+  @override
+  String get join_paste => '粘贴';
+
+  @override
+  String get join_submit => '加入小屋';
+
+  @override
+  String join_retry_in(String time) {
+    return '尝试次数过多，请 $time 后再试';
+  }
+
+  @override
+  String get join_go_room => '去小屋看看';
+
+  @override
+  String get join_success_title => '欢迎入住！';
+
+  @override
+  String join_success_body(String room) {
+    return '你加入了$room';
+  }
+
+  @override
+  String get join_reward_title => '送你一份礼物';
+
+  @override
+  String get join_reward_body => '分享给朋友，让他们住进你的小屋';
+
+  @override
+  String get join_share => '去分享';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -1092,4 +1166,41 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get room_join_button => '輸入驗證碼';
+
+  @override
+  String get join_title => '輸入驗證碼';
+
+  @override
+  String get join_hint => '輸入朋友分享給你的 8 位驗證碼';
+
+  @override
+  String get join_paste => '貼上';
+
+  @override
+  String get join_submit => '加入小屋';
+
+  @override
+  String join_retry_in(String time) {
+    return '嘗試次數過多，請 $time 後再試';
+  }
+
+  @override
+  String get join_go_room => '去小屋看看';
+
+  @override
+  String get join_success_title => '歡迎入住！';
+
+  @override
+  String join_success_body(String room) {
+    return '你加入了$room';
+  }
+
+  @override
+  String get join_reward_title => '送你一份禮物';
+
+  @override
+  String get join_reward_body => '分享給朋友，讓他們住進你的小屋';
+
+  @override
+  String get join_share => '去分享';
 }

@@ -799,6 +799,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter a code'**
   String get room_join_button;
+
+  /// Join page app bar title
+  ///
+  /// In en, this message translates to:
+  /// **'Enter invite code'**
+  String get join_title;
+
+  /// Join page explanation above the code field
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 8-character code a friend shared with you'**
+  String get join_hint;
+
+  /// Button that pastes the clipboard into the code field
+  ///
+  /// In en, this message translates to:
+  /// **'Paste'**
+  String get join_paste;
+
+  /// Join page submit button
+  ///
+  /// In en, this message translates to:
+  /// **'Join room'**
+  String get join_submit;
+
+  /// Cooldown message; time is mm:ss
+  ///
+  /// In en, this message translates to:
+  /// **'Too many tries. Try again in {time}'**
+  String join_retry_in(String time);
+
+  /// Button that opens the joined room in the room tab
+  ///
+  /// In en, this message translates to:
+  /// **'Go to room'**
+  String get join_go_room;
+
+  /// Join success title
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome in!'**
+  String get join_success_title;
+
+  /// Join success body; room is a room title such as Hikari's room
+  ///
+  /// In en, this message translates to:
+  /// **'You joined {room}'**
+  String join_success_body(String room);
+
+  /// Reward card title on the join success page
+  ///
+  /// In en, this message translates to:
+  /// **'A gift for you'**
+  String get join_reward_title;
+
+  /// Reward card explanation
+  ///
+  /// In en, this message translates to:
+  /// **'Share it with friends so they can move into your room'**
+  String get join_reward_body;
+
+  /// Button that opens the share page for the first reward code
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get join_share;
 }
 
 class _AppLocalizationsDelegate

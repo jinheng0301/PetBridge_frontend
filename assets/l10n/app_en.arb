@@ -497,5 +497,59 @@
   "room_join_button": "Enter a code",
   "@room_join_button": {
     "description": "Opens the join page."
+  },
+  "join_title": "Enter invite code",
+  "@join_title": {
+    "description": "Join page app bar title"
+  },
+  "join_hint": "Enter the 8-character code a friend shared with you",
+  "@join_hint": {
+    "description": "Join page explanation above the code field"
+  },
+  "join_paste": "Paste",
+  "@join_paste": {
+    "description": "Button that pastes the clipboard into the code field"
+  },
+  "join_submit": "Join room",
+  "@join_submit": {
+    "description": "Join page submit button"
+  },
+  "join_retry_in": "Too many tries. Try again in {time}",
+  "@join_retry_in": {
+    "description": "Cooldown message; time is mm:ss",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "join_go_room": "Go to room",
+  "@join_go_room": {
+    "description": "Button that opens the joined room in the room tab"
+  },
+  "join_success_title": "Welcome in!",
+  "@join_success_title": {
+    "description": "Join success title"
+  },
+  "join_success_body": "You joined {room}",
+  "@join_success_body": {
+    "description": "Join success body; room is a room title such as Hikari's room",
+    "placeholders": {
+      "room": {
+        "type": "String"
+      }
+    }
+  },
+  "join_reward_title": "A gift for you",
+  "@join_reward_title": {
+    "description": "Reward card title on the join success page"
+  },
+  "join_reward_body": "Share it with friends so they can move into your room",
+  "@join_reward_body": {
+    "description": "Reward card explanation"
+  },
+  "join_share": "Share",
+  "@join_share": {
+    "description": "Button that opens the share page for the first reward code"
   }
 }

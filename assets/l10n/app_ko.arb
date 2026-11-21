@@ -116,5 +116,16 @@
   "room_solo_hint": "펫이 새 친구를 기다리고 있어요",
   "room_locked_title": "아직 방이 열리지 않았어요",
   "room_locked_body": "친구의 코드를 입력하거나 내 코드를 공유해 보세요",
-  "room_join_button": "코드 입력"
+  "room_join_button": "코드 입력",
+  "join_title": "초대 코드 입력",
+  "join_hint": "친구가 공유한 8자리 코드를 입력하세요",
+  "join_paste": "붙여넣기",
+  "join_submit": "방 들어가기",
+  "join_retry_in": "시도 횟수가 너무 많아요. {time} 후에 다시 시도하세요",
+  "join_go_room": "방 보러 가기",
+  "join_success_title": "환영해요!",
+  "join_success_body": "{room}에 들어갔어요",
+  "join_reward_title": "선물이 도착했어요",
+  "join_reward_body": "친구에게 공유해서 내 방에 초대해 보세요",
+  "join_share": "공유하기"
 }

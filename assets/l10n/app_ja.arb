@@ -116,5 +116,16 @@
   "room_solo_hint": "ペットが新しい友だちを待っています",
   "room_locked_title": "お部屋はまだ開いていません",
   "room_locked_body": "友だちの招待コードを入力するか、自分のコードをシェアしましょう",
-  "room_join_button": "招待コードを入力"
+  "room_join_button": "招待コードを入力",
+  "join_title": "招待コードを入力",
+  "join_hint": "友だちから届いた8文字のコードを入力してください",
+  "join_paste": "貼り付け",
+  "join_submit": "ルームに参加",
+  "join_retry_in": "試行回数が多すぎます。{time} 後にもう一度お試しください",
+  "join_go_room": "ルームを見に行く",
+  "join_success_title": "ようこそ！",
+  "join_success_body": "{room}に参加しました",
+  "join_reward_title": "プレゼントが届きました",
+  "join_reward_body": "友だちにシェアして、あなたのルームに招待しよう",
+  "join_share": "シェアする"
 }

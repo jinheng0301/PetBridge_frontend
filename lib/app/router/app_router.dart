@@ -9,6 +9,7 @@ import 'package:petbridge/features/auth/presentation/login_page.dart';
 import 'package:petbridge/features/auth/presentation/splash_page.dart';
 import 'package:petbridge/features/home/presentation/home_shell.dart';
 import 'package:petbridge/features/home/presentation/me_tab.dart';
+import 'package:petbridge/features/invite/presentation/join_page.dart';
 import 'package:petbridge/features/onboarding/presentation/pages/lang_page.dart';
 import 'package:petbridge/features/onboarding/presentation/pages/mbti_page.dart';
 import 'package:petbridge/features/onboarding/presentation/pages/profile_page.dart';
@@ -49,6 +50,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       page(Routes.onbReveal, const RevealPage()),
       page(Routes.onbProfile, const ProfilePage()),
       page(Routes.onbTooYoung, const TooYoungPage()),
+      GoRoute(
+        path: Routes.join,
+        builder: (_, state) =>
+            JoinPage(initialCode: state.uri.queryParameters['code']),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (_, _, shell) => HomeShell(shell: shell),
         branches: [

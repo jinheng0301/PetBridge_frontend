@@ -115,5 +115,16 @@
   "room_solo_hint": "你的宠物正在等新朋友",
   "room_locked_title": "小屋还没解锁",
   "room_locked_body": "输入朋友的验证码，或把你的验证码分享出去",
-  "room_join_button": "输入验证码"
+  "room_join_button": "输入验证码",
+  "join_title": "输入验证码",
+  "join_hint": "输入朋友分享给你的 8 位验证码",
+  "join_paste": "粘贴",
+  "join_submit": "加入小屋",
+  "join_retry_in": "尝试次数过多，请 {time} 后再试",
+  "join_go_room": "去小屋看看",
+  "join_success_title": "欢迎入住！",
+  "join_success_body": "你加入了{room}",
+  "join_reward_title": "送你一份礼物",
+  "join_reward_body": "分享给朋友，让他们住进你的小屋",
+  "join_share": "去分享"
 }
