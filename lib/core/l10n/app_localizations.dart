@@ -679,6 +679,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pet'**
   String get me_pet;
+
+  /// Join code cannot be used (reason deliberately not given).
+  ///
+  /// In en, this message translates to:
+  /// **'This code is invalid or no longer works.'**
+  String get err_CODE_INVALID;
+
+  /// Join refused: room full.
+  ///
+  /// In en, this message translates to:
+  /// **'This room is already full.'**
+  String get err_ROOM_FULL;
+
+  /// Join refused: already a member.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re already in this room.'**
+  String get err_ALREADY_MEMBER;
+
+  /// Join refused: age groups differ.
+  ///
+  /// In en, this message translates to:
+  /// **'Minors and adults can\'t share a room.'**
+  String get err_AGE_RESTRICTED;
+
+  /// Join refused: in 2 rooms already.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re already in 2 rooms. Leave one first.'**
+  String get err_ROOM_LIMIT;
+
+  /// Too many wrong codes; generic text when no countdown is shown.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Please try again later.'**
+  String get err_CODE_COOLDOWN;
+
+  /// Action needs completed onboarding.
+  ///
+  /// In en, this message translates to:
+  /// **'Please finish signing up first.'**
+  String get err_ONBOARDING_REQUIRED;
+
+  /// Code regeneration refused; generic text.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t create a code right now.'**
+  String get err_CODE_ISSUE_LIMIT;
 }
 
 class _AppLocalizationsDelegate

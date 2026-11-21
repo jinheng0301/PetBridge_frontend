@@ -300,6 +300,30 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get me_pet => '宠物';
+
+  @override
+  String get err_CODE_INVALID => '验证码无效或已失效。';
+
+  @override
+  String get err_ROOM_FULL => '这个小屋已经满员了。';
+
+  @override
+  String get err_ALREADY_MEMBER => '你已经在这个小屋里了。';
+
+  @override
+  String get err_AGE_RESTRICTED => '未成年人与成年人不能住在同一个小屋。';
+
+  @override
+  String get err_ROOM_LIMIT => '你已经在 2 间小屋里了，请先退出一间。';
+
+  @override
+  String get err_CODE_COOLDOWN => '尝试次数过多，请稍后再试。';
+
+  @override
+  String get err_ONBOARDING_REQUIRED => '请先完成注册。';
+
+  @override
+  String get err_CODE_ISSUE_LIMIT => '暂时无法生成验证码。';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -597,6 +621,30 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get me_pet => '宠物';
+
+  @override
+  String get err_CODE_INVALID => '验证码无效或已失效。';
+
+  @override
+  String get err_ROOM_FULL => '这个小屋已经满员了。';
+
+  @override
+  String get err_ALREADY_MEMBER => '你已经在这个小屋里了。';
+
+  @override
+  String get err_AGE_RESTRICTED => '未成年人与成年人不能住在同一个小屋。';
+
+  @override
+  String get err_ROOM_LIMIT => '你已经在 2 间小屋里了，请先退出一间。';
+
+  @override
+  String get err_CODE_COOLDOWN => '尝试次数过多，请稍后再试。';
+
+  @override
+  String get err_ONBOARDING_REQUIRED => '请先完成注册。';
+
+  @override
+  String get err_CODE_ISSUE_LIMIT => '暂时无法生成验证码。';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -894,4 +942,28 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get me_pet => '寵物';
+
+  @override
+  String get err_CODE_INVALID => '驗證碼無效或已失效。';
+
+  @override
+  String get err_ROOM_FULL => '這個小屋已經滿員了。';
+
+  @override
+  String get err_ALREADY_MEMBER => '你已經在這個小屋裡了。';
+
+  @override
+  String get err_AGE_RESTRICTED => '未成年人與成年人不能住在同一個小屋。';
+
+  @override
+  String get err_ROOM_LIMIT => '你已經在 2 間小屋裡了，請先退出一間。';
+
+  @override
+  String get err_CODE_COOLDOWN => '嘗試次數過多，請稍後再試。';
+
+  @override
+  String get err_ONBOARDING_REQUIRED => '請先完成註冊。';
+
+  @override
+  String get err_CODE_ISSUE_LIMIT => '暫時無法產生驗證碼。';
 }

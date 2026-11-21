@@ -6,4 +6,8 @@ void main() {
     expect(Env.apiBaseUrl, 'http://10.0.2.2:8090/api/v1');
     expect(Env.devLogin, isFalse);
   });
+
+  test('shareBaseUrl defaults to placeholder', () {
+    expect(Env.shareBaseUrl, 'https://petbridge.example.com');
+  });
 }

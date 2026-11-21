@@ -301,4 +301,28 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get me_pet => 'ペット';
+
+  @override
+  String get err_CODE_INVALID => 'この招待コードは無効か、使えなくなっています。';
+
+  @override
+  String get err_ROOM_FULL => 'このお部屋はもう満員です。';
+
+  @override
+  String get err_ALREADY_MEMBER => 'すでにこのお部屋にいます。';
+
+  @override
+  String get err_AGE_RESTRICTED => '未成年と成人は同じお部屋に入れません。';
+
+  @override
+  String get err_ROOM_LIMIT => 'すでに 2 つのお部屋にいます。先に 1 つ退出してください。';
+
+  @override
+  String get err_CODE_COOLDOWN => '試行回数が多すぎます。しばらくしてからお試しください。';
+
+  @override
+  String get err_ONBOARDING_REQUIRED => '先に登録を完了してください。';
+
+  @override
+  String get err_CODE_ISSUE_LIMIT => '今は招待コードを作れません。';
 }

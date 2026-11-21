@@ -332,4 +332,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get me_pet => 'Pet';
+
+  @override
+  String get err_CODE_INVALID => 'This code is invalid or no longer works.';
+
+  @override
+  String get err_ROOM_FULL => 'This room is already full.';
+
+  @override
+  String get err_ALREADY_MEMBER => 'You\'re already in this room.';
+
+  @override
+  String get err_AGE_RESTRICTED => 'Minors and adults can\'t share a room.';
+
+  @override
+  String get err_ROOM_LIMIT => 'You\'re already in 2 rooms. Leave one first.';
+
+  @override
+  String get err_CODE_COOLDOWN => 'Too many attempts. Please try again later.';
+
+  @override
+  String get err_ONBOARDING_REQUIRED => 'Please finish signing up first.';
+
+  @override
+  String get err_CODE_ISSUE_LIMIT => 'Can\'t create a code right now.';
 }

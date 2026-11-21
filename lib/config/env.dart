@@ -17,4 +17,11 @@ abstract final class Env {
   static const bool appleLoginEnabled = bool.fromEnvironment(
     'APPLE_LOGIN_ENABLED',
   );
+
+  /// Base of share links and poster QR codes (`{base}/j/{code}`). A
+  /// placeholder until the real domain exists.
+  static const String shareBaseUrl = String.fromEnvironment(
+    'SHARE_BASE_URL',
+    defaultValue: 'https://petbridge.example.com',
+  );
 }

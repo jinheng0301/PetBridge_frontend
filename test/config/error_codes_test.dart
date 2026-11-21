@@ -23,4 +23,23 @@ void main() {
   test('unknown code falls back to err_UNKNOWN', () {
     expect(localizedError(l, const AppFailure('SOMETHING_NEW')), l.err_UNKNOWN);
   });
+
+  test('join and code errors have their own text', () {
+    for (final code in const [
+      'CODE_INVALID',
+      'ROOM_FULL',
+      'ALREADY_MEMBER',
+      'AGE_RESTRICTED',
+      'ROOM_LIMIT',
+      'CODE_COOLDOWN',
+      'ONBOARDING_REQUIRED',
+      'CODE_ISSUE_LIMIT',
+    ]) {
+      expect(
+        localizedError(l, AppFailure(code)),
+        isNot(l.err_UNKNOWN),
+        reason: code,
+      );
+    }
+  });
 }

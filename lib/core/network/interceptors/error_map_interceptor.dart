@@ -50,14 +50,23 @@ class ErrorMapInterceptor extends Interceptor {
     if (data case {
       'error': {'code': final String code} && final Map<String, Object?> e,
     }) {
-      final details = e['details'];
+      final raw = e['details'];
+      final details = <String, Object?>{
+        if (raw is Map) ...raw.map((k, v) => MapEntry(k.toString(), v)),
+      };
+      // RATE_LIMITED carries its wait in the Retry-After header only; put it
+      // under the same key CODE_COOLDOWN uses so the UI reads one place.
+      final retryAfter = int.tryParse(
+        response.headers.value('retry-after') ?? '',
+      );
+      if (status == 429 && retryAfter != null) {
+        details.putIfAbsent('retry_after_seconds', () => retryAfter);
+      }
       return AppFailure(
         code,
         status: status,
         requestId: e['request_id'] as String?,
-        details: details is Map
-            ? details.map((k, v) => MapEntry(k.toString(), v))
-            : const {},
+        details: details,
       );
     }
     return AppFailure(AppFailure.unknown, status: status);

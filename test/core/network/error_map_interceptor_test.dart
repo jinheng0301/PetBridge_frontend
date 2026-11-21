@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -21,7 +22,62 @@ Future<AppFailure> _failureOf(Dio dio) async {
   fail('expected the request to fail');
 }
 
+ResponseBody _withHeaders(int status, Object body, Map<String, String> h) =>
+    ResponseBody.fromString(
+      jsonEncode(body),
+      status,
+      headers: {
+        Headers.contentTypeHeader: [Headers.jsonContentType],
+        for (final e in h.entries) e.key: [e.value],
+      },
+    );
+
+Map<String, Object> _err(String code, [Map<String, Object>? details]) => {
+  'error': {
+    'code': code,
+    'message': 'x',
+    'request_id': 'r',
+    'details': ?details,
+  },
+};
+
 void main() {
+  test('RATE_LIMITED copies Retry-After into details', () async {
+    final dio = _dio(
+      (_) async =>
+          _withHeaders(429, _err('RATE_LIMITED'), {'retry-after': '42'}),
+    );
+
+    final f = await _failureOf(dio);
+
+    expect(f.code, 'RATE_LIMITED');
+    expect(f.details['retry_after_seconds'], 42);
+  });
+
+  test('non-integer Retry-After is ignored', () async {
+    final dio = _dio(
+      (_) async =>
+          _withHeaders(429, _err('RATE_LIMITED'), {'retry-after': 'soon'}),
+    );
+
+    final f = await _failureOf(dio);
+
+    expect(f.details.containsKey('retry_after_seconds'), isFalse);
+  });
+
+  test('CODE_COOLDOWN keeps body retry_after_seconds', () async {
+    final dio = _dio(
+      (_) async => jsonBody(
+        429,
+        _err('CODE_COOLDOWN', {'retry_after_seconds': 1800}),
+      ),
+    );
+
+    final f = await _failureOf(dio);
+
+    expect(f.details['retry_after_seconds'], 1800);
+  });
+
   test('maps backend error body to AppFailure', () async {
     final dio = _dio(
       (_) async => jsonBody(409, {

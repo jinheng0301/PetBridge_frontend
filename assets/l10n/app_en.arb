@@ -399,5 +399,37 @@
   "me_pet": "Pet",
   "@me_pet": {
     "description": "Me tab row label: pet."
+  },
+  "err_CODE_INVALID": "This code is invalid or no longer works.",
+  "@err_CODE_INVALID": {
+    "description": "Join code cannot be used (reason deliberately not given)."
+  },
+  "err_ROOM_FULL": "This room is already full.",
+  "@err_ROOM_FULL": {
+    "description": "Join refused: room full."
+  },
+  "err_ALREADY_MEMBER": "You're already in this room.",
+  "@err_ALREADY_MEMBER": {
+    "description": "Join refused: already a member."
+  },
+  "err_AGE_RESTRICTED": "Minors and adults can't share a room.",
+  "@err_AGE_RESTRICTED": {
+    "description": "Join refused: age groups differ."
+  },
+  "err_ROOM_LIMIT": "You're already in 2 rooms. Leave one first.",
+  "@err_ROOM_LIMIT": {
+    "description": "Join refused: in 2 rooms already."
+  },
+  "err_CODE_COOLDOWN": "Too many attempts. Please try again later.",
+  "@err_CODE_COOLDOWN": {
+    "description": "Too many wrong codes; generic text when no countdown is shown."
+  },
+  "err_ONBOARDING_REQUIRED": "Please finish signing up first.",
+  "@err_ONBOARDING_REQUIRED": {
+    "description": "Action needs completed onboarding."
+  },
+  "err_CODE_ISSUE_LIMIT": "Can't create a code right now.",
+  "@err_CODE_ISSUE_LIMIT": {
+    "description": "Code regeneration refused; generic text."
   }
 }

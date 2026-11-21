@@ -304,4 +304,28 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get me_pet => '펫';
+
+  @override
+  String get err_CODE_INVALID => '유효하지 않거나 만료된 코드입니다.';
+
+  @override
+  String get err_ROOM_FULL => '이 방은 이미 꽉 찼어요.';
+
+  @override
+  String get err_ALREADY_MEMBER => '이미 이 방에 있어요.';
+
+  @override
+  String get err_AGE_RESTRICTED => '미성년자와 성인은 같은 방에 있을 수 없어요.';
+
+  @override
+  String get err_ROOM_LIMIT => '이미 방 2개에 있어요. 먼저 하나에서 나가 주세요.';
+
+  @override
+  String get err_CODE_COOLDOWN => '시도 횟수가 너무 많아요. 잠시 후 다시 시도해 주세요.';
+
+  @override
+  String get err_ONBOARDING_REQUIRED => '먼저 가입을 완료해 주세요.';
+
+  @override
+  String get err_CODE_ISSUE_LIMIT => '지금은 코드를 만들 수 없어요.';
 }
