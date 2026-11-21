@@ -57,10 +57,10 @@ void main() {
     ]);
   });
 
-  testWidgets('first three tabs show coming soon', (tester) async {
+  testWidgets('chat and bag tabs show coming soon', (tester) async {
     await pumpHome(tester);
 
-    for (final tab in [en.home_tab_room, en.home_tab_chat, en.home_tab_bag]) {
+    for (final tab in [en.home_tab_chat, en.home_tab_bag]) {
       await tester.tap(
         find.descendant(
           of: find.byType(NavigationBar),

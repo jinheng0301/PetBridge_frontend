@@ -324,6 +324,48 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get err_CODE_ISSUE_LIMIT => '暂时无法生成验证码。';
+
+  @override
+  String get room_title_mine => '我的小屋';
+
+  @override
+  String room_title_of(String name) {
+    return '$name的小屋';
+  }
+
+  @override
+  String get room_title_friend => '朋友的小屋';
+
+  @override
+  String get room_me => '我';
+
+  @override
+  String get room_owner_tag => '房主';
+
+  @override
+  String room_free_seats(int count) {
+    return '还有 $count 个空位';
+  }
+
+  @override
+  String room_count(int count, int capacity) {
+    return '$count/$capacity';
+  }
+
+  @override
+  String get room_invite => '邀请朋友';
+
+  @override
+  String get room_solo_hint => '你的宠物正在等新朋友';
+
+  @override
+  String get room_locked_title => '小屋还没解锁';
+
+  @override
+  String get room_locked_body => '输入朋友的验证码，或把你的验证码分享出去';
+
+  @override
+  String get room_join_button => '输入验证码';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -645,6 +687,48 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get err_CODE_ISSUE_LIMIT => '暂时无法生成验证码。';
+
+  @override
+  String get room_title_mine => '我的小屋';
+
+  @override
+  String room_title_of(String name) {
+    return '$name的小屋';
+  }
+
+  @override
+  String get room_title_friend => '朋友的小屋';
+
+  @override
+  String get room_me => '我';
+
+  @override
+  String get room_owner_tag => '房主';
+
+  @override
+  String room_free_seats(int count) {
+    return '还有 $count 个空位';
+  }
+
+  @override
+  String room_count(int count, int capacity) {
+    return '$count/$capacity';
+  }
+
+  @override
+  String get room_invite => '邀请朋友';
+
+  @override
+  String get room_solo_hint => '你的宠物正在等新朋友';
+
+  @override
+  String get room_locked_title => '小屋还没解锁';
+
+  @override
+  String get room_locked_body => '输入朋友的验证码，或把你的验证码分享出去';
+
+  @override
+  String get room_join_button => '输入验证码';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -966,4 +1050,46 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get err_CODE_ISSUE_LIMIT => '暫時無法產生驗證碼。';
+
+  @override
+  String get room_title_mine => '我的小屋';
+
+  @override
+  String room_title_of(String name) {
+    return '$name的小屋';
+  }
+
+  @override
+  String get room_title_friend => '朋友的小屋';
+
+  @override
+  String get room_me => '我';
+
+  @override
+  String get room_owner_tag => '房主';
+
+  @override
+  String room_free_seats(int count) {
+    return '還有 $count 個空位';
+  }
+
+  @override
+  String room_count(int count, int capacity) {
+    return '$count/$capacity';
+  }
+
+  @override
+  String get room_invite => '邀請朋友';
+
+  @override
+  String get room_solo_hint => '你的寵物正在等新朋友';
+
+  @override
+  String get room_locked_title => '小屋還沒解鎖';
+
+  @override
+  String get room_locked_body => '輸入朋友的驗證碼，或把你的驗證碼分享出去';
+
+  @override
+  String get room_join_button => '輸入驗證碼';
 }

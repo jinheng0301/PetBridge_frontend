@@ -16,6 +16,7 @@ import 'package:petbridge/features/onboarding/presentation/pages/quiz_page.dart'
 import 'package:petbridge/features/onboarding/presentation/pages/quiz_result_page.dart';
 import 'package:petbridge/features/onboarding/presentation/pages/reveal_page.dart';
 import 'package:petbridge/features/onboarding/presentation/pages/too_young_page.dart';
+import 'package:petbridge/features/room/presentation/room_tab.dart';
 
 /// The app's router. Its redirect reads only the [Session]; every session
 /// change re-runs it.
@@ -51,7 +52,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       StatefulShellRoute.indexedStack(
         builder: (_, _, shell) => HomeShell(shell: shell),
         branches: [
-          tab(Routes.home, comingSoon((l) => l.home_tab_room)),
+          tab(Routes.home, const RoomTab()),
           tab(Routes.homeChat, comingSoon((l) => l.home_tab_chat)),
           tab(Routes.homeBag, comingSoon((l) => l.home_tab_bag)),
           tab(Routes.homeMe, const MeTab()),

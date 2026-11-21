@@ -727,6 +727,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Can\'t create a code right now.'**
   String get err_CODE_ISSUE_LIMIT;
+
+  /// Title of the user's own room.
+  ///
+  /// In en, this message translates to:
+  /// **'My room'**
+  String get room_title_mine;
+
+  /// Title of someone else's room, named after its owner.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}\'s room'**
+  String room_title_of(String name);
+
+  /// Title of someone else's room when the owner has no nickname.
+  ///
+  /// In en, this message translates to:
+  /// **'A friend\'s room'**
+  String get room_title_friend;
+
+  /// The user in a member list.
+  ///
+  /// In en, this message translates to:
+  /// **'Me'**
+  String get room_me;
+
+  /// Tag next to the room owner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get room_owner_tag;
+
+  /// Free seats in the room.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 seat left} other{{count} seats left}}'**
+  String room_free_seats(int count);
+
+  /// Members over capacity.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}/{capacity}'**
+  String room_count(int count, int capacity);
+
+  /// Button to the backpack to share a code.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite friends'**
+  String get room_invite;
+
+  /// Solo state caption.
+  ///
+  /// In en, this message translates to:
+  /// **'Your pet is waiting for new friends'**
+  String get room_solo_hint;
+
+  /// Solo state: room locked.
+  ///
+  /// In en, this message translates to:
+  /// **'Your room isn\'t unlocked yet'**
+  String get room_locked_title;
+
+  /// Solo state: how to unlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a friend\'s code, or share yours'**
+  String get room_locked_body;
+
+  /// Opens the join page.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a code'**
+  String get room_join_button;
 }
 
 class _AppLocalizationsDelegate

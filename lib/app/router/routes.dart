@@ -16,6 +16,8 @@ abstract final class Routes {
   static const homeChat = '/home/chat';
   static const homeBag = '/home/bag';
   static const homeMe = '/home/me';
+
+  static const join = '/join';
 }
 
 /// Where [s] sends a user who is at [location], or `null` to stay.

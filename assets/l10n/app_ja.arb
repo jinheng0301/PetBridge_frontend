@@ -104,5 +104,17 @@
   "err_ROOM_LIMIT": "すでに 2 つのお部屋にいます。先に 1 つ退出してください。",
   "err_CODE_COOLDOWN": "試行回数が多すぎます。しばらくしてからお試しください。",
   "err_ONBOARDING_REQUIRED": "先に登録を完了してください。",
-  "err_CODE_ISSUE_LIMIT": "今は招待コードを作れません。"
+  "err_CODE_ISSUE_LIMIT": "今は招待コードを作れません。",
+  "room_title_mine": "わたしのお部屋",
+  "room_title_of": "{name}のお部屋",
+  "room_title_friend": "友だちのお部屋",
+  "room_me": "わたし",
+  "room_owner_tag": "オーナー",
+  "room_free_seats": "空席あと {count}",
+  "room_count": "{count}/{capacity}",
+  "room_invite": "友だちを招待",
+  "room_solo_hint": "ペットが新しい友だちを待っています",
+  "room_locked_title": "お部屋はまだ開いていません",
+  "room_locked_body": "友だちの招待コードを入力するか、自分のコードをシェアしましょう",
+  "room_join_button": "招待コードを入力"
 }

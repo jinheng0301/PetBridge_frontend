@@ -431,5 +431,71 @@
   "err_CODE_ISSUE_LIMIT": "Can't create a code right now.",
   "@err_CODE_ISSUE_LIMIT": {
     "description": "Code regeneration refused; generic text."
+  },
+  "room_title_mine": "My room",
+  "@room_title_mine": {
+    "description": "Title of the user's own room."
+  },
+  "room_title_of": "{name}'s room",
+  "@room_title_of": {
+    "description": "Title of someone else's room, named after its owner.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "room_title_friend": "A friend's room",
+  "@room_title_friend": {
+    "description": "Title of someone else's room when the owner has no nickname."
+  },
+  "room_me": "Me",
+  "@room_me": {
+    "description": "The user in a member list."
+  },
+  "room_owner_tag": "Owner",
+  "@room_owner_tag": {
+    "description": "Tag next to the room owner."
+  },
+  "room_free_seats": "{count, plural, =1{1 seat left} other{{count} seats left}}",
+  "@room_free_seats": {
+    "description": "Free seats in the room.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "room_count": "{count}/{capacity}",
+  "@room_count": {
+    "description": "Members over capacity.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "capacity": {
+        "type": "int"
+      }
+    }
+  },
+  "room_invite": "Invite friends",
+  "@room_invite": {
+    "description": "Button to the backpack to share a code."
+  },
+  "room_solo_hint": "Your pet is waiting for new friends",
+  "@room_solo_hint": {
+    "description": "Solo state caption."
+  },
+  "room_locked_title": "Your room isn't unlocked yet",
+  "@room_locked_title": {
+    "description": "Solo state: room locked."
+  },
+  "room_locked_body": "Enter a friend's code, or share yours",
+  "@room_locked_body": {
+    "description": "Solo state: how to unlock."
+  },
+  "room_join_button": "Enter a code",
+  "@room_join_button": {
+    "description": "Opens the join page."
   }
 }

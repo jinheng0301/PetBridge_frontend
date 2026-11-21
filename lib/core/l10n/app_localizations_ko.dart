@@ -328,4 +328,46 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get err_CODE_ISSUE_LIMIT => '지금은 코드를 만들 수 없어요.';
+
+  @override
+  String get room_title_mine => '내 방';
+
+  @override
+  String room_title_of(String name) {
+    return '$name의 방';
+  }
+
+  @override
+  String get room_title_friend => '친구의 방';
+
+  @override
+  String get room_me => '나';
+
+  @override
+  String get room_owner_tag => '방장';
+
+  @override
+  String room_free_seats(int count) {
+    return '빈자리 $count개';
+  }
+
+  @override
+  String room_count(int count, int capacity) {
+    return '$count/$capacity';
+  }
+
+  @override
+  String get room_invite => '친구 초대';
+
+  @override
+  String get room_solo_hint => '펫이 새 친구를 기다리고 있어요';
+
+  @override
+  String get room_locked_title => '아직 방이 열리지 않았어요';
+
+  @override
+  String get room_locked_body => '친구의 코드를 입력하거나 내 코드를 공유해 보세요';
+
+  @override
+  String get room_join_button => '코드 입력';
 }

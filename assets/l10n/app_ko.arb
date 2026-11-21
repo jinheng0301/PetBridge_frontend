@@ -104,5 +104,17 @@
   "err_ROOM_LIMIT": "이미 방 2개에 있어요. 먼저 하나에서 나가 주세요.",
   "err_CODE_COOLDOWN": "시도 횟수가 너무 많아요. 잠시 후 다시 시도해 주세요.",
   "err_ONBOARDING_REQUIRED": "먼저 가입을 완료해 주세요.",
-  "err_CODE_ISSUE_LIMIT": "지금은 코드를 만들 수 없어요."
+  "err_CODE_ISSUE_LIMIT": "지금은 코드를 만들 수 없어요.",
+  "room_title_mine": "내 방",
+  "room_title_of": "{name}의 방",
+  "room_title_friend": "친구의 방",
+  "room_me": "나",
+  "room_owner_tag": "방장",
+  "room_free_seats": "빈자리 {count}개",
+  "room_count": "{count}/{capacity}",
+  "room_invite": "친구 초대",
+  "room_solo_hint": "펫이 새 친구를 기다리고 있어요",
+  "room_locked_title": "아직 방이 열리지 않았어요",
+  "room_locked_body": "친구의 코드를 입력하거나 내 코드를 공유해 보세요",
+  "room_join_button": "코드 입력"
 }

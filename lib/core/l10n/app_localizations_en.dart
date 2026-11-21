@@ -356,4 +356,52 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get err_CODE_ISSUE_LIMIT => 'Can\'t create a code right now.';
+
+  @override
+  String get room_title_mine => 'My room';
+
+  @override
+  String room_title_of(String name) {
+    return '$name\'s room';
+  }
+
+  @override
+  String get room_title_friend => 'A friend\'s room';
+
+  @override
+  String get room_me => 'Me';
+
+  @override
+  String get room_owner_tag => 'Owner';
+
+  @override
+  String room_free_seats(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count seats left',
+      one: '1 seat left',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String room_count(int count, int capacity) {
+    return '$count/$capacity';
+  }
+
+  @override
+  String get room_invite => 'Invite friends';
+
+  @override
+  String get room_solo_hint => 'Your pet is waiting for new friends';
+
+  @override
+  String get room_locked_title => 'Your room isn\'t unlocked yet';
+
+  @override
+  String get room_locked_body => 'Enter a friend\'s code, or share yours';
+
+  @override
+  String get room_join_button => 'Enter a code';
 }

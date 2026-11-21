@@ -103,5 +103,17 @@
   "err_ROOM_LIMIT": "你已经在 2 间小屋里了，请先退出一间。",
   "err_CODE_COOLDOWN": "尝试次数过多，请稍后再试。",
   "err_ONBOARDING_REQUIRED": "请先完成注册。",
-  "err_CODE_ISSUE_LIMIT": "暂时无法生成验证码。"
+  "err_CODE_ISSUE_LIMIT": "暂时无法生成验证码。",
+  "room_title_mine": "我的小屋",
+  "room_title_of": "{name}的小屋",
+  "room_title_friend": "朋友的小屋",
+  "room_me": "我",
+  "room_owner_tag": "房主",
+  "room_free_seats": "还有 {count} 个空位",
+  "room_count": "{count}/{capacity}",
+  "room_invite": "邀请朋友",
+  "room_solo_hint": "你的宠物正在等新朋友",
+  "room_locked_title": "小屋还没解锁",
+  "room_locked_body": "输入朋友的验证码，或把你的验证码分享出去",
+  "room_join_button": "输入验证码"
 }

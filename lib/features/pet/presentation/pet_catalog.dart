@@ -68,3 +68,6 @@ String petIntro(AppLocalizations l, String petType) => switch (petType) {
   'party_parrot' => l.pet_party_parrot_intro,
   _ => throw ArgumentError.value(petType, 'petType', 'unknown pet'),
 };
+
+/// Whether [petType] is one of the 16 pets this build knows.
+bool isKnownPet(String petType) => kPetTypeByMbti.containsValue(petType);
