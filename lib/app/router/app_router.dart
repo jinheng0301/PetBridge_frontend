@@ -11,6 +11,7 @@ import 'package:petbridge/features/home/presentation/home_shell.dart';
 import 'package:petbridge/features/home/presentation/me_tab.dart';
 import 'package:petbridge/features/invite/presentation/bag_tab.dart';
 import 'package:petbridge/features/invite/presentation/join_page.dart';
+import 'package:petbridge/features/invite/presentation/share_page.dart';
 import 'package:petbridge/features/onboarding/presentation/pages/lang_page.dart';
 import 'package:petbridge/features/onboarding/presentation/pages/mbti_page.dart';
 import 'package:petbridge/features/onboarding/presentation/pages/profile_page.dart';
@@ -55,6 +56,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: Routes.join,
         builder: (_, state) =>
             JoinPage(initialCode: state.uri.queryParameters['code']),
+      ),
+      GoRoute(
+        path: '${Routes.share}/:code',
+        builder: (_, state) => SharePage(code: state.pathParameters['code']!),
       ),
       StatefulShellRoute.indexedStack(
         builder: (_, _, shell) => HomeShell(shell: shell),

@@ -474,6 +474,40 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get bag_regen_lifetime_limit => '已达到可生成的上限';
+
+  @override
+  String get share_title => '分享验证码';
+
+  @override
+  String get share_headline => '来我的小屋玩吧！';
+
+  @override
+  String share_room_count(int count, int capacity) {
+    return '小屋 $count / $capacity 人';
+  }
+
+  @override
+  String get share_save => '保存到相册';
+
+  @override
+  String get share_system => '系统分享';
+
+  @override
+  String share_text(String code, String link) {
+    return '来我的小屋玩吧！验证码 $code $link';
+  }
+
+  @override
+  String get share_saved => '已保存到相册';
+
+  @override
+  String get share_denied => '需要相册权限才能保存';
+
+  @override
+  String get share_unavailable => '这个验证码不能再分享了';
+
+  @override
+  String get share_failed => '海报生成失败，请重试';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -945,6 +979,40 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get bag_regen_lifetime_limit => '已达到可生成的上限';
+
+  @override
+  String get share_title => '分享验证码';
+
+  @override
+  String get share_headline => '来我的小屋玩吧！';
+
+  @override
+  String share_room_count(int count, int capacity) {
+    return '小屋 $count / $capacity 人';
+  }
+
+  @override
+  String get share_save => '保存到相册';
+
+  @override
+  String get share_system => '系统分享';
+
+  @override
+  String share_text(String code, String link) {
+    return '来我的小屋玩吧！验证码 $code $link';
+  }
+
+  @override
+  String get share_saved => '已保存到相册';
+
+  @override
+  String get share_denied => '需要相册权限才能保存';
+
+  @override
+  String get share_unavailable => '这个验证码不能再分享了';
+
+  @override
+  String get share_failed => '海报生成失败，请重试';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -1416,4 +1484,38 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get bag_regen_lifetime_limit => '已達到可生成的上限';
+
+  @override
+  String get share_title => '分享驗證碼';
+
+  @override
+  String get share_headline => '來我的小屋玩吧！';
+
+  @override
+  String share_room_count(int count, int capacity) {
+    return '小屋 $count / $capacity 人';
+  }
+
+  @override
+  String get share_save => '儲存到相簿';
+
+  @override
+  String get share_system => '系統分享';
+
+  @override
+  String share_text(String code, String link) {
+    return '來我的小屋玩吧！驗證碼 $code $link';
+  }
+
+  @override
+  String get share_saved => '已儲存到相簿';
+
+  @override
+  String get share_denied => '需要相簿權限才能儲存';
+
+  @override
+  String get share_unavailable => '這個驗證碼不能再分享了';
+
+  @override
+  String get share_failed => '海報生成失敗，請重試';
 }

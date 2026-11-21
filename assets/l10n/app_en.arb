@@ -658,5 +658,61 @@
   "bag_regen_lifetime_limit": "You've reached the most codes you can generate",
   "@bag_regen_lifetime_limit": {
     "description": "Generate refused: lifetime limit"
+  },
+  "share_title": "Share code",
+  "@share_title": {
+    "description": "Share page app bar title"
+  },
+  "share_headline": "Come visit my room!",
+  "@share_headline": {
+    "description": "Poster headline"
+  },
+  "share_room_count": "Room {count} / {capacity}",
+  "@share_room_count": {
+    "description": "Room size on the poster",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "capacity": {
+        "type": "int"
+      }
+    }
+  },
+  "share_save": "Save to gallery",
+  "@share_save": {
+    "description": "Button that saves the poster to the gallery"
+  },
+  "share_system": "Share",
+  "@share_system": {
+    "description": "Button that opens the system share sheet"
+  },
+  "share_text": "Come visit my room! Code {code} {link}",
+  "@share_text": {
+    "description": "Text sent with the shared poster; code is XXXX-XXXX",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      },
+      "link": {
+        "type": "String"
+      }
+    }
+  },
+  "share_saved": "Saved to gallery",
+  "@share_saved": {
+    "description": "SnackBar after saving the poster"
+  },
+  "share_denied": "Allow photo access to save the poster",
+  "@share_denied": {
+    "description": "SnackBar when gallery permission is denied"
+  },
+  "share_unavailable": "This code can no longer be shared",
+  "@share_unavailable": {
+    "description": "Share page when the code is unknown or not unused"
+  },
+  "share_failed": "Couldn't create the poster. Please try again.",
+  "@share_failed": {
+    "description": "SnackBar when capturing, saving or sharing the poster fails"
   }
 }

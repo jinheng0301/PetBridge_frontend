@@ -478,4 +478,38 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get bag_regen_lifetime_limit => '만들 수 있는 최대 개수에 도달했어요';
+
+  @override
+  String get share_title => '코드 공유';
+
+  @override
+  String get share_headline => '내 방에 놀러 와!';
+
+  @override
+  String share_room_count(int count, int capacity) {
+    return '방 $count / $capacity명';
+  }
+
+  @override
+  String get share_save => '갤러리에 저장';
+
+  @override
+  String get share_system => '공유';
+
+  @override
+  String share_text(String code, String link) {
+    return '내 방에 놀러 와! 코드 $code $link';
+  }
+
+  @override
+  String get share_saved => '갤러리에 저장했어요';
+
+  @override
+  String get share_denied => '저장하려면 사진 접근을 허용해 주세요';
+
+  @override
+  String get share_unavailable => '이 코드는 더 이상 공유할 수 없어요';
+
+  @override
+  String get share_failed => '포스터를 만들지 못했어요. 다시 시도해 주세요';
 }

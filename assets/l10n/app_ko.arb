@@ -148,5 +148,15 @@
   "bag_regen_room_full": "방이 가득 찼어요",
   "bag_regen_enough_unused": "사용하지 않은 코드가 충분해요. 먼저 공유해 보세요",
   "bag_regen_daily_limit": "오늘 만들 수 있는 횟수를 다 썼어요",
-  "bag_regen_lifetime_limit": "만들 수 있는 최대 개수에 도달했어요"
+  "bag_regen_lifetime_limit": "만들 수 있는 최대 개수에 도달했어요",
+  "share_title": "코드 공유",
+  "share_headline": "내 방에 놀러 와!",
+  "share_room_count": "방 {count} / {capacity}명",
+  "share_save": "갤러리에 저장",
+  "share_system": "공유",
+  "share_text": "내 방에 놀러 와! 코드 {code} {link}",
+  "share_saved": "갤러리에 저장했어요",
+  "share_denied": "저장하려면 사진 접근을 허용해 주세요",
+  "share_unavailable": "이 코드는 더 이상 공유할 수 없어요",
+  "share_failed": "포스터를 만들지 못했어요. 다시 시도해 주세요"
 }

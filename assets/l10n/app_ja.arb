@@ -148,5 +148,15 @@
   "bag_regen_room_full": "ルームが満員です",
   "bag_regen_enough_unused": "未使用のコードが十分あります。先にシェアしましょう",
   "bag_regen_daily_limit": "今日の発行回数を使い切りました",
-  "bag_regen_lifetime_limit": "発行できる上限に達しました"
+  "bag_regen_lifetime_limit": "発行できる上限に達しました",
+  "share_title": "コードをシェア",
+  "share_headline": "わたしのルームに遊びに来て！",
+  "share_room_count": "ルーム {count} / {capacity} 人",
+  "share_save": "写真に保存",
+  "share_system": "共有",
+  "share_text": "わたしのルームに遊びに来て！コード {code} {link}",
+  "share_saved": "写真に保存しました",
+  "share_denied": "保存するには写真へのアクセスを許可してください",
+  "share_unavailable": "このコードはもうシェアできません",
+  "share_failed": "ポスターを作成できませんでした。もう一度お試しください"
 }

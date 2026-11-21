@@ -7,6 +7,7 @@ import 'package:petbridge/features/auth/application/session_controller.dart';
 import 'package:petbridge/features/auth/data/auth_repository.dart';
 import 'package:petbridge/features/auth/data/google_auth.dart';
 import 'package:petbridge/features/invite/data/invite_repository.dart';
+import 'package:petbridge/features/invite/data/poster_sink.dart';
 import 'package:petbridge/features/onboarding/data/onboarding_repository.dart';
 import 'package:petbridge/features/room/data/room_repository.dart';
 
@@ -21,6 +22,8 @@ class MockOnboardingRepository extends Mock implements OnboardingRepository;
 class MockRoomRepository extends Mock implements RoomRepository;
 
 class MockInviteRepository extends Mock implements InviteRepository;
+
+class MockPosterSink extends Mock implements PosterSink;
 
 /// A [SessionController] that starts in [initial] and never touches the
 /// network. Login calls throw [loginError] when set.

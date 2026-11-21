@@ -991,6 +991,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You\'ve reached the most codes you can generate'**
   String get bag_regen_lifetime_limit;
+
+  /// Share page app bar title
+  ///
+  /// In en, this message translates to:
+  /// **'Share code'**
+  String get share_title;
+
+  /// Poster headline
+  ///
+  /// In en, this message translates to:
+  /// **'Come visit my room!'**
+  String get share_headline;
+
+  /// Room size on the poster
+  ///
+  /// In en, this message translates to:
+  /// **'Room {count} / {capacity}'**
+  String share_room_count(int count, int capacity);
+
+  /// Button that saves the poster to the gallery
+  ///
+  /// In en, this message translates to:
+  /// **'Save to gallery'**
+  String get share_save;
+
+  /// Button that opens the system share sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get share_system;
+
+  /// Text sent with the shared poster; code is XXXX-XXXX
+  ///
+  /// In en, this message translates to:
+  /// **'Come visit my room! Code {code} {link}'**
+  String share_text(String code, String link);
+
+  /// SnackBar after saving the poster
+  ///
+  /// In en, this message translates to:
+  /// **'Saved to gallery'**
+  String get share_saved;
+
+  /// SnackBar when gallery permission is denied
+  ///
+  /// In en, this message translates to:
+  /// **'Allow photo access to save the poster'**
+  String get share_denied;
+
+  /// Share page when the code is unknown or not unused
+  ///
+  /// In en, this message translates to:
+  /// **'This code can no longer be shared'**
+  String get share_unavailable;
+
+  /// SnackBar when capturing, saving or sharing the poster fails
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t create the poster. Please try again.'**
+  String get share_failed;
 }
 
 class _AppLocalizationsDelegate

@@ -475,4 +475,38 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get bag_regen_lifetime_limit => '発行できる上限に達しました';
+
+  @override
+  String get share_title => 'コードをシェア';
+
+  @override
+  String get share_headline => 'わたしのルームに遊びに来て！';
+
+  @override
+  String share_room_count(int count, int capacity) {
+    return 'ルーム $count / $capacity 人';
+  }
+
+  @override
+  String get share_save => '写真に保存';
+
+  @override
+  String get share_system => '共有';
+
+  @override
+  String share_text(String code, String link) {
+    return 'わたしのルームに遊びに来て！コード $code $link';
+  }
+
+  @override
+  String get share_saved => '写真に保存しました';
+
+  @override
+  String get share_denied => '保存するには写真へのアクセスを許可してください';
+
+  @override
+  String get share_unavailable => 'このコードはもうシェアできません';
+
+  @override
+  String get share_failed => 'ポスターを作成できませんでした。もう一度お試しください';
 }

@@ -533,4 +533,38 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get bag_regen_lifetime_limit =>
       'You\'ve reached the most codes you can generate';
+
+  @override
+  String get share_title => 'Share code';
+
+  @override
+  String get share_headline => 'Come visit my room!';
+
+  @override
+  String share_room_count(int count, int capacity) {
+    return 'Room $count / $capacity';
+  }
+
+  @override
+  String get share_save => 'Save to gallery';
+
+  @override
+  String get share_system => 'Share';
+
+  @override
+  String share_text(String code, String link) {
+    return 'Come visit my room! Code $code $link';
+  }
+
+  @override
+  String get share_saved => 'Saved to gallery';
+
+  @override
+  String get share_denied => 'Allow photo access to save the poster';
+
+  @override
+  String get share_unavailable => 'This code can no longer be shared';
+
+  @override
+  String get share_failed => 'Couldn\'t create the poster. Please try again.';
 }

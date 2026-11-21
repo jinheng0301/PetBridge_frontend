@@ -148,5 +148,15 @@
   "bag_regen_room_full": "小屋已滿",
   "bag_regen_enough_unused": "你已經有足夠的未使用驗證碼，先分享它們吧",
   "bag_regen_daily_limit": "今天的生成次數已用完",
-  "bag_regen_lifetime_limit": "已達到可生成的上限"
+  "bag_regen_lifetime_limit": "已達到可生成的上限",
+  "share_title": "分享驗證碼",
+  "share_headline": "來我的小屋玩吧！",
+  "share_room_count": "小屋 {count} / {capacity} 人",
+  "share_save": "儲存到相簿",
+  "share_system": "系統分享",
+  "share_text": "來我的小屋玩吧！驗證碼 {code} {link}",
+  "share_saved": "已儲存到相簿",
+  "share_denied": "需要相簿權限才能儲存",
+  "share_unavailable": "這個驗證碼不能再分享了",
+  "share_failed": "海報生成失敗，請重試"
 }
