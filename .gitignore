@@ -49,3 +49,6 @@ app.*.map.json
 
 # Local env overrides (LAN IP etc.)
 env/local.json
+
+# Brainstorm mockups (superpowers visual companion)
+.superpowers/
