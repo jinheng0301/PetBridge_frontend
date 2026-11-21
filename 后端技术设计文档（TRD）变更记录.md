@@ -4,6 +4,12 @@
 
 ---
 
+## V1.10 变更说明
+
+配合前端 F1（前端 TRD v1.10），PRD 不变。PRD F2.9 要求背包显示房主今日剩余补码次数，但补码接口只在用完时返回 `CODE_ISSUE_LIMIT`（`daily_limit`），客户端拿不到这个数字。现在 `GET /rooms/mine` 中自己的小屋增加 `regen_remaining_today`，取值为 `OWNER_REGEN_DAILY_LIMIT` 减去房主时区今天已补码的次数（不小于 0），与补码校验第 4 步共用计数；他人小屋为 `null`，`room.snapshot` 不带这个字段（7.8、第 8 章、第 9 章）。它只反映每日次数，其他拒绝原因仍以补码接口为准。
+
+---
+
 ## V1.9 变更说明
 
 B5（消息收发与 AI 网关）设计定稿，对齐 PRD v1.8 与前端 TRD v1.9，详细设计见 `docs/superpowers/specs/2026-11-21-b5-messaging-ai-gateway-design.md`。① **落库即推原文卡片**（4.5②、7.4、第 9 章）：原写法是翻译完成才发 `message.new`，AI 一慢接收者就什么都看不到，与 12.2“先发原文卡片”和前端的“翻译中”骨架屏矛盾。现在消息落库后立即给每个接收者和发送者本人发 `message.new`，翻译结束发新事件 `message.translated`，润色结束发 `message.polished`。三者共用 `MessageView` 结构、都不带 seq、只投给订阅了该房间的连接，客户端按消息 id 插入或更新，delivery 状态只前进不后退。② **断线后从数据库补消息**（7.3、7.4、第 11 章）：`GET /rooms/{id}/messages` 支持 `before` / `after` 双向游标，重新订阅后用 `after` 补齐；删除 B4 留待评估的 Redis Stream `room:{rid}:events`。③ **供应商定为 Gemini 主力 + Claude 备用**（第 3 章、10.1、10.2、15.4）：都用官方 Go SDK，主备顺序由 `AI_PRIMARY` 决定，模型名都在环境变量里；Claude 默认用 `claude-haiku-5-5`。Gemini 免费层的数据会被 Google 用于改进产品，只能用于开发，production 下 `GEMINI_FREE_TIER` 必须为 false。**不接机器翻译兜底**，删除 `pkg/mt` 与 `MT_FALLBACK_API_KEY`、`LLM_PRIMARY_*`、`LLM_SECONDARY_*`。④ **翻译失败自动重试**（7.4、12.2）：都失败时 `translation_status = failed`，卡片显示原文 + “暂无法翻译”，不提供手动重试；asynq 重试 3 次后，由 worker 的补偿扫描每 10 分钟再试，24 小时后放弃。补偿扫描同时捡起停住的 `pending` 翻译与润色。⑤ **Redis 不可用时消息照常翻译**（4.1、7.4、12.2）：无法入队时 api 在本进程内有上限地翻译，结果经 B4 的本机兜底推送。⑥ **预算与配额**（10.2、第 11 章）：翻译与润色的估算成本都累加进 `ai:cost:{yyyymmdd}`；超过日预算关闭润色，超过 2 倍连翻译也停止；发送方润色开关每条消息扣 1 次，失败不退；润色总开关先用 `AI_POLISH_ENABLED`（B5 不建 `app_config`）。⑦ **接口与错误码**（第 8 章）：新增 `DELIVERY_NOT_FOUND`（404）、`POLISH_NOT_READY`（409）、`QUOTA_EXCEEDED` 的 `details.reason`、`CONTENT_BLOCKED` 定为 422；短语接口版本相同返回 304；已读接口移到 B7。⑧ **表结构**（6.1）：`deliveries` 增加 `translation_status`、`translate_attempts`、`polish_by`、`created_at`、`updated_at`，`messages` 增加 `phrase_id`、`polish_requested`；迁移 0004（B5a）、0005（B5b，`ai_usage_daily`）。⑨ 源语言取发送者母语，不做语言识别；纯 emoji 或标点的文本不翻译（7.4）。⑩ 第 17 章 B5 拆为 B5a（消息与翻译）、B5b（润色与成本）；15.5 本地运行加 `task worker`、冒烟步骤更新；16、18 章补充测试、假设与风险。

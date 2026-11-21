@@ -2,9 +2,9 @@
 
 | 项目 | 内容 |
 | :-- | :-- |
-| 版本 | v1.9（草案，待自评审）<br>• v1.9 较 v1.8：B5 消息与 AI 网关设计定稿：落库即推原文卡片、译文与润色另发事件，断线后从数据库补消息，Gemini 主力 + Claude 备用，不接机翻，翻译失败自动重试，每日预算与翻译硬上限，B5 拆为 B5a / B5b。<br>• v1.8 较 v1.7：refresh token 轮换加 60 秒重试宽限，Google 公钥拉取失败返回 503，`ROOM_CAPACITY` 生效，presence 补发进程崩溃后的离线。<br>• v1.7 较 v1.6：新增 10.3 MBTI 语气重构逻辑，润色只按接收方 MBTI 调整，失败回退基础译文。<br>• v1.6 较 v1.5：F0 联调后修正契约中可空枚举的写法，补充本机集成测试须串行运行。<br>• v1.5 较 v1.4：B4 安全审查后加固 WebSocket：连接在 access token 到期时关闭（4401），连接与订阅限流。<br>• v1.4 较 v1.3：B4 WebSocket 协议定稿，断线恢复改为每次订阅下发快照，presence 只有在线 / 离线，Redis 故障时本机兜底推送。<br>• v1.3 较 v1.2：对齐 PRD v1.5 与前端 TRD v1.3，Google 登录接入真实校验，Apple 登录延后，本地端口统一为 8090。<br>• v1.2 较 v1.1：对齐 PRD v1.4，新增房主管理，修正消息表分区方案，补充本地运行说明。 |
+| 版本 | v1.10（草案，待自评审）<br>• v1.10 较 v1.9：配合前端 F1，`GET /rooms/mine` 的自己小屋增加 `regen_remaining_today`（今日剩余补码次数）。<br>• v1.9 较 v1.8：B5 消息与 AI 网关设计定稿：落库即推原文卡片、译文与润色另发事件，断线后从数据库补消息，Gemini 主力 + Claude 备用，不接机翻，翻译失败自动重试，每日预算与翻译硬上限，B5 拆为 B5a / B5b。<br>• v1.8 较 v1.7：refresh token 轮换加 60 秒重试宽限，Google 公钥拉取失败返回 503，`ROOM_CAPACITY` 生效，presence 补发进程崩溃后的离线。<br>• v1.7 较 v1.6：新增 10.3 MBTI 语气重构逻辑，润色只按接收方 MBTI 调整，失败回退基础译文。<br>• v1.6 较 v1.5：F0 联调后修正契约中可空枚举的写法，补充本机集成测试须串行运行。<br>• v1.5 较 v1.4：B4 安全审查后加固 WebSocket：连接在 access token 到期时关闭（4401），连接与订阅限流。<br>• v1.4 较 v1.3：B4 WebSocket 协议定稿，断线恢复改为每次订阅下发快照，presence 只有在线 / 离线，Redis 故障时本机兜底推送。<br>• v1.3 较 v1.2：对齐 PRD v1.5 与前端 TRD v1.3，Google 登录接入真实校验，Apple 登录延后，本地端口统一为 8090。<br>• v1.2 较 v1.1：对齐 PRD v1.4，新增房主管理，修正消息表分区方案，补充本地运行说明。 |
 | 对应 PRD | 《跨国 MBTI 情感 AI 电子宠物 PRD v1.8》 |
-| 配套文档 | 《前端 TRD（Flutter）v1.9》：WebSocket 协议、API 调用方式以本文第 8、9 章为准 |
+| 配套文档 | 《前端 TRD（Flutter）v1.10》：WebSocket 协议、API 调用方式以本文第 8、9 章为准 |
 | 语言 / 运行时 | Go 1.26（以 `go.mod` 为准） |
 | 开发模式 | **单人全栈开发**，所有选型以“一个人能长期维护”为第一约束 |
 | 目标区域 | 日本东京区域起步（覆盖 JP / KR / TW 延迟；中国大陆暂不首发） |
@@ -695,6 +695,8 @@ v1.9 按 B5 设计（`docs/superpowers/specs/2026-11-21-b5-messaging-ai-gateway-
 
 任一条件不满足返回 `CODE_ISSUE_LIMIT`，`error.details.reason` 取 `room_full` / `enough_unused` / `daily_limit` / `lifetime_limit`，前端据此展示不同文案。
 
+**今日剩余次数**（v1.10，对应 PRD F2.9）：`GET /rooms/mine` 中 `is_owner = true` 的房间带 `regen_remaining_today = max(0, OWNER_REGEN_DAILY_LIMIT − 今日已补码数)`，“今日”与第 4 步相同（房主时区的 local_day，同一套计数查询）；他人小屋为 `null`。它只反映第 4 步，满员、未使用码已够、终身上限仍以补码接口的结果为准。只读查询，不加锁，与并发补码之间可能短暂不一致，以补码接口为准。
+
 **成员退出** `POST /rooms/{id}/leave`：仅限“所加入的他人小屋”。房主对自己的小屋调用返回 `OWNER_CANNOT_LEAVE`（应使用解散）。事务内置 `left_reason='left'`、`member_count - 1`、满员则恢复 `open`；不拉黑，已作废的码不恢复。COMMIT 后向房内其余成员发 `member.left{reason:"left"}`，并向退出者本人发 `room.kicked{reason:"left"}`，让其其他设备同步离开（v1.4）。**幂等规则（B3b 定稿）**：曾经在席、现已不在席的人（主动退出、被移除、被解散）再次调用一律返回成功（204），所以被移除者与主动退出者看到的结果完全一致，不会暴露"被移除"；从没进过该房间的人，或房间不存在，返回 `ROOM_NOT_FOUND`。房主类操作（移除、解散、补码）对在席的非房主返回 `NOT_ROOM_OWNER`，对其他人返回 `ROOM_NOT_FOUND`。入房、移除、解散、补码、退出的事务遇到死锁或序列化失败（`40P01`/`40001`）时整体重试一次。
 
 **测试要求**：踢人与入房并发（最后一个席位）不超员；dissolve 与 join 并发不死锁；补码并发不超过“空位数”和每日上限；被移除者用同房间新码入房一律得到 CODE_INVALID。
@@ -718,7 +720,7 @@ v1.9 按 B5 设计（`docs/superpowers/specs/2026-11-21-b5-messaging-ai-gateway-
 | 验证码 | GET /codes | 背包：码、状态、过期时间、绑定房间人数 |
 |  | GET /codes/{code}/share-card | 分享卡片所需数据（宠物、码、人数进度），海报图由客户端渲染 |
 | 房间 | POST /rooms/join | 见 7.2 |
-|  | GET /rooms/mine | 我所在的房间（自己的 + 已加入的） |
+|  | GET /rooms/mine | 我所在的房间（自己的 + 已加入的）；自己的小屋带 `regen_remaining_today`（v1.10，见 7.8） |
 |  | GET /rooms/{id}；POST /rooms/{id}/leave | 详情与退出（仅限他人小屋，见 7.8）。v1.4：`GET /rooms/{id}` MVP 不实现，房间详情由 WS `room.snapshot` 提供 |
 |  | DELETE /rooms/{id}/members/{user\_id} | 房主移除成员，见 7.8 |
 |  | POST /rooms/{id}/dissolve | 房主解散，见 7.8 |
@@ -786,7 +788,7 @@ v1.9 按 B5 设计（`docs/superpowers/specs/2026-11-21-b5-messaging-ai-gateway-
 | S→C | hello | 连接后的第一帧（v1.5 保证）：`server_time`、`heartbeat_sec`（25）、`proto`（1）、`min_app_version` | 否 |
 | C→S | room.sub | `room_id`、`last_seq`（可选，v1.4 暂不使用）；每连接每 10 秒最多 10 次（v1.5） | — |
 | C→S | room.unsub | `room_id`（v1.4 新增） | — |
-| S→C | room.snapshot | `room_id`、`seq`（当前房间序号）、`room`：与 `GET /rooms/mine` 单项同结构（`id`、`status`、`member_count`、`capacity`、`is_owner`、`members[]`），每个成员多一个 `presence`（`online` / `offline`） | 否（seq 在 d 里） |
+| S→C | room.snapshot | `room_id`、`seq`（当前房间序号）、`room`：与 `GET /rooms/mine` 单项同结构（`id`、`status`、`member_count`、`capacity`、`is_owner`、`members[]`），每个成员多一个 `presence`（`online` / `offline`）；不含 `regen_remaining_today`（v1.10：该字段只属于房主本人，由 `GET /rooms/mine` 提供） | 否（seq 在 d 里） |
 | S→C | member.joined | `room_id`、`member`（成员信息 + `presence`） | 是 |
 | S→C | member.left | `room_id`、`user_id`、`reason`（left / kicked / dissolved） | 是 |
 | S→C | room.kicked | 仅发给离开者本人：`room_id`、`reason`（kicked / dissolved / left）；客户端收到后退出该房间页并刷新房间列表，`left` 不提示 | 否 |
