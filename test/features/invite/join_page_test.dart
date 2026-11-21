@@ -54,6 +54,7 @@ void main() {
     platformCalls = [];
     clipboard = '';
     when(() => rooms.listMine()).thenAnswer((_) async => []);
+    when(() => invites.listCodes()).thenAnswer((_) async => []);
   });
 
   Future<void> pump(

@@ -865,6 +865,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Share'**
   String get join_share;
+
+  /// Backpack tab app bar title
+  ///
+  /// In en, this message translates to:
+  /// **'Backpack'**
+  String get bag_title;
+
+  /// Backpack app bar action that opens the join page
+  ///
+  /// In en, this message translates to:
+  /// **'Enter code'**
+  String get bag_join;
+
+  /// Code status label
+  ///
+  /// In en, this message translates to:
+  /// **'Unused'**
+  String get bag_status_unused;
+
+  /// Code status label
+  ///
+  /// In en, this message translates to:
+  /// **'Used'**
+  String get bag_status_used;
+
+  /// Code status label
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get bag_status_expired;
+
+  /// Code status label (room filled or dissolved)
+  ///
+  /// In en, this message translates to:
+  /// **'Void'**
+  String get bag_status_void;
+
+  /// Current size of the room a code belongs to
+  ///
+  /// In en, this message translates to:
+  /// **'Room {count}/{capacity}'**
+  String bag_room_count(int count, int capacity);
+
+  /// Validity left on an unused code, one day or more
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{1 day left} other{{days} days left}}'**
+  String bag_days_left(int days);
+
+  /// Validity left on an unused code, under a day
+  ///
+  /// In en, this message translates to:
+  /// **'{hours, plural, =1{1 hour left} other{{hours} hours left}}'**
+  String bag_hours_left(int hours);
+
+  /// Validity left on an unused code, under an hour
+  ///
+  /// In en, this message translates to:
+  /// **'Expiring soon'**
+  String get bag_expiring;
+
+  /// Share button on an unused code
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get bag_share;
+
+  /// Button that issues a new code for the user's own room
+  ///
+  /// In en, this message translates to:
+  /// **'Generate code'**
+  String get bag_regen;
+
+  /// Hint under a disabled generate button when the own room is full
+  ///
+  /// In en, this message translates to:
+  /// **'Your room is full. Free up a seat first.'**
+  String get bag_regen_full;
+
+  /// Generations left today
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{You can generate 1 more today} other{You can generate {count} more today}}'**
+  String bag_regen_remaining(int count);
+
+  /// Hint when no generations are left today
+  ///
+  /// In en, this message translates to:
+  /// **'No generations left today'**
+  String get bag_regen_none_left;
+
+  /// SnackBar after generating a code
+  ///
+  /// In en, this message translates to:
+  /// **'New code generated'**
+  String get bag_regen_done;
+
+  /// Empty backpack
+  ///
+  /// In en, this message translates to:
+  /// **'No codes yet'**
+  String get bag_empty;
+
+  /// Generate refused: room full
+  ///
+  /// In en, this message translates to:
+  /// **'Your room is full'**
+  String get bag_regen_room_full;
+
+  /// Generate refused: enough unused codes
+  ///
+  /// In en, this message translates to:
+  /// **'You already have enough unused codes. Share them first!'**
+  String get bag_regen_enough_unused;
+
+  /// Generate refused: daily limit
+  ///
+  /// In en, this message translates to:
+  /// **'No generations left today'**
+  String get bag_regen_daily_limit;
+
+  /// Generate refused: lifetime limit
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve reached the most codes you can generate'**
+  String get bag_regen_lifetime_limit;
 }
 
 class _AppLocalizationsDelegate

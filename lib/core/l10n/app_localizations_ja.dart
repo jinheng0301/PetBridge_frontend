@@ -404,4 +404,75 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get join_share => 'シェアする';
+
+  @override
+  String get bag_title => 'バックパック';
+
+  @override
+  String get bag_join => 'コードを入力';
+
+  @override
+  String get bag_status_unused => '未使用';
+
+  @override
+  String get bag_status_used => '使用済み';
+
+  @override
+  String get bag_status_expired => '期限切れ';
+
+  @override
+  String get bag_status_void => '無効';
+
+  @override
+  String bag_room_count(int count, int capacity) {
+    return 'ルーム $count/$capacity';
+  }
+
+  @override
+  String bag_days_left(int days) {
+    return '残り $days 日';
+  }
+
+  @override
+  String bag_hours_left(int hours) {
+    return '残り $hours 時間';
+  }
+
+  @override
+  String get bag_expiring => 'まもなく期限切れ';
+
+  @override
+  String get bag_share => 'シェア';
+
+  @override
+  String get bag_regen => 'コードを発行';
+
+  @override
+  String get bag_regen_full => 'ルームが満員です。先に空席を作ってください';
+
+  @override
+  String bag_regen_remaining(int count) {
+    return '今日はあと $count 回発行できます';
+  }
+
+  @override
+  String get bag_regen_none_left => '今日の発行回数を使い切りました';
+
+  @override
+  String get bag_regen_done => '新しいコードを発行しました';
+
+  @override
+  String get bag_empty => 'まだコードがありません';
+
+  @override
+  String get bag_regen_room_full => 'ルームが満員です';
+
+  @override
+  String get bag_regen_enough_unused => '未使用のコードが十分あります。先にシェアしましょう';
+
+  @override
+  String get bag_regen_daily_limit => '今日の発行回数を使い切りました';
+
+  @override
+  String get bag_regen_lifetime_limit => '発行できる上限に達しました';
 }

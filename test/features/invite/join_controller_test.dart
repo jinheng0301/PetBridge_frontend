@@ -8,6 +8,7 @@ import 'package:petbridge/core/network/app_failure.dart';
 import 'package:petbridge/features/auth/application/session.dart';
 import 'package:petbridge/features/auth/application/session_controller.dart';
 import 'package:petbridge/features/invite/application/codes.dart';
+import 'package:petbridge/features/invite/application/codes_provider.dart';
 import 'package:petbridge/features/invite/application/join_controller.dart';
 import 'package:petbridge/features/invite/data/invite_repository.dart';
 import 'package:petbridge/features/room/application/room.dart';
@@ -58,6 +59,7 @@ void main() {
     rooms = MockRoomRepository();
     now = DateTime.utc(2026, 11, 21, 10);
     when(() => rooms.listMine()).thenAnswer((_) async => [own]);
+    when(() => invites.listCodes()).thenAnswer((_) async => []);
   });
 
   ProviderContainer make() {
@@ -122,6 +124,18 @@ void main() {
     expect(c.read(selectedRoomIdProvider), 'r9');
     expect(c.read(roomsProvider).value?.map((r) => r.id), ['own', 'r9']);
     expect(c.read(selectedRoomProvider)?.id, 'r9');
+  });
+
+  test('success refreshes codes', () async {
+    when(() => invites.join(any())).thenAnswer((_) async => outcome);
+    final c = make()..listen(codesProvider, (_, _) {});
+    await c.read(codesProvider.future);
+    clearInteractions(invites);
+
+    ctl(c).setInput('ABCD2345');
+    await ctl(c).submit();
+
+    verify(() => invites.listCodes()).called(1);
   });
 
   test('failure keeps input', () async {
@@ -228,6 +242,44 @@ void main() {
 
     expect(st(c).blockedUntil, isNull);
     expect(st(c).input, '');
+  });
+
+  test('success appears only once codes include the reward', () async {
+    final withReward = JoinOutcome(
+      roomId: 'r9',
+      memberCount: 2,
+      capacity: 5,
+      members: [],
+      rewards: [IssuedCode(code: 'GIFT2345', expiresAt: DateTime.utc(2099))],
+    );
+    when(() => invites.join(any())).thenAnswer((_) async => withReward);
+    final c = make()..listen(codesProvider, (_, _) {});
+    await c.read(codesProvider.future);
+    when(() => invites.listCodes()).thenAnswer(
+      (_) async => [
+        InviteCode(
+          code: 'GIFT2345',
+          status: CodeStatus.unused,
+          expiresAt: DateTime.utc(2099),
+          roomId: 'own',
+          roomMemberCount: 1,
+          roomCapacity: 5,
+        ),
+      ],
+    );
+    List<String>? codesAtSuccess;
+    c.listen(joinControllerProvider, (_, next) {
+      if (next.result != null) {
+        codesAtSuccess ??= [
+          for (final x in c.read(codesProvider).value ?? <InviteCode>[]) x.code,
+        ];
+      }
+    });
+
+    ctl(c).setInput('ABCD2345');
+    await ctl(c).submit();
+
+    expect(codesAtSuccess, ['GIFT2345']);
   });
 
   test('user switch during submit drops the result quietly', () async {

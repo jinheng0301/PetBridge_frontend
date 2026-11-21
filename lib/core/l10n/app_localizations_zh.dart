@@ -403,6 +403,77 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get join_share => '去分享';
+
+  @override
+  String get bag_title => '背包';
+
+  @override
+  String get bag_join => '输入验证码';
+
+  @override
+  String get bag_status_unused => '未使用';
+
+  @override
+  String get bag_status_used => '已使用';
+
+  @override
+  String get bag_status_expired => '已过期';
+
+  @override
+  String get bag_status_void => '已作废';
+
+  @override
+  String bag_room_count(int count, int capacity) {
+    return '小屋 $count/$capacity';
+  }
+
+  @override
+  String bag_days_left(int days) {
+    return '还剩 $days 天';
+  }
+
+  @override
+  String bag_hours_left(int hours) {
+    return '还剩 $hours 小时';
+  }
+
+  @override
+  String get bag_expiring => '即将过期';
+
+  @override
+  String get bag_share => '分享';
+
+  @override
+  String get bag_regen => '生成验证码';
+
+  @override
+  String get bag_regen_full => '小屋已满，先腾出空位';
+
+  @override
+  String bag_regen_remaining(int count) {
+    return '今天还可以生成 $count 次';
+  }
+
+  @override
+  String get bag_regen_none_left => '今天的生成次数已用完';
+
+  @override
+  String get bag_regen_done => '已生成新的验证码';
+
+  @override
+  String get bag_empty => '还没有验证码';
+
+  @override
+  String get bag_regen_room_full => '小屋已满';
+
+  @override
+  String get bag_regen_enough_unused => '你已经有足够的未使用验证码，先分享它们吧';
+
+  @override
+  String get bag_regen_daily_limit => '今天的生成次数已用完';
+
+  @override
+  String get bag_regen_lifetime_limit => '已达到可生成的上限';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -803,6 +874,77 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get join_share => '去分享';
+
+  @override
+  String get bag_title => '背包';
+
+  @override
+  String get bag_join => '输入验证码';
+
+  @override
+  String get bag_status_unused => '未使用';
+
+  @override
+  String get bag_status_used => '已使用';
+
+  @override
+  String get bag_status_expired => '已过期';
+
+  @override
+  String get bag_status_void => '已作废';
+
+  @override
+  String bag_room_count(int count, int capacity) {
+    return '小屋 $count/$capacity';
+  }
+
+  @override
+  String bag_days_left(int days) {
+    return '还剩 $days 天';
+  }
+
+  @override
+  String bag_hours_left(int hours) {
+    return '还剩 $hours 小时';
+  }
+
+  @override
+  String get bag_expiring => '即将过期';
+
+  @override
+  String get bag_share => '分享';
+
+  @override
+  String get bag_regen => '生成验证码';
+
+  @override
+  String get bag_regen_full => '小屋已满，先腾出空位';
+
+  @override
+  String bag_regen_remaining(int count) {
+    return '今天还可以生成 $count 次';
+  }
+
+  @override
+  String get bag_regen_none_left => '今天的生成次数已用完';
+
+  @override
+  String get bag_regen_done => '已生成新的验证码';
+
+  @override
+  String get bag_empty => '还没有验证码';
+
+  @override
+  String get bag_regen_room_full => '小屋已满';
+
+  @override
+  String get bag_regen_enough_unused => '你已经有足够的未使用验证码，先分享它们吧';
+
+  @override
+  String get bag_regen_daily_limit => '今天的生成次数已用完';
+
+  @override
+  String get bag_regen_lifetime_limit => '已达到可生成的上限';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -1203,4 +1345,75 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get join_share => '去分享';
+
+  @override
+  String get bag_title => '背包';
+
+  @override
+  String get bag_join => '輸入驗證碼';
+
+  @override
+  String get bag_status_unused => '未使用';
+
+  @override
+  String get bag_status_used => '已使用';
+
+  @override
+  String get bag_status_expired => '已過期';
+
+  @override
+  String get bag_status_void => '已作廢';
+
+  @override
+  String bag_room_count(int count, int capacity) {
+    return '小屋 $count/$capacity';
+  }
+
+  @override
+  String bag_days_left(int days) {
+    return '還剩 $days 天';
+  }
+
+  @override
+  String bag_hours_left(int hours) {
+    return '還剩 $hours 小時';
+  }
+
+  @override
+  String get bag_expiring => '即將過期';
+
+  @override
+  String get bag_share => '分享';
+
+  @override
+  String get bag_regen => '生成驗證碼';
+
+  @override
+  String get bag_regen_full => '小屋已滿，先騰出空位';
+
+  @override
+  String bag_regen_remaining(int count) {
+    return '今天還可以生成 $count 次';
+  }
+
+  @override
+  String get bag_regen_none_left => '今天的生成次數已用完';
+
+  @override
+  String get bag_regen_done => '已生成新的驗證碼';
+
+  @override
+  String get bag_empty => '還沒有驗證碼';
+
+  @override
+  String get bag_regen_room_full => '小屋已滿';
+
+  @override
+  String get bag_regen_enough_unused => '你已經有足夠的未使用驗證碼，先分享它們吧';
+
+  @override
+  String get bag_regen_daily_limit => '今天的生成次數已用完';
+
+  @override
+  String get bag_regen_lifetime_limit => '已達到可生成的上限';
 }

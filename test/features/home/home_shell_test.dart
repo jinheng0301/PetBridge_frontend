@@ -8,6 +8,7 @@ import 'package:petbridge/features/auth/application/session.dart';
 import 'package:petbridge/features/auth/application/session_controller.dart';
 import 'package:petbridge/features/auth/presentation/login_page.dart';
 import 'package:petbridge/features/home/presentation/me_tab.dart';
+import 'package:petbridge/features/invite/data/invite_repository.dart';
 import 'package:petbridge/features/room/data/room_repository.dart';
 
 import '../../helpers/fakes.dart';
@@ -16,6 +17,7 @@ import '../../helpers/pump_app.dart';
 void main() {
   late FakeSessionController session;
   late MockRoomRepository rooms;
+  late MockInviteRepository invites;
 
   const me = Me(
     id: 'u1',
@@ -29,12 +31,15 @@ void main() {
     session = FakeSessionController(const SessionReady(me));
     rooms = MockRoomRepository();
     when(() => rooms.listMine()).thenAnswer((_) async => []);
+    invites = MockInviteRepository();
+    when(() => invites.listCodes()).thenAnswer((_) async => []);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           sessionControllerProvider.overrideWith(() => session),
           prefsStoreProvider.overrideWithValue(stubPrefs()),
           roomRepositoryProvider.overrideWithValue(rooms),
+          inviteRepositoryProvider.overrideWithValue(invites),
         ],
         child: const PetBridgeApp(),
       ),
@@ -57,10 +62,10 @@ void main() {
     ]);
   });
 
-  testWidgets('chat and bag tabs show coming soon', (tester) async {
+  testWidgets('chat tab shows coming soon', (tester) async {
     await pumpHome(tester);
 
-    for (final tab in [en.home_tab_chat, en.home_tab_bag]) {
+    for (final tab in [en.home_tab_chat]) {
       await tester.tap(
         find.descendant(
           of: find.byType(NavigationBar),
@@ -111,5 +116,22 @@ void main() {
     await tester.pumpAndSettle();
 
     verify(() => rooms.listMine()).called(1);
+  });
+
+  testWidgets('refreshes codes on resume', (tester) async {
+    await pumpHome(tester);
+    clearInteractions(invites);
+
+    const [
+      AppLifecycleState.inactive,
+      AppLifecycleState.hidden,
+      AppLifecycleState.paused,
+      AppLifecycleState.hidden,
+      AppLifecycleState.inactive,
+      AppLifecycleState.resumed,
+    ].forEach(tester.binding.handleAppLifecycleStateChanged);
+    await tester.pumpAndSettle();
+
+    verify(() => invites.listCodes()).called(1);
   });
 }

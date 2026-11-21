@@ -407,4 +407,75 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get join_share => '공유하기';
+
+  @override
+  String get bag_title => '가방';
+
+  @override
+  String get bag_join => '코드 입력';
+
+  @override
+  String get bag_status_unused => '미사용';
+
+  @override
+  String get bag_status_used => '사용됨';
+
+  @override
+  String get bag_status_expired => '만료됨';
+
+  @override
+  String get bag_status_void => '무효';
+
+  @override
+  String bag_room_count(int count, int capacity) {
+    return '방 $count/$capacity';
+  }
+
+  @override
+  String bag_days_left(int days) {
+    return '$days일 남음';
+  }
+
+  @override
+  String bag_hours_left(int hours) {
+    return '$hours시간 남음';
+  }
+
+  @override
+  String get bag_expiring => '곧 만료';
+
+  @override
+  String get bag_share => '공유';
+
+  @override
+  String get bag_regen => '코드 만들기';
+
+  @override
+  String get bag_regen_full => '방이 가득 찼어요. 먼저 자리를 비워 주세요';
+
+  @override
+  String bag_regen_remaining(int count) {
+    return '오늘 $count번 더 만들 수 있어요';
+  }
+
+  @override
+  String get bag_regen_none_left => '오늘 만들 수 있는 횟수를 다 썼어요';
+
+  @override
+  String get bag_regen_done => '새 코드를 만들었어요';
+
+  @override
+  String get bag_empty => '아직 코드가 없어요';
+
+  @override
+  String get bag_regen_room_full => '방이 가득 찼어요';
+
+  @override
+  String get bag_regen_enough_unused => '사용하지 않은 코드가 충분해요. 먼저 공유해 보세요';
+
+  @override
+  String get bag_regen_daily_limit => '오늘 만들 수 있는 횟수를 다 썼어요';
+
+  @override
+  String get bag_regen_lifetime_limit => '만들 수 있는 최대 개수에 도달했어요';
 }

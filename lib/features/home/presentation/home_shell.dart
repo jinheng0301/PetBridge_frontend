@@ -3,11 +3,13 @@ import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:petbridge/core/l10n/app_localizations.dart';
 import 'package:petbridge/core/network/app_failure.dart';
+import 'package:petbridge/features/invite/application/codes_provider.dart';
 import 'package:petbridge/features/room/application/rooms_provider.dart';
 
 /// Bottom navigation for the four home tabs: room, chat, backpack, me.
-/// Also reloads the rooms whenever the app comes back to the foreground,
-/// so someone joining the user's room shows up without the WebSocket.
+/// Also reloads the rooms and codes whenever the app comes back to the
+/// foreground, so someone joining the user's room shows up without the
+/// WebSocket.
 class HomeShell extends ConsumerStatefulWidget {
   const new({required this.shell, super.key});
 
@@ -33,11 +35,18 @@ class _HomeShellState extends ConsumerState<HomeShell> {
   }
 
   Future<void> _refreshAll() async {
-    try {
-      await ref.read(roomsProvider.notifier).refresh();
-    } on AppFailure {
-      // Keep what is shown; the next resume or pull-down tries again.
+    Future<void> quietly(Future<void> Function() reload) async {
+      try {
+        await reload();
+      } on AppFailure {
+        // Keep what is shown; the next resume or pull-down tries again.
+      }
     }
+
+    await Future.wait([
+      quietly(ref.read(roomsProvider.notifier).refresh),
+      quietly(ref.read(codesProvider.notifier).refresh),
+    ]);
   }
 
   @override

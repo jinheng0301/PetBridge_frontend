@@ -442,4 +442,95 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get join_share => 'Share';
+
+  @override
+  String get bag_title => 'Backpack';
+
+  @override
+  String get bag_join => 'Enter code';
+
+  @override
+  String get bag_status_unused => 'Unused';
+
+  @override
+  String get bag_status_used => 'Used';
+
+  @override
+  String get bag_status_expired => 'Expired';
+
+  @override
+  String get bag_status_void => 'Void';
+
+  @override
+  String bag_room_count(int count, int capacity) {
+    return 'Room $count/$capacity';
+  }
+
+  @override
+  String bag_days_left(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days left',
+      one: '1 day left',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String bag_hours_left(int hours) {
+    String _temp0 = intl.Intl.pluralLogic(
+      hours,
+      locale: localeName,
+      other: '$hours hours left',
+      one: '1 hour left',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bag_expiring => 'Expiring soon';
+
+  @override
+  String get bag_share => 'Share';
+
+  @override
+  String get bag_regen => 'Generate code';
+
+  @override
+  String get bag_regen_full => 'Your room is full. Free up a seat first.';
+
+  @override
+  String bag_regen_remaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'You can generate $count more today',
+      one: 'You can generate 1 more today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bag_regen_none_left => 'No generations left today';
+
+  @override
+  String get bag_regen_done => 'New code generated';
+
+  @override
+  String get bag_empty => 'No codes yet';
+
+  @override
+  String get bag_regen_room_full => 'Your room is full';
+
+  @override
+  String get bag_regen_enough_unused =>
+      'You already have enough unused codes. Share them first!';
+
+  @override
+  String get bag_regen_daily_limit => 'No generations left today';
+
+  @override
+  String get bag_regen_lifetime_limit =>
+      'You\'ve reached the most codes you can generate';
 }

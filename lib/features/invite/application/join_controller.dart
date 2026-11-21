@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:petbridge/core/clock.dart';
 import 'package:petbridge/core/network/app_failure.dart';
 import 'package:petbridge/features/invite/application/codes.dart';
+import 'package:petbridge/features/invite/application/codes_provider.dart';
 import 'package:petbridge/features/invite/application/invite_code.dart';
 import 'package:petbridge/features/invite/data/invite_repository.dart';
 import 'package:petbridge/features/room/application/rooms_provider.dart';
@@ -85,7 +86,7 @@ class JoinController extends Notifier<JoinState> {
           .join(state.input);
       if (stale()) return;
       ref.read(selectedRoomIdProvider.notifier).select(outcome.roomId);
-      // Reload first so the room tab is current when the user goes there.
+      // Reload first so "Share" on the success page finds the reward code.
       await _refreshAfterJoin();
       if (stale()) return;
       _set(submitting: false, result: outcome);
@@ -97,11 +98,18 @@ class JoinController extends Notifier<JoinState> {
 
   /// The join succeeded; a failed reload catches up on the next refresh.
   Future<void> _refreshAfterJoin() async {
-    try {
-      await ref.read(roomsProvider.notifier).refresh();
-    } on AppFailure {
-      // Keep what is shown.
+    Future<void> quietly(Future<void> Function() reload) async {
+      try {
+        await reload();
+      } on AppFailure {
+        // Keep what is shown.
+      }
     }
+
+    await Future.wait([
+      quietly(ref.read(roomsProvider.notifier).refresh),
+      quietly(ref.read(codesProvider.notifier).refresh),
+    ]);
   }
 
   DateTime? _blockedUntil(AppFailure f) {

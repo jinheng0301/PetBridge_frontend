@@ -9,6 +9,7 @@ import 'package:petbridge/features/auth/presentation/login_page.dart';
 import 'package:petbridge/features/auth/presentation/splash_page.dart';
 import 'package:petbridge/features/home/presentation/home_shell.dart';
 import 'package:petbridge/features/home/presentation/me_tab.dart';
+import 'package:petbridge/features/invite/presentation/bag_tab.dart';
 import 'package:petbridge/features/invite/presentation/join_page.dart';
 import 'package:petbridge/features/onboarding/presentation/pages/lang_page.dart';
 import 'package:petbridge/features/onboarding/presentation/pages/mbti_page.dart';
@@ -60,7 +61,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         branches: [
           tab(Routes.home, const RoomTab()),
           tab(Routes.homeChat, comingSoon((l) => l.home_tab_chat)),
-          tab(Routes.homeBag, comingSoon((l) => l.home_tab_bag)),
+          tab(Routes.homeBag, const BagTab()),
           tab(Routes.homeMe, const MeTab()),
         ],
       ),

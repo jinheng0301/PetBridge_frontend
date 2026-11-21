@@ -551,5 +551,112 @@
   "join_share": "Share",
   "@join_share": {
     "description": "Button that opens the share page for the first reward code"
+  },
+  "bag_title": "Backpack",
+  "@bag_title": {
+    "description": "Backpack tab app bar title"
+  },
+  "bag_join": "Enter code",
+  "@bag_join": {
+    "description": "Backpack app bar action that opens the join page"
+  },
+  "bag_status_unused": "Unused",
+  "@bag_status_unused": {
+    "description": "Code status label"
+  },
+  "bag_status_used": "Used",
+  "@bag_status_used": {
+    "description": "Code status label"
+  },
+  "bag_status_expired": "Expired",
+  "@bag_status_expired": {
+    "description": "Code status label"
+  },
+  "bag_status_void": "Void",
+  "@bag_status_void": {
+    "description": "Code status label (room filled or dissolved)"
+  },
+  "bag_room_count": "Room {count}/{capacity}",
+  "@bag_room_count": {
+    "description": "Current size of the room a code belongs to",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "capacity": {
+        "type": "int"
+      }
+    }
+  },
+  "bag_days_left": "{days, plural, =1{1 day left} other{{days} days left}}",
+  "@bag_days_left": {
+    "description": "Validity left on an unused code, one day or more",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "bag_hours_left": "{hours, plural, =1{1 hour left} other{{hours} hours left}}",
+  "@bag_hours_left": {
+    "description": "Validity left on an unused code, under a day",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "bag_expiring": "Expiring soon",
+  "@bag_expiring": {
+    "description": "Validity left on an unused code, under an hour"
+  },
+  "bag_share": "Share",
+  "@bag_share": {
+    "description": "Share button on an unused code"
+  },
+  "bag_regen": "Generate code",
+  "@bag_regen": {
+    "description": "Button that issues a new code for the user's own room"
+  },
+  "bag_regen_full": "Your room is full. Free up a seat first.",
+  "@bag_regen_full": {
+    "description": "Hint under a disabled generate button when the own room is full"
+  },
+  "bag_regen_remaining": "{count, plural, =1{You can generate 1 more today} other{You can generate {count} more today}}",
+  "@bag_regen_remaining": {
+    "description": "Generations left today",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bag_regen_none_left": "No generations left today",
+  "@bag_regen_none_left": {
+    "description": "Hint when no generations are left today"
+  },
+  "bag_regen_done": "New code generated",
+  "@bag_regen_done": {
+    "description": "SnackBar after generating a code"
+  },
+  "bag_empty": "No codes yet",
+  "@bag_empty": {
+    "description": "Empty backpack"
+  },
+  "bag_regen_room_full": "Your room is full",
+  "@bag_regen_room_full": {
+    "description": "Generate refused: room full"
+  },
+  "bag_regen_enough_unused": "You already have enough unused codes. Share them first!",
+  "@bag_regen_enough_unused": {
+    "description": "Generate refused: enough unused codes"
+  },
+  "bag_regen_daily_limit": "No generations left today",
+  "@bag_regen_daily_limit": {
+    "description": "Generate refused: daily limit"
+  },
+  "bag_regen_lifetime_limit": "You've reached the most codes you can generate",
+  "@bag_regen_lifetime_limit": {
+    "description": "Generate refused: lifetime limit"
   }
 }
