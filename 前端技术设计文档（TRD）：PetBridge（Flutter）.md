@@ -2,9 +2,9 @@
 
 | 项目 | 内容 |
 | :-- | :-- |
-| 版本 | v1.9（草案，待自评审）<br>• v1.9 较 v1.8：对齐后端 TRD v1.9 的 B5 消息协议：原文卡片先到、译文与润色另发事件，消息事件按 id 插入或更新、状态只前进，重连后用 `after` 补消息，翻译失败不提供手动重试，润色改为异步、新增错误码文案。<br>• v1.8 较 v1.7：刷新 token 失败只在服务端拒绝时登出，两个 token 存在同一个键里一次写入，新增 `NOT_READY` 文案。<br>• v1.7 较 v1.6：对齐后端 TRD v1.7 的 MBTI 语气重构规则，信使卡片处理润色回退（“未润色”）。<br>• v1.6 较 v1.5：F0 联调后补齐实现细节：界面语言的取值顺序、启动时网络失败可重试、Google 取消与无账号不报错、设备时区回落、可空枚举的契约写法。<br>• v1.5 较 v1.4：对齐后端 TRD v1.5 的 WebSocket 加固：处理关闭码 4401、升级 429 / 503 与 `room.sub` 限流。<br>• v1.4 较 v1.3：对齐后端 B4 的 WebSocket 协议，reducer 改为以订阅快照为准，presence 只有在线 / 离线、离线显示为睡觉。<br>• v1.3 较 v1.2：对齐 PRD v1.5 与后端 TRD v1.3，F0 登录与 onboarding 设计定稿，首页改为四个 Tab，契约生成改用 swagger_parser。 |
+| 版本 | v1.10（草案，待自评审）<br>• v1.10 较 v1.9：F1 设计定稿：验证码输入页、背包、分享海报（保存与系统分享）、小屋 Tab 先用成员列表占位；`solo` / `inRoom` 由房间数据派生、不并进会话；背包显示今日剩余补码次数；房主管理与退出小屋移到 F2。<br>• v1.9 较 v1.8：对齐后端 TRD v1.9 的 B5 消息协议：原文卡片先到、译文与润色另发事件，消息事件按 id 插入或更新、状态只前进，重连后用 `after` 补消息，翻译失败不提供手动重试，润色改为异步、新增错误码文案。<br>• v1.8 较 v1.7：刷新 token 失败只在服务端拒绝时登出，两个 token 存在同一个键里一次写入，新增 `NOT_READY` 文案。<br>• v1.7 较 v1.6：对齐后端 TRD v1.7 的 MBTI 语气重构规则，信使卡片处理润色回退（“未润色”）。<br>• v1.6 较 v1.5：F0 联调后补齐实现细节：界面语言的取值顺序、启动时网络失败可重试、Google 取消与无账号不报错、设备时区回落、可空枚举的契约写法。<br>• v1.5 较 v1.4：对齐后端 TRD v1.5 的 WebSocket 加固：处理关闭码 4401、升级 429 / 503 与 `room.sub` 限流。<br>• v1.4 较 v1.3：对齐后端 B4 的 WebSocket 协议，reducer 改为以订阅快照为准，presence 只有在线 / 离线、离线显示为睡觉。<br>• v1.3 较 v1.2：对齐 PRD v1.5 与后端 TRD v1.3，F0 登录与 onboarding 设计定稿，首页改为四个 Tab，契约生成改用 swagger_parser。 |
 | 对应 PRD | 《跨国 MBTI 情感 AI 电子宠物 PRD v1.8》 |
-| 配套文档 | 《后端 TRD（Go）v1.9》：REST 接口见其第 8 章，WebSocket 协议见其第 9 章，本文以其为准 |
+| 配套文档 | 《后端 TRD（Go）v1.10》：REST 接口见其第 8 章，WebSocket 协议见其第 9 章，本文以其为准 |
 | 技术栈 | Flutter 3.x 稳定版 / Dart 3 |
 | 平台 | iOS 15+、Android 8+（竖屏，手机优先，不适配平板） |
 | 开发模式 | **单人全栈开发**，选型以“一个人能长期维护”为第一约束 |
@@ -410,7 +410,7 @@ petbridge_app/
 
 ### 6.1 会话状态机
 
-路由由**一个 `sessionProvider`** 决定，它综合令牌、onboarding 完成度、房间情况：
+路由由**一个 `sessionProvider`** 决定，它综合令牌与 onboarding 完成度；`solo` / `inRoom` 由房间数据派生，不并进会话（v1.10）：
 
 ```
 unauthenticated ──登录成功──► needsOnboarding ──完成──► solo ◄──────────► inRoom
@@ -426,7 +426,8 @@ unauthenticated ──登录成功──► needsOnboarding ──完成──�
 - `inRoom`：首页展示小屋场景；自己的小屋与已加入的小屋可切换【假设最多 2 间】。
 - **WebSocket 在完成 onboarding 后即连接，`solo` 状态也连接**，并订阅自己所有在席房间（自己的小屋 + 已加入的小屋，v1.4 写明），这样别人加入时能实时收到 `member.joined` 并从 `solo` 切换到 `inRoom`。App 回到前台时额外调用一次 `GET /rooms/mine` 校正，防止错过事件。
 - `go_router` 的 `redirect` 只读取 `sessionProvider`，保证页面不会在不合法状态下被打开。
-- **F0 阶段**（小屋功能之前）先用四态：`unknown`（启动中）/ `unauthenticated` / `needsOnboarding` / `ready`；`ready` 在小屋阶段再细分为 `solo` / `inRoom`。
+- **会话只有四态**：`unknown`（启动中）/ `unauthenticated` / `needsOnboarding` / `ready`。`solo` / `inRoom` **不拆进会话**（v1.10）：由 `roomModeProvider` 从 `roomsProvider` 派生，小屋 Tab 据此切换显示；两者可去的页面相同，redirect 只看 `ready`。这样 `/rooms/mine` 失败或变慢都不影响登录与进入首页。
+- **房间数据的刷新时机**（v1.10）：F1 还没有 WebSocket，`roomsProvider` 在进入 `ready`（登录、恢复会话、完成 onboarding）、入房成功、App 回到前台、小屋 Tab 下拉刷新时拉 `GET /rooms/mine`；刷新失败保留旧数据。F2 起再由 WS 事件实时更新。
 - **启动恢复会话**（v1.6）：有令牌时拉 `/me`；网络错误或 5xx 时保留令牌、停在 `unknown` 并带上错误，启动页显示错误文案与“重试”；其他失败（如刷新令牌失效）清除令牌，进入 `unauthenticated`。
 
 ### 6.2 路由表
@@ -445,8 +446,9 @@ unauthenticated ──登录成功──► needsOnboarding ──完成──�
 | `/room/:id` | 小屋 | 场景（宠物、打卡、装扮）；聊天在“聊天”Tab |
 | `/room/:id/chat` | 聊天 | 该房间的消息列表与输入栏 |
 | `/room/:id/manage` | 房主管理 | 仅自己的小屋可进入：成员移除、解散，见 11.6 |
-| `/codes`、`/codes/share/:code` | 背包与分享海报 |  |
-| `/join` | 输入验证码 | 也可由深链接 `?code=` 打开 |
+| `/home/bag` | 背包 Tab | v1.10 按实际路径改（原写 `/codes`） |
+| `/share/:code` | 分享海报 | 全屏；`:code` 先用正则校验（v1.10，原写 `/codes/share/:code`） |
+| `/join` | 输入验证码 | 全屏；也可由深链接 `?code=` 打开，参数先用正则校验；成功态在同一页显示 |
 | `/settings/*` | 设置、隐私、删除账号 |  |
 | `/report` | 举报 | 从宠物或消息长按进入 |
 
@@ -460,12 +462,13 @@ unauthenticated ──登录成功──► needsOnboarding ──完成──�
 | :-- | :-- | :-- |
 | `authControllerProvider` | 登录、登出、令牌 | 登录 API + secure storage |
 | `meProvider` | 当前用户资料 | `GET /me` |
-| `sessionProvider` | 路由用会话状态（派生） | auth + me + rooms |
-| `roomsProvider` | 我的房间列表 | `GET /rooms/mine` + WS 事件 |
+| `sessionProvider` | 路由用会话状态（派生） | auth + me（v1.10 起不含房间） |
+| `roomsProvider` | 我的房间列表 | `GET /rooms/mine`（按 6.1 的时机刷新）+ WS 事件（F2 起） |
+| `roomModeProvider` / `selectedRoomProvider` | `solo` / `inRoom`；小屋 Tab 当前显示哪一间（v1.10） | 由 `roomsProvider` 派生；选中项只存内存 |
 | `roomControllerProvider(roomId)` | 房间成员、presence、打卡、装扮 | 快照 + WS 事件 reducer |
 | `chatControllerProvider(roomId)` | 消息列表、发送状态、润色状态 | drift 缓存 + REST + WS |
-| `codesProvider` | 背包验证码 | `GET /codes` + `code.invalidated` |
-| `joinControllerProvider` | 验证码输入流程、冷却倒计时 | `POST /rooms/join` |
+| `codesProvider` | 背包验证码、生成验证码 | `GET /codes`、`POST /rooms/{id}/codes` + `code.invalidated` |
+| `joinControllerProvider` | 验证码输入流程、冷却与限流倒计时（App 生命周期内保留，v1.10） | `POST /rooms/join` |
 | `phraseTemplatesProvider` | 短语模板（带版本） | 随包兜底 + `GET /config/phrases` |
 | `uiLocaleProvider` / `nativeLangProvider` | 界面语言 / 母语 | prefs + `/me` |
 | `wsClientProvider` | WebSocket 单例 | 完成 onboarding 后即连接（含 `solo`，用于接收“有人加入我的小屋”） |
@@ -604,7 +607,7 @@ flowchart LR
     subgraph Tabs["底部 Tab（/home）"]
         TabRoom["小屋"]
         TabChat["聊天"]
-        TabCodes["背包 /codes"]
+        TabCodes["背包 /home/bag"]
         TabMe["我的 /settings"]
     end
     Home --> Tabs
@@ -613,7 +616,7 @@ flowchart LR
     Room --> Manage["房主管理 /room/:id/manage"]
     Room --> Report["举报 /report"]
     TabRoom --> Join["输入验证码 /join"]
-    TabCodes --> Share["分享海报 /codes/share/:code"]
+    TabCodes --> Share["分享海报 /share/:code"]
     TabCodes --> Join
     TabMe --> Settings["设置 / 隐私 / 删除账号"]
 ```
@@ -702,30 +705,33 @@ flowchart LR
 **⑤ 验证码输入页**
 
 ```
-┌──────────────────────────┐
-│ ←  输入验证码              │
-│                          │
-│     [ XXXX - XXXX ]      │  自动大写、去空格与连字符
-│     [ 粘贴 ]              │  不自动读取剪贴板
-│     （错误/冷却倒计时文案）   │
-│                          │
-│     [   加入小屋   ]       │  格式不合法时不可点
-└──────────────────────────┘
+输入态                                成功态（同一页，v1.10）
+┌──────────────────────────┐        ┌──────────────────────────┐
+│ ←  输入验证码              │        │       欢迎入住！           │
+│                          │        │  你加入了 {房主昵称}的小屋   │
+│     [ XXXX - XXXX ]      │        │  ┌ 礼盒 ─────────────┐   │  有奖励码时才显示
+│     [ 粘贴 ]              │        │  │ 你获得了 1 个新验证码 │   │
+│     （错误/冷却倒计时文案）   │        │  │    YYYY-YYYY       │   │
+│                          │        │  └────────────────────┘   │
+│     [   加入小屋   ]       │        │  [ 去分享 ]  [ 去小屋看看 ] │
+└──────────────────────────┘        └──────────────────────────┘
+自动大写、去空格与连字符；不自动读取剪贴板；格式不合法时按钮不可点
 ```
 
 **⑥ 背包与分享海报**
 
 ```
-背包                              分享海报（离屏 1080×1440 导出）
+背包（/home/bag）                     分享海报（离屏 1080×1440 导出）
 ┌──────────────────────────┐    ┌──────────────────────┐
-│ 我的验证码                 │    │      [ 宠物形象 ]      │
+│ 背包            输入验证码  │    │      [ 宠物形象 ]      │
 │ ┌──────────────────────┐ │    │   XXXX-XXXX           │
-│ │ XXXX-XXXX  未使用 6天  │ │    │   小屋 2 / 5 人        │
-│ │              [分享]    │ │    │   [ 邀请二维码 ]       │
+│ │ XXXX-XXXX  未使用      │ │    │   小屋 2 / 5 人        │
+│ │ 小屋 2/5  还剩 6 天 [分享]│ │    │   [ 邀请二维码 ]       │
 │ ├──────────────────────┤ │    └──────────────────────┘
-│ │ YYYY-YYYY  已使用      │ │    [ 保存 / 系统分享 ]
+│ │ YYYY-YYYY  已使用      │ │    [ 保存到相册 ] [ 系统分享 ]
 │ └──────────────────────┘ │
 │ [ 生成验证码 ]（房主，未满）  │
+│ 今天还可以生成 2 次          │
 └──────────────────────────┘
 ```
 
@@ -782,18 +788,23 @@ flowchart LR
 
 - 8 位输入，自动转大写、去空格与连字符，展示为 `XXXX-XXXX`；格式不合法时按钮不可点（只做格式预校验，字符集 32 个）。
 - 提供明确的\*\*“粘贴”按钮\*\*，不在页面打开时自动读取剪贴板（iOS 会弹粘贴提示，体验差且易引起审核疑问）。
-- 结果处理：成功 → 入房动画 + 奖励验证码揭晓（礼盒动效）+ 引导分享；`ROOM_FULL`、`CODE_INVALID`、`ALREADY_MEMBER`、`AGE_RESTRICTED`、`ROOM_LIMIT`（已在 2 间房内，提示先退出已加入的小屋）各有独立文案；`CODE_COOLDOWN` 显示倒计时并禁用输入。
+- 粘贴的内容若是分享链接（含 `/j/{code}`），取出链接里的码再规范化（v1.10）。
+- 结果处理：成功 → 同一页切到成功态，入房动画 + 奖励验证码揭晓（礼盒动效）+ 引导分享；`rewards` 为空（例如同一房间的奖励已领过）时不显示礼盒；成功后刷新 `roomsProvider` 与 `codesProvider`。`ROOM_FULL`、`CODE_INVALID`、`ALREADY_MEMBER`（v1.10：附“去小屋看看”，按 `details.room_id` 选中该房间）、`AGE_RESTRICTED`、`ROOM_LIMIT`（已在 2 间房内，提示先退出已加入的小屋）各有独立文案；`CODE_COOLDOWN` 按 `details.retry_after_seconds` 显示倒计时并禁用输入；`RATE_LIMITED` 按 `Retry-After` 响应头同样处理（v1.10，网络层把它写进 `details.retry_after_seconds`）。
+- 冷却与限流的倒计时在 App 生命周期内保留，离开页面再回来仍然有效；已输入的内容在离开页面时清空（v1.10）。
 - 失败不清空已输入内容，便于用户修改。
 
 ### 11.3 背包与分享海报
 
-- 背包列表：验证码、状态（未使用 / 已使用 / 已过期 / 已作废——满员与房主解散都会作废，对应后端 `void`）、剩余有效期；未使用的显示“分享”。
+- 背包列表：验证码、状态（未使用 / 已使用 / 已过期 / 已作废——满员与房主解散都会作废，对应后端 `void`）、绑定小屋的当前人数（PRD F2.4）、剩余有效期（≥1 天显示天数，不足 1 天显示小时，不足 1 小时显示“即将过期”，v1.10）；未使用的显示“分享”。右上角提供“输入验证码”入口（v1.10）。
+- 生成验证码（PRD F2.9，v1.10）：按钮下方显示“今天还可以生成 N 次”，取自 `GET /rooms/mine` 中自己小屋的 `regen_remaining_today`；为 0 或小屋满员时置灰。其余拒绝原因（`enough_unused`、`lifetime_limit`）前端无法提前知道，按 11.6 中 `CODE_ISSUE_LIMIT` 的规则提示。
 - 海报：离屏构建 1080×1440 的 Widget，`RepaintBoundary.toImage` 导出 PNG，含宠物形象、验证码、房间人数进度、二维码（`https://<域名>/j/{code}`）；字体使用系统字体，确保导出前已完成布局。
+- 保存（PRD F2.5，v1.10）：用 `gal` 写入系统相册；Android 10 及以上不需要权限，Android 8–9 需要 `WRITE_EXTERNAL_STORAGE`（`maxSdkVersion="28"`），用户拒绝时提示需要相册权限。
 - 分享：调用系统分享面板（`share_plus`），同时附带文本与链接；**不接入 X / Instagram / 小红书各自的 SDK**【假设】，系统面板已覆盖，省去大量适配与审核成本。
 
 ### 11.4 小屋与聊天
 
 - 场景在“小屋”Tab，聊天在“聊天”Tab（v1.3 起分开，原“上半场景、下半聊天”作废）；两个 Tab 共用顶部的房间切换，切到哪间房两边一起变。
+- **F1 的小屋 Tab 先用成员列表占位**（v1.10）：`solo` 时显示自己的宠物与“输入验证码”入口；`inRoom` 时显示房间成员（`PetView` 小图、昵称、房主标签，按 `seat_no` 排列）与剩余空位，自己的小屋未满时有“邀请朋友”入口跳到背包；在两间房里时顶部可切换。接口没有房间名，标题为“我的小屋”或“{房主昵称}的小屋”（昵称为空时“朋友的小屋”）。F2 把列表换成场景并加入管理 / 退出入口。
 - 输入栏：母语输入、**常用短语快捷条**（读取 `phraseTemplatesProvider`，点击发送 `phrase_id`，不触发 AI）、“AI 润色”开关（默认关）、发送按钮。
 - 发送：生成 `client_msg_id`，先在列表中以“发送中”状态上屏，REST 成功改为“已发送”，失败显示重试（复用同一个 `client_msg_id`）。打开了“AI 润色”开关、但响应里 `polish_requested=false` 时，轻提示“今天的润色次数用完了”，消息照常发出（v1.9）。
 - 私聊（v1.9）：只能发给同一小屋的其他成员；未成年人账号不显示私聊入口（服务端对未成年人私聊返回 `AGE_RESTRICTED`）。
@@ -991,7 +1002,7 @@ Android：Jetpack Glance（或 RemoteViews）读取共享存储渲染
 | 类型 | 重点 |
 | :-- | :-- |
 | 单元测试 | `RoomEventReducer`（去重、乱序、缺口、resync）、验证码格式化与校验、outbox 状态流转、会话状态机 |
-| Widget / Golden | 信使卡片的各状态（翻译中、基础译文、已润色、原文、不可用）、验证码输入页的各错误态、分享海报、五语言长文案溢出检查 |
+| Widget / Golden | 信使卡片的各状态（翻译中、基础译文、已润色、原文、不可用）、验证码输入页的各错误态、分享海报、五语言长文案溢出检查。F1 的 golden 只做分享海报（用测试字体，避免 Windows 与 CI 字体渲染不一致），其余用 widget 测试覆盖（v1.10） |
 | 集成测试 | `integration_test` 对本地后端（本机原生 PostgreSQL + Memurai，go-task 启动）跑通：登录 → onboarding → 入房 → 发消息 → 收到事件 |
 | 真机矩阵 | iPhone SE 与较新机型各一台；Android：一台低端机、一台主流机；每次发版手测核心流程 |
 | 手动脚本 | 断网/弱网、杀进程重启、前后台切换、后端重启时重连 |
@@ -1026,11 +1037,12 @@ F0 只有 `env/dev_android.json` 与 `env/local.json`，键随功能逐步加入
   "API_BASE_URL": "http://10.0.2.2:8090/api/v1",
   "GOOGLE_SERVER_CLIENT_ID": "234594731344-fkbbq90jse9giqlmlkrn3qgjn3om9c8r.apps.googleusercontent.com",
   "DEV_LOGIN": true,
-  "APPLE_LOGIN_ENABLED": false
+  "APPLE_LOGIN_ENABLED": false,
+  "SHARE_BASE_URL": "https://petbridge.example.com"
 }
 ```
 
-后续阶段再加入 `WS_URL`（`ws://10.0.2.2:8090/api/v1/ws`，v1.4 起与 REST 同一基础路径）、`SHARE_BASE_URL`、`SENTRY_DSN`、`ANALYTICS_ENABLED`。
+`SHARE_BASE_URL` 在 F1 加入，先用占位地址，上线前换成真实域名（v1.10）。后续阶段再加入 `WS_URL`（`ws://10.0.2.2:8090/api/v1/ws`，v1.4 起与 REST 同一基础路径）、`SENTRY_DSN`、`ANALYTICS_ENABLED`。
 
 | 键 | 含义 |
 | :-- | :-- |
@@ -1096,8 +1108,8 @@ flutter run -d <真机ID> --dart-define-from-file=env/local.json
 | 周 | 后端（对应后端 TRD 第 17 章） | 前端 | 里程碑 |
 | :-- | :-- | :-- | :-- |
 | W1–2 | B1 骨架、B2 登录与 onboarding | F0 项目骨架、主题、i18n、网络层、契约生成、登录页（Google + 开发登录；Apple 只做按钮与接口层，v1.3 起延后），onboarding 全流程提前到此阶段 | 能登录并创建用户 |
-| W3–4 | B3 验证码与入房事务 | F1 onboarding 全流程、占位宠物、验证码输入、背包 | **核心机制跑通（M1）** |
-| W5–6 | B4 WS 与事件分发（订阅快照、presence 在线 / 离线、`pet.tap`） | F2 WsClient、reducer、小屋场景与座位、presence（离线显示为睡觉） | 多人实时可见（M2） |
+| W3–4 | B3 验证码与入房事务 | F1 验证码输入、背包（含今日剩余补码次数）、分享海报（保存与系统分享）、小屋 Tab 成员列表（F2 换成场景）；onboarding 与占位宠物已在 F0 完成（v1.10） | **核心机制跑通（M1）** |
+| W5–6 | B4 WS 与事件分发（订阅快照、presence 在线 / 离线、`pet.tap`） | F2 WsClient、reducer、小屋场景与座位、presence（离线显示为睡觉）、房主管理（11.6）与退出小屋（v1.10 从 F1 移入） | 多人实时可见（M2） |
 | W7–8 | B5 消息与 AI 网关 | F3 聊天、信使卡片、短语、outbox | **跨语言消息可用（M3）** |
 | W9–10 | B6 审核、举报、打卡装扮 | F4 打卡、装扮、举报屏蔽、设置、账号删除、分享海报 | 功能完整的内测版（M4） |
 | W11–12 | B7 推送、Widget 快照 | F5 推送、深链、**Widget（iOS + Android）** | 外部依赖对接完成 |

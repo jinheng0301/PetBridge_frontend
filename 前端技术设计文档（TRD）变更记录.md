@@ -4,6 +4,12 @@
 
 ---
 
+## V1.10 变更说明
+
+F1（验证码入房、背包与分享海报）设计定稿，对齐后端 TRD v1.10，PRD 不变；详细设计见 `docs/superpowers/specs/2026-11-21-f1-join-backpack-design.md`。① **排期调整**（第 20 章）：onboarding 与占位宠物已在 F0 完成，F1 改为验证码输入、背包、分享海报、小屋 Tab 成员列表；**房主管理（11.6）与退出小屋移到 F2**，与小屋场景一起做。② **`solo` / `inRoom` 不并进会话**（6.1、第 7 章）：会话保持四态，`solo` / `inRoom` 由 `roomsProvider` 派生的 `roomModeProvider` 给出；两者可去的页面相同，并进会话只会让启动等 `/rooms/mine`、并且要处理它失败时会话怎么办。F1 没有 WebSocket，房间数据在进入 `ready`、入房成功、回到前台、下拉刷新时拉取。③ **小屋 Tab 先用成员列表占位**（11.4）：入房结果要能直接看到；接口没有房间名，标题用“我的小屋”或“{房主昵称}的小屋”。④ **路由按实际路径改**（6.2、11.0）：背包 `/home/bag`，分享海报 `/share/:code`。⑤ **输码页细节**（11.0、11.2）：成功态在同一页，没有奖励码时不显示礼盒；`ALREADY_MEMBER` 可跳到该房间；`RATE_LIMITED` 按 `Retry-After` 倒计时；粘贴支持分享链接；冷却倒计时在 App 生命周期内保留。⑥ **背包与海报**（11.0、11.3）：显示绑定小屋人数与剩余有效期，右上角可进输码页；生成验证码显示今日剩余次数（后端 v1.10 新字段 `regen_remaining_today`），为 0 或满员时置灰；海报可保存到相册（`gal`，Android 8–9 需存储权限）与系统分享，对应 PRD F2.5、F2.9。⑦ `SHARE_BASE_URL` 在 F1 加入，先用占位地址（19.4）；F1 的 golden 只做分享海报（19.2）。
+
+---
+
 ## V1.9 变更说明
 
 对齐后端 TRD v1.9 的 B5 消息协议与 PRD v1.8。① **原文卡片先到**（4.5②、11.4、第 18 章）：接收者先收到 `message.new`（原文，译文 `pending`，卡片显示“翻译中”骨架屏），翻译结束收到新事件 `message.translated`，润色结束收到 `message.polished`。② **消息事件的 reducer 规则**（第 7 章规则 10）：三种事件都不带 seq，负载都是完整的 `MessageView`，按 `message.id` 插入或更新，与到达顺序无关；delivery 状态只前进不后退。发送者本人也会收到自己的 `message.new`（带 `client_msg_id`），用于替换 outbox 的本地气泡和同步其他设备。③ **重新订阅后补消息**（第 7 章规则 11、9.2、第 12 章）：每次收到 `room.snapshot` 都用 `GET /rooms/{id}/messages?after=<本地最新消息 id>` 补齐；拉取结果一律从旧到新，支持 `before` / `after` 双向翻页。④ **翻译失败不提供手动重试**（11.4、第 18 章、21.1）：卡片显示原文 + “暂无法翻译”，服务端 24 小时内自动重试，成功后自动换成译文。⑤ **润色改为异步**（8.2、11.4）：`POST /deliveries/{id}/polish` 立即返回 202，结果走 `message.polished`，取消原先放宽到 12 秒的超时；按钮只在文本消息、翻译完成、尚未润色时显示；发送时润色次数已用完（`polish_requested=false`）消息照常发出并轻提示。⑥ **新增错误码文案**（8.2）：`QUOTA_EXCEEDED` 按 `details.reason` 分四种，`POLISH_NOT_READY`、`DELIVERY_NOT_FOUND`、`CONTENT_BLOCKED`。⑦ 发消息的幂等以请求体 `client_msg_id` 为准（8.1）；未成年人不显示私聊入口（11.4）；已读延到 B7（21.1）。
