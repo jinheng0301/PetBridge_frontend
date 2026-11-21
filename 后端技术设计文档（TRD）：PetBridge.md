@@ -2,9 +2,9 @@
 
 | 项目 | 内容 |
 | :-- | :-- |
-| 版本 | v1.8（草案，待自评审）<br>• v1.8 较 v1.7：refresh token 轮换加 60 秒重试宽限，Google 公钥拉取失败返回 503，`ROOM_CAPACITY` 生效，presence 补发进程崩溃后的离线。<br>• v1.7 较 v1.6：新增 10.3 MBTI 语气重构逻辑，润色只按接收方 MBTI 调整，失败回退基础译文。<br>• v1.6 较 v1.5：F0 联调后修正契约中可空枚举的写法，补充本机集成测试须串行运行。<br>• v1.5 较 v1.4：B4 安全审查后加固 WebSocket：连接在 access token 到期时关闭（4401），连接与订阅限流。<br>• v1.4 较 v1.3：B4 WebSocket 协议定稿，断线恢复改为每次订阅下发快照，presence 只有在线 / 离线，Redis 故障时本机兜底推送。<br>• v1.3 较 v1.2：对齐 PRD v1.5 与前端 TRD v1.3，Google 登录接入真实校验，Apple 登录延后，本地端口统一为 8090。<br>• v1.2 较 v1.1：对齐 PRD v1.4，新增房主管理，修正消息表分区方案，补充本地运行说明。 |
-| 对应 PRD | 《跨国 MBTI 情感 AI 电子宠物 PRD v1.7》 |
-| 配套文档 | 《前端 TRD（Flutter）v1.8》：WebSocket 协议、API 调用方式以本文第 8、9 章为准 |
+| 版本 | v1.9（草案，待自评审）<br>• v1.9 较 v1.8：B5 消息与 AI 网关设计定稿：落库即推原文卡片、译文与润色另发事件，断线后从数据库补消息，Gemini 主力 + Claude 备用，不接机翻，翻译失败自动重试，每日预算与翻译硬上限，B5 拆为 B5a / B5b。<br>• v1.8 较 v1.7：refresh token 轮换加 60 秒重试宽限，Google 公钥拉取失败返回 503，`ROOM_CAPACITY` 生效，presence 补发进程崩溃后的离线。<br>• v1.7 较 v1.6：新增 10.3 MBTI 语气重构逻辑，润色只按接收方 MBTI 调整，失败回退基础译文。<br>• v1.6 较 v1.5：F0 联调后修正契约中可空枚举的写法，补充本机集成测试须串行运行。<br>• v1.5 较 v1.4：B4 安全审查后加固 WebSocket：连接在 access token 到期时关闭（4401），连接与订阅限流。<br>• v1.4 较 v1.3：B4 WebSocket 协议定稿，断线恢复改为每次订阅下发快照，presence 只有在线 / 离线，Redis 故障时本机兜底推送。<br>• v1.3 较 v1.2：对齐 PRD v1.5 与前端 TRD v1.3，Google 登录接入真实校验，Apple 登录延后，本地端口统一为 8090。<br>• v1.2 较 v1.1：对齐 PRD v1.4，新增房主管理，修正消息表分区方案，补充本地运行说明。 |
+| 对应 PRD | 《跨国 MBTI 情感 AI 电子宠物 PRD v1.8》 |
+| 配套文档 | 《前端 TRD（Flutter）v1.9》：WebSocket 协议、API 调用方式以本文第 8、9 章为准 |
 | 语言 / 运行时 | Go 1.26（以 `go.mod` 为准） |
 | 开发模式 | **单人全栈开发**，所有选型以“一个人能长期维护”为第一约束 |
 | 目标区域 | 日本东京区域起步（覆盖 JP / KR / TW 延迟；中国大陆暂不首发） |
@@ -23,7 +23,7 @@
 2. **正确性靠数据库事务，不靠分布式技巧。** 验证码占位、房间满员这类强一致逻辑，用 PostgreSQL 行锁和条件更新解决，不引入分布式锁。
 3. **托管优先。** 数据库、Redis、对象存储、推送、TLS 证书能托管就托管，把时间花在业务上。
 4. **先单节点，但接口预留。** WebSocket 事件分发抽象成“发布/订阅”接口，MVP 用 Redis Pub/Sub，将来加节点不改业务代码。
-5. **AI 一律可降级。** 任何一次模型调用失败，用户都必须仍然收到消息（至少是原文或机翻）。
+5. **AI 一律可降级。** 任何一次模型调用失败，用户都必须仍然收到消息（至少是原文，v1.9 起不接机翻）。
 
 ### 1.2 对“大厂高并发方案”的取舍
 
@@ -71,6 +71,7 @@
 | 异步任务 | `asynq`（基于 Redis） | 重试、延迟、优先级队列、Web UI，省去自己搭 Kafka |
 | 定时任务 | worker 内置 cron（asynq 的 Scheduler） | 过期验证码清理、数据脱敏、统计汇总 |
 | 熔断 | `sony/gobreaker` | 给每个 AI 供应商单独一个熔断器 |
+| LLM 供应商（v1.9） | 主：Google Gemini（`google.golang.org/genai`）；备用：Anthropic Claude（`github.com/anthropics/anthropic-sdk-go/v2`） | 都用官方 Go SDK；开发期 Gemini 用免费层，有真实用户前须换付费层或让 Claude 当主力（见 10.2）；MVP 不接机器翻译兜底 |
 | 鉴权 | `golang-jwt/jwt/v5` + Apple / Google ID Token 校验 | 见第 13 章 |
 | 推送 | FCM HTTP v1（iOS 通过 FCM 转 APNs） | 一个入口覆盖双端；中国大陆厂商推送通道暂不做 |
 | 配置 | 环境变量 + `koanf` | 12-factor，密钥不进仓库 |
@@ -110,7 +111,7 @@ flowchart TB
     subgraph WorkerProc["worker 进程（cmd/worker）"]
         direction TB
         Tasks["Task 层（asynq 消费者）\ntranslate · polish · push · cleanup\n+ Scheduler 定时任务"]
-        WService["Service 层（与 api 同一份代码）\nai_service（AI 网关）· push_service · moderation"]
+        WService["Service 层（与 api 同一份代码）\nai_gateway（AI 网关）· push_service · moderation"]
         WRepo["Repository 层"]
     end
 
@@ -120,8 +121,7 @@ flowchart TB
     end
 
     subgraph External["外部依赖"]
-        LLM["LLM 供应商 A / B"]
-        MT["机器翻译（兜底）"]
+        LLM["LLM 供应商\nGemini（主）/ Claude（备用）"]
         FCM["FCM（iOS 经 APNs）"]
         ModAPI["内容审核 API"]
         IDP["Apple / Google\nID Token 校验"]
@@ -147,9 +147,8 @@ flowchart TB
     Tasks --> WService
     WService --> WRepo --> PG
     WService -->|"缓存/配额/熔断状态"| Redis
-    WService -->|"message.new 等事件 publish"| Redis
+    WService -->|"message.translated 等事件 publish"| Redis
     WService --> LLM
-    WService --> MT
     WService --> FCM
     WService --> ModAPI
     Service -.->|"海报/美术资源"| S3
@@ -158,8 +157,8 @@ flowchart TB
 **读图要点：**
 
 - **api 与 worker 是同一代码库、同一镜像、不同启动参数**（`cmd/api` / `cmd/worker`），Service、Repository、Model 三层完全共用，只有入口层不同：api 的入口是 Handler，worker 的入口是 Task。
-- **api 进程不直接调用任何 AI / 推送供应商**：发消息的同步段只做校验、审核、幂等落库，然后把 `translate:{message_id}` 入队即返回，所有慢操作与外部调用都在 worker（对应原则 5「AI 一律可降级」）。
-- **事件走 Redis，不走进程内通信**：业务代码只调 `Publisher.Publish(event)`，事件写入 Redis 频道 `ws:events`，每个 api 节点订阅后只推给本机连接。worker 发布的 `message.new` 同样走这条路，所以 api 与 worker 之间没有任何直连。
+- **api 进程正常情况下不调用 AI / 推送供应商**：发消息的同步段只做校验、审核、幂等落库、推送原文卡片，然后把 `translate:{message_id}` 入队即返回，慢操作与外部调用都在 worker（对应原则 5「AI 一律可降级」）。唯一例外（v1.9）：Redis 不可用、无法入队时，api 在本进程内有上限地直接翻译（见 7.4）。
+- **事件走 Redis，不走进程内通信**：业务代码只调 `Publisher.Publish(event)`，事件写入 Redis 频道 `ws:events`，每个 api 节点订阅后只推给本机连接。worker 发布的 `message.translated`、`message.polished` 同样走这条路，所以 api 与 worker 之间没有任何直连。
 - **强一致逻辑只靠 PostgreSQL 事务**：验证码入房、房间满员等在 Repository 层的事务里用行锁解决，不引入分布式锁（原则 2）。
 
 ### 4.2 进程职责
@@ -182,7 +181,7 @@ flowchart LR
     R["repository\n数据访问"]
     P["platform\ndb · redis · queue · storage · clock"]
     M["model\n实体 · DTO · 事件帧 · 错误码"]
-    PK["pkg\nllm · mt · fcm · idtoken · wordfilter"]
+    PK["pkg\nllm · fcm · idtoken · wordfilter"]
 
     Entry --> MW --> H --> S
     Entry --> T --> S
@@ -204,9 +203,9 @@ flowchart LR
 | repository | `internal/repository` | **唯一**访问 PostgreSQL 的地方，对上暴露 interface，便于单测 mock；跨表事务通过 `TxManager` 传入 | 不含业务规则 |
 | model | `internal/model` | 数据库实体、接口 DTO、WS 事件帧、业务错误码；不依赖任何其他层 | 不含逻辑 |
 | platform | `internal/platform` | 数据库连接池、Redis 客户端、asynq 队列、对象存储、时钟等基础设施 | 不含业务概念 |
-| pkg | `pkg/*` | 与业务无关、可复用的外部能力封装（LLM 供应商、机翻、FCM、Apple/Google ID Token 校验、敏感词自动机） | 不依赖 `internal/*` |
+| pkg | `pkg/*` | 与业务无关、可复用的外部能力封装（LLM 供应商、FCM、Apple/Google ID Token 校验、敏感词自动机） | 不依赖 `internal/*` |
 
-**依赖规则（单向）：** `handler / task → service → repository → platform`；`model` 被所有层引用但自身不引用任何层；`middleware` 只依赖自己声明的小接口（如 `TokenParser`，由 `service.Issuer` 满足），写错误响应时复用 `handler` 的 `Fail`；`handler` 不反向依赖 `middleware`，请求ID、用户ID 通过 `model` 里的上下文键常量在两者之间传递；`service` 之间通过接口通信，禁止循环依赖，例如 `chat_service` 只依赖 `Translator`、`Publisher` 接口，不依赖具体的 `ai_service`。
+**依赖规则（单向）：** `handler / task → service → repository → platform`；`model` 被所有层引用但自身不引用任何层；`middleware` 只依赖自己声明的小接口（如 `TokenParser`，由 `service.Issuer` 满足），写错误响应时复用 `handler` 的 `Fail`；`handler` 不反向依赖 `middleware`，请求ID、用户ID 通过 `model` 里的上下文键常量在两者之间传递；`service` 之间通过接口通信，禁止循环依赖，例如 `chat_service` 只依赖 `Translator`、`Publisher` 接口，不依赖具体的 `ai_gateway`。
 
 ### 4.4 路由分组与鉴权
 
@@ -259,31 +258,32 @@ sequenceDiagram
     participant R as repository
     participant Q as asynq（Redis）
     participant T as task（worker）
-    participant AI as ai_service（AI 网关）
+    participant AI as ai_gateway（AI 网关）
     participant Pub as Publisher
     participant Hub as hub_service（各 api 节点）
 
     C->>H: POST /rooms/{id}/messages
     H->>S: Send(...)
-    S->>S: 校验 · 本地词库前置审核
-    S->>R: 以 (sender_id, client_msg_id) 幂等写 messages
-    alt kind = phrase
-        S->>R: 取短语模板，直接写 deliveries
-        S->>Pub: Publish message.new（不调用 AI）
-    else 文本消息
-        S->>Q: enqueue translate:{message_id}
-        S-->>H: 202 + message_id
+    S->>S: 校验 · 限流 · 前置审核 · 润色配额（发送方开关）
+    S->>R: 一个事务：幂等写 messages + 每个接收者一行 deliveries
+    Note over S,R: 同语言、短语、纯 emoji 直接 done；其余 pending
+    S->>Pub: Publish message.new（原文卡片，各自视角）
+    Pub->>Hub: Redis ws:events
+    Hub-->>C: WS message.new（接收者看到“翻译中”）
+    opt 有 pending
+        S->>Q: enqueue translate:{message_id}（失败则本进程内翻译，v1.9）
     end
+    S-->>H: 202 + MessageView
     H-->>C: 响应
 
     Q->>T: dequeue
-    T->>AI: 按目标语言分组翻译（缓存→限流→熔断→供应商链）
-    AI-->>T: 译文（失败则降级为机翻或原文）
+    T->>AI: 按目标语言分组翻译（缓存 → 并发上限 → 熔断 → Gemini → Claude）
+    AI-->>T: 译文（都失败则 failed，卡片显示原文，之后自动重试）
     T->>R: 写 deliveries · 后置审核
-    T->>Pub: Publish message.new
+    T->>Pub: Publish message.translated（每个接收者一条）
     Pub->>Hub: Redis ws:events
-    Hub-->>C: WS message.new（含各自译文）
-    Note over T,Q: 接收者不在线 → 入队 push 任务 → FCM
+    Hub-->>C: WS message.translated（含各自译文）
+    Note over T,Q: 接收者不在线 → 入队 push 任务 → FCM（B7）
 ```
 
 **③ WebSocket 连接与断线重放（详见 7.3）**
@@ -315,7 +315,7 @@ sequenceDiagram
 
 ### 4.6 子系统解耦说明
 
-- **AI 网关与业务解耦**：`chat_service` 只依赖 `Translator` / `Polisher` 两个接口，不知道背后是哪家模型、是否命中缓存、是否已降级；换供应商、调提示词版本只改 `ai_service` 与 `pkg/llm`，不触及聊天流程（详见第 10 章）。
+- **AI 网关与业务解耦**：`chat_service` 只依赖 `Translator` / `Polisher` 两个接口，不知道背后是哪家模型、是否命中缓存、是否已降级；换供应商、调提示词版本只改 `ai_gateway` 与 `pkg/llm`，不触及聊天流程（详见第 10 章）。
 - **实时分发与业务解耦**：业务代码只调用 `Publisher.Publish(event)`，不感知当前有几个 api 节点、目标用户连在哪台——这是“单节点起步、加节点零改动”的关键（原则 4）。
 - **审核与业务解耦**：本地词库（Aho-Corasick，`pkg/wordfilter`）与外部审核 API 都封装在 `moderation_service` 里，`chat_service` 只拿到“通过 / 拒绝 / 标记待审”三种结果。
 - **推送策略与 FCM 解耦**：推送时机、合并与免打扰规则在 `push_service`，FCM 调用细节在 `pkg/fcm`。
@@ -351,7 +351,7 @@ petbridge/
 │   │   ├── device_handler.go          # PUT /devices/current
 │   │   ├── invite_handler.go          # /codes、share-card
 │   │   ├── room_handler.go            # join、详情、leave、移除成员、解散、补码
-│   │   ├── chat_handler.go            # 发送/拉取消息、润色、已读
+│   │   ├── chat_handler.go            # 发送/拉取消息、接收方润色（已读随 B7）
 │   │   ├── checkin_handler.go         # 打卡、装扮
 │   │   ├── config_handler.go          # /config/phrases
 │   │   ├── safety_handler.go          # 举报、屏蔽
@@ -366,10 +366,14 @@ petbridge/
 │   │   ├── errors.go                  # 业务哨兵错误（ErrAccountDisabled 等）、ValidationError
 │   │   ├── ports.go                   # service 依赖的 repository 接口（TxRunner、UserStore 等）
 │   │   ├── room_service.go            # 入房事务、成员、房主管理（踢人/解散/补码）
-│   │   ├── chat_service.go            # 消息同步段：校验、审核、幂等落库、入队
+│   │   ├── chat_service.go            # 消息同步段：校验、审核、幂等落库、推原文卡片、入队；拉取；润色入口
+│   │   ├── translation_service.go     # 翻译任务：按语言分组、写 deliveries、发 message.translated（v1.9）
+│   │   ├── polish_service.go          # 润色任务与 10.3 程序校验（v1.9）
+│   │   ├── ai_gateway.go              # AI 网关：缓存→并发上限→熔断→供应商链→降级（v1.9，原 ai_service）
+│   │   ├── quota_service.go           # 润色配额、每分钟上限、全局每日预算与翻译硬上限（v1.9）
+│   │   ├── phrases.go                 # 短语模板表（代码常量，带版本号）（v1.9）
 │   │   ├── checkin_service.go         # 打卡、能量、装扮解锁
-│   │   ├── ai_service.go              # AI 网关：缓存→配额→熔断→供应商链→降级
-│   │   ├── moderation_service.go      # 本地词库 + 外部审核
+│   │   ├── moderation_service.go      # 本地词库 + 外部审核（B5 为全部放行的实现，B6 补齐）
 │   │   ├── safety_service.go          # 举报、屏蔽、未成年人规则
 │   │   ├── push_service.go            # 推送策略（时机、合并、免打扰）
 │   │   ├── hub_service.go             # WS Hub：本机连接池、订阅 ws:events、分发
@@ -413,7 +417,8 @@ petbridge/
 │   │   └── ratelimit_middleware.go    # Redis 令牌桶：按 IP / 用户 / 接口
 │   ├── task/                          # worker 入口层（asynq）
 │   │   ├── translate_task.go          # translate:{message_id}：翻译 + 后置审核 + 发布事件
-│   │   ├── polish_task.go
+│   │   ├── polish_task.go             # polish:{delivery_id}
+│   │   ├── sweep_task.go              # 补偿扫描：重新入队停住的翻译 / 润色（v1.9）
 │   │   ├── push_task.go
 │   │   ├── cleanup_task.go            # 过期码清理、消息脱敏/删除（分批）
 │   │   └── scheduler.go               # 定时任务注册
@@ -425,8 +430,7 @@ petbridge/
 │       ├── storage/                   # S3 兼容存储
 │       └── clock/
 ├── pkg/                               # 与业务无关、可复用，不依赖 internal/*
-│   ├── llm/                           # Translator / Polisher 接口 + 各供应商实现 + gobreaker
-│   ├── mt/                            # 机器翻译兜底
+│   ├── llm/                           # Translator / Polisher 接口；gemini/、claude/、fake/ 三个实现（v1.9）
 │   ├── fcm/                           # FCM HTTP v1 封装
 │   ├── idtoken/                       # Apple / Google ID Token 校验（Verifier 接口；Google 用 JWKS 真实校验，Apple 暂为占位）
 │   └── wordfilter/                    # Aho-Corasick 敏感词自动机（按语言分库）
@@ -466,12 +470,12 @@ petbridge/
 | invite\_codes | code, room\_id, issued\_to, source, status, used\_by, used\_at, expires\_at, reward\_for（B3 迁移 0003：奖励码由哪个码触发，可空） | source：zero / signup / join\_reward / owner\_regen；status：unused / used / expired / void |
 | reward\_grants | user\_id, room\_id, granted\_count, created\_at | 唯一键 (user\_id, room\_id)，保证奖励幂等 |
 | invite\_edges | inviter\_id, invitee\_id, code, created\_at | 裂变关系树，运营分析与风控用 |
-| messages | id(uuidv7), room\_id, sender\_id, scope(room/dm), to\_user\_id, kind(text/phrase/sticker), src\_lang, body, client\_msg\_id, mod\_status, created\_at | **MVP 不分区**（见下方说明）；主键 id，唯一键 (sender\_id, client\_msg\_id) 保证重发幂等；索引 (room\_id, id) 支撑游标分页 |
-| deliveries | id, message\_id, receiver\_id, target\_lang, base\_text, polished\_text, polish\_status, read\_at | 每个接收者一行，存各自语言的结果 |
+| messages | id(uuidv7，服务端生成), room\_id, sender\_id, scope(room/dm), to\_user\_id, kind(text/phrase；sticker 延后), phrase\_id, src\_lang, body, client\_msg\_id, polish\_requested, mod\_status, created\_at | **MVP 不分区**（见下方说明）；主键 id，唯一键 (sender\_id, client\_msg\_id) 保证重发幂等；索引 (room\_id, id) 支撑游标分页；B5a 迁移 0004（v1.9） |
+| deliveries | id, message\_id, receiver\_id, target\_lang, base\_text, translation\_status(pending/done/failed), translate\_attempts, polished\_text, polish\_status(none/pending/done/fallback), polish\_by, read\_at, created\_at, updated\_at | 每个接收者一行（发送者没有），存各自语言的结果；唯一键 (message\_id, receiver\_id)；索引 (receiver\_id, message\_id)；补偿扫描用部分索引；B5a 迁移 0004（v1.9） |
 | checkins | user\_id, room\_id, local\_day, energy | 唯一键 (user\_id, room\_id, local\_day)，按用户时区算“当天” |
 | room\_progress / room\_decor | room\_id, energy\_total, level / item\_id, unlocked\_at | 打卡能量与装扮解锁 |
 | reports / blocks | reporter\_id, target\_id, message\_id, reason, status | 应用商店 UGC 合规必备 |
-| ai\_usage\_daily | day, user\_id, kind, calls, tokens\_in, tokens\_out, cost\_micro | 配额与成本看板 |
+| ai\_usage\_daily | day, user\_id, kind(translate/polish), calls, tokens\_in, tokens\_out, cost\_micro | 成本看板；主键 (day, user\_id, kind)；配额本身在 Redis（第 11 章）；B5b 迁移 0005（v1.9） |
 | app\_config | key, value(jsonb) | 运营开关：奖励数量、有效期、AI 开关等，进程内缓存 30 秒 |
 
 > **为什么 messages 不分区**：PostgreSQL 分区表上的主键和唯一索引必须包含分区键（`created_at`），这样 `(sender_id, client_msg_id)` 就无法全局唯一，重发幂等会失效。MVP 单库约 200 QPS 写入、每日 200 万行，30 天保留期内约 6000 万行，配合 `(room_id, id)` 索引完全够用。过期数据由 worker 的定时任务批量脱敏/删除（每批限量，避免长事务）。若日后确需分区，再用单独的 `msg_idempotency` 表承担幂等。
@@ -573,36 +577,58 @@ ALTER TABLE room_bans ADD CONSTRAINT pk_room_ban PRIMARY KEY (room_id, user_id);
 - **每次订阅都下发快照（v1.4）**：服务端先登记订阅（此后该房间的事件暂存），再读 `room:{rid}:seq` 得到 S，再从 PostgreSQL 读房间与成员、从 presence 读在线状态，发 `room.snapshot{seq:S}`，最后按序发暂存的事件。快照是唯一可信的状态，客户端用它整体替换房间状态，并把 `last_seq` **设为** S（不取较大值）。非在席成员订阅返回 `error{ROOM_NOT_FOUND}`；每条连接最多订阅 2 个房间。
 - **事件分发**：业务代码调用 `Publisher.Publish(event)`。发给全房在席成员的状态事件（`member.joined`、`member.left`）先 `INCR room:{rid}:seq` 取得 seq；事件写入 Redis 频道 `ws:events`；每个 api 节点订阅该频道，只推给本机上订阅了该房间的目标用户连接。个人事件（`room.kicked`、`code.invalidated`）推给目标用户的所有连接，不需要订阅；服务端收到 `room.kicked` 时同时取消该用户对该房间的订阅。单节点阶段这层看似多余，但它让“加第二台 api”变成零改动。
 - **Redis 故障时本机兜底（v1.4）**：`INCR` 或 `PUBLISH` 任一步失败，事件由本进程的 Hub 直接推送，不带 seq，客户端收到即应用（成员事件按 `user_id` 幂等）。单节点阶段实时功能不中断；多节点时兜底只覆盖本机，其他节点的客户端在下次订阅时由快照修正。Redis 订阅断开后重连成功，向本机所有连接发一次 `resync`，客户端重新订阅拿新快照（Redis 重启后 seq 会从头开始，也由此恢复）。
-- **断线重放**：v1.4 起不做。早于快照 seq 的事件客户端会丢弃，补发没有收益；`room.sub` 的 `last_seq` 保留但暂不使用。B5 有了 `message.new` 再评估是否需要 Redis Stream 重放。
+- **断线重放**：v1.4 起不做。早于快照 seq 的事件客户端会丢弃，补发没有收益；`room.sub` 的 `last_seq` 保留但暂不使用。v1.9：消息也不做 Redis Stream 重放，重新订阅后客户端用 `GET /rooms/{id}/messages?after=` 从数据库补齐（见 7.4）。
 - **Presence（v1.4）**：只有 `online` / `offline` 两种，前端把离线成员画成宠物在睡觉。`presence:u:{uid}` 为 ZSET（成员是连接 id，分数是过期时间），服务端每 25 秒对每条连接发 WS ping，成功即刷新（过期时间 = 现在 + 70 秒），10 秒无回应则关闭连接。用户在线连接数 0→1 时广播 `online`，降到 0 时广播 `offline`，发给他所有在席房间的其他成员，状态持续实时更新：离线的人回到 App，同屋在线的人立刻看到他的宠物醒来。新成员入房时，`member.joined` 里带上他当前的 presence。Redis 不可用时退化为进程内连接计数。进程被强杀时，它持有的连接不会走正常的关闭流程：其他节点每 35 秒扫描一次 `presence:u:*`，清掉过期成员，清掉某用户最后一条连接的那个节点负责广播 `offline`（v1.8，取代 v1.4 的“已知局限：不广播 offline”）。键本身保留 140 秒（成员的两倍），保证扫描时还看得到过期成员；查询在线状态只计数、不清理，清理只由连接关闭和扫描来做。Redis 不可用时不扫描。
 - **连接保护**：单用户最多 3 条并发连接，超出时关闭最旧的一条（关闭码 4001）；读帧上限 4KB；每连接每秒最多 10 个客户端帧；每条连接一个容量 64 的发送队列，队列满或写超时 5 秒即断开（慢客户端）；`pet.tap` 每连接每秒最多 2 次，超出静默丢弃；`room.sub` 每连接每 10 秒最多 10 次，超出回 `error{RATE_LIMITED}`，`room_id` 不是 UUID 的直接回 `ROOM_NOT_FOUND`；订阅等待快照期间暂存的事件超过 64 条即以 1008 断开；每个客户端请求背后的数据库与 Redis 操作 5 秒超时（v1.5）。
 - **优雅重启**：收到 SIGTERM 先向所有连接下发 `server.restart` 帧，随即以 1001 断开全部连接，再关闭 HTTP 服务；客户端随机等待 1–10 秒后重连（v1.4：不再等待 30 秒）。
 
 ### 7.4 消息发送与 AI 信使
 
-`POST /rooms/{id}/messages`，体：`client_msg_id`、`kind`、`text` 或 `phrase_id`、`scope`、`to_user_id`、`polish`（布尔，默认 false）。
+v1.9 按 B5 设计（`docs/superpowers/specs/2026-11-21-b5-messaging-ai-gateway-design.md`）重写。B5 分两段交付：**B5a** 消息与翻译，**B5b** 润色与成本（第 17 章）。
+
+`POST /rooms/{id}/messages`，体：`client_msg_id`（客户端生成，1–64 个字母、数字、`-`、`_`）、`kind`（`text` / `phrase`）、`text`（文本消息）或 `phrase_id`（短语消息）、`scope`（`room` / `dm`，默认 `room`）、`to_user_id`（私聊必填）、`polish`（布尔，默认 false，只对文本有效）。幂等以请求体里的 `client_msg_id` 为准，`Idempotency-Key` 头服务端不读。
 
 ```
 同步段（api，目标 < 100ms）
-  1. 校验：成员身份、屏蔽关系、年龄规则、长度（≤500 字）、限流
-  2. 前置审核：本地词库（Aho-Corasick，按语言分库）
-     命中高危 → 拒绝（CONTENT_BLOCKED）；疑似 → 标记 mod_status=review，仍继续
-  3. 以 (sender_id, client_msg_id) 幂等写入 messages
-  4. 若 kind=phrase：直接用服务端短语模板表取各目标语言文案，写 deliveries，推送，结束（不调用 AI）
-  5. 否则入队 asynq：translate:{message_id}，返回 202 + message_id
+  1. 校验：调用者在席（否则 ROOM_NOT_FOUND）；文本去首尾空白后 1–500 字；phrase_id 存在；
+     私聊对象是同房间其他在席成员，且双方都是成年人（否则 AGE_RESTRICTED）；屏蔽关系 B6 加
+  2. 限流：每用户每分钟 20 条、每日 1000 条（RATE_LIMITED）
+  3. 前置审核：Moderator（B5 全部放行；B6 接本地词库，命中高危 → CONTENT_BLOCKED，疑似 → mod_status=review）
+  4. polish=true 时扣发送者 1 次润色配额（不论几个接收者）；配额不足不拒绝消息，只是 polish_requested=false
+  5. 一个事务：以 (sender_id, client_msg_id) 幂等写 messages；为每个接收者写一行 deliveries
+       同语言、短语（按接收者语言取模板）、去掉空白标点 emoji 后为空的文本 → base_text 直接确定，done
+       其余 → pending；polish_requested 时 polish_status = pending
+  6. 提交后：给每个接收者和发送者本人各发一条 message.new（各自视角；发送者的 delivery 为空）
+     有 pending 就入队 translate:{message_id}（TaskID 去重）；入队失败 → 本进程内翻译（协程池 4 个）
+  7. 返回 202 + 发送者视角的 MessageView；同一 client_msg_id 重放直接返回原消息，不扣配额、不发事件
 
 异步段（worker）
-  6. 取接收者，按 target_lang 分组（群聊中同语言只翻译一次）
-  7. 对每个语言：AI 网关 → 基础翻译（便宜模型），结果写 deliveries.base_text
-  8. 若 polish=true：再按（目标语言 × 接收者 MBTI）走润色，规则与校验见 10.3（v1.7）
-  9. 后置审核：对译文再过一遍词库
- 10. 发布 message.new 事件（每个接收者带各自的译文、发送者宠物形象、原文）
- 11. 接收者不在线 → 入队推送
+  8. 读 pending 的 deliveries，按 target_lang 分组（同语言只翻译一次，PRD F4.5）
+  9. 对每个语言：AI 网关（第 10 章）→ 基础翻译；成功写 base_text、done，都失败写 failed
+ 10. 后置审核：Moderator（B5 全部放行）
+ 11. 每个 delivery 写完就发 message.translated（只发给仍在席的接收者）
+ 12. polish_status = pending 且翻译 done → 入队 polish:{delivery_id}（B5b，规则见 10.3）
+ 13. 接收者不在线 → 入队推送（B7）
 ```
 
-**润色的两个入口**【假设】：发送方发送时打开“AI 润色”开关；接收方在卡片上点“让 AI 润色”，调用 `POST /deliveries/{id}/polish`，结果写回 `deliveries.polished_text` 并以 `message.polished` 事件通知。两个入口共用同一套缓存和配额。
+**接收者先看到原文卡片**（v1.9）：消息落库后立即推 `message.new`，卡片显示原文，译文一栏为“翻译中”；译文好了再推 `message.translated`。AI 变慢或队列积压时，接收者也不会“收不到消息”。
 
-**卡片切换“润色译文 / 原文”完全在客户端完成**，后端已在 message.new 中下发原文、基础译文，润色后补发 polished\_text。
+**翻译失败与重试**（v1.9）：整条供应商链都失败时记为 `failed`，卡片显示原文 + “暂无法翻译”，**不提供手动重试**。asynq 重试 3 次（间隔 15 秒、60 秒）；之后由补偿扫描继续：worker 每 60 秒扫一次，重新入队 ① 停在 `pending` 超过 2 分钟的翻译，② 消息发出不到 24 小时、距上次尝试已过 10 分钟的 `failed` 翻译（供应商故障期间熔断器是打开的，这些重试不会真的调用供应商），③ 翻译已 `done`、停在 `pending` 超过 2 分钟的润色。超过 24 小时仍失败的翻译不再重试，挂在上面的润色记为 `fallback`。
+
+**源语言**：取发送者的 `native_lang`，不做语言识别（PRD 8.1，v1.9）。
+
+**拉取** `GET /rooms/{id}/messages?before=|after=&limit=`（v1.9）：`limit` 默认 30、最大 100；不给游标取最新的，`before` 取紧挨着它之前的，`after` 取紧挨着它之后的，二者不能同时给。返回 `{ items, has_more }`，`items` 一律按 id 从旧到新。只返回调用者自己发的或有自己 delivery 的（私聊只有双方可见）；调用者必须当前在席。接收者在发送那一刻确定：之后入房的人看不到之前的消息。**断线恢复**：重新 `room.sub` 后，客户端用 `after=<本地最新消息 id>` 补齐，不做 Redis Stream 重放。
+
+**`MessageView`**（REST 响应与三种消息事件共用）：`id`、`room_id`、`sender{user_id, nickname, pet_type}`、`scope`、`to_user_id`、`kind`、`phrase_id`、`src_lang`、`text`（原文）、`client_msg_id`（只在发送者自己的视图里有）、`polish_requested`、`created_at`、`delivery`（发送者为空；接收者为自己那一行：`id`、`target_lang`、`base_text`、`translation_status`、`polished_text`、`polish_status`）。
+
+**润色的两个入口**【假设】（B5b）：
+- **发送方开关**：`polish=true`，扣发送者 1 次（第 4 步），每个接收者的翻译完成后各自润色；翻译最终放弃时润色记为 `fallback`，配额不退。
+- **接收方按钮**：`POST /deliveries/{id}/polish`，只有该接收者能调用（否则 `DELIVERY_NOT_FOUND`）；扣接收者 1 次，返回 202 与当前视图，结果以 `message.polished` 通知。已经 `pending` / `done` / `fallback` 时直接返回、不再扣；翻译未完成或是短语消息返回 `POLISH_NOT_READY`；配额、每分钟上限、全局预算或开关不允许时返回 `QUOTA_EXCEEDED`（`details.reason`：`daily_quota` / `minute_limit` / `global_budget` / `disabled`）。
+- 两个入口共用缓存与配额；极短文本（10.3.1）不调用模型、不扣配额。
+
+**卡片切换“润色译文 / 基础译文 / 原文”完全在客户端完成**：`MessageView` 里同时有原文、基础译文与润色译文。
+
+**短语** `GET /config/phrases?v=`（v1.9）：短语表是代码常量，带版本号；先定 8 个（`good_morning`、`good_night`、`thank_you`、`sorry`、`ok`、`see_you`、`congrats`、`take_care`），每个有五种语言文字。`v` 等于当前版本返回 304，否则返回 `{ version, phrases: [{ id, texts }] }`。发短语只传 `phrase_id`，不调用 AI，也不能润色。
 
 ### 7.5 打卡与装扮
 
@@ -697,10 +723,11 @@ ALTER TABLE room_bans ADD CONSTRAINT pk_room_ban PRIMARY KEY (room_id, user_id);
 |  | DELETE /rooms/{id}/members/{user\_id} | 房主移除成员，见 7.8 |
 |  | POST /rooms/{id}/dissolve | 房主解散，见 7.8 |
 |  | POST /rooms/{id}/codes | 房主自助补码，见 7.8 |
-| 消息 | POST /rooms/{id}/messages；GET /rooms/{id}/messages?before= | 发送、游标分页 |
-|  | POST /deliveries/{id}/polish；POST /deliveries/{id}/read | 接收方润色、已读 |
+| 消息 | POST /rooms/{id}/messages；GET /rooms/{id}/messages?before=\|after=&limit= | 发送（202）、双向游标分页，见 7.4（B5a） |
+|  | POST /deliveries/{id}/polish | 接收方润色（202，结果走 `message.polished`，B5b） |
+|  | POST /deliveries/{id}/read | 已读；v1.9 移到 B7，与 Widget 一起做 |
 | 小屋 | POST /rooms/{id}/checkin；GET /rooms/{id}/decor | 打卡与装扮 |
-| 配置 | GET /config/phrases?v= | 常用短语多语言模板，带版本号，客户端缓存 |
+| 配置 | GET /config/phrases?v= | 常用短语多语言模板，带版本号，客户端缓存；版本相同返回 304（B5a） |
 
 **B3 新增错误码与 HTTP 状态**（`error.details` 里的字段见括号）：
 
@@ -716,6 +743,10 @@ ALTER TABLE room_bans ADD CONSTRAINT pk_room_ban PRIMARY KEY (room_id, user_id);
 | OWNER_CANNOT_LEAVE | 409 | 房主应使用解散 |
 | CODE_ISSUE_LIMIT（`reason`：`room_full` / `enough_unused` / `daily_limit` / `lifetime_limit`） | 409 | |
 | NOT_READY | 503 | 服务重启中，或登录提供方（Google 公钥）暂时不可达（v1.8），稍后重试 |
+| DELIVERY_NOT_FOUND | 404 | delivery 不存在或不是调用者的（v1.9，B5b） |
+| POLISH_NOT_READY | 409 | 翻译还没完成，或是短语消息，不能润色（v1.9，B5b） |
+| QUOTA_EXCEEDED（`reason`：`daily_quota` / `minute_limit` / `global_budget` / `disabled`） | 429 | 润色被拒（v1.9，B5b）；`minute_limit` 时带 `Retry-After` 头 |
+| CONTENT_BLOCKED | 422 | 内容未通过审核（v1.9 定义，B6 才会触发） |
 | 安全 | POST /reports；POST /blocks；DELETE /blocks/{user\_id} | 举报与屏蔽 |
 | 设备 | PUT /devices/current | 登记推送 token、语言、时区 |
 | Widget | GET /widget/snapshot | 见 7.6 |
@@ -729,7 +760,9 @@ ALTER TABLE room_bans ADD CONSTRAINT pk_room_ban PRIMARY KEY (room_id, user_id);
 | CODE\_COOLDOWN | 连续输错进入冷却 | 显示剩余时间 |
 | ALREADY\_MEMBER | 已在该房间 | 直接进入 |
 | AGE\_RESTRICTED | 年龄规则限制 | 说明原因 |
-| QUOTA\_EXCEEDED | 润色次数用尽 | 引导明日再试 |
+| QUOTA\_EXCEEDED | 润色被拒，`details.reason` 区分今日次数用完、太频繁、全局预算用完、润色已关闭（v1.9） | 按 reason 提示（明天再来 / 稍后再试 / 暂不可用） |
+| POLISH\_NOT\_READY | 翻译未完成或短语消息（v1.9） | 隐藏润色按钮，一般不会触发 |
+| DELIVERY\_NOT\_FOUND | 不是自己的 delivery（v1.9） | 刷新消息列表 |
 | CONTENT\_BLOCKED | 内容未通过审核 | 提示修改 |
 | RATE\_LIMITED | 触发限流 | 退避重试 |
 | UPGRADE\_REQUIRED | App 版本低于最低要求（HTTP 426） | 全屏强制更新页，跳转商店 |
@@ -740,7 +773,7 @@ ALTER TABLE room_bans ADD CONSTRAINT pk_room_ban PRIMARY KEY (room_id, user_id);
 | ONBOARDING\_REQUIRED | 未完成 onboarding 就调用入房等接口（7.1 约定） | 跳转 onboarding |
 | ROOM\_NOT\_FOUND | 房间不存在，或调用者与该房间无关（不泄露房间是否存在） | 刷新房间列表 |
 
-**HTTP 状态映射**：CODE\_INVALID 404；ROOM\_FULL、ALREADY\_MEMBER（`details.room_id`）、ROOM\_LIMIT、OWNER\_CANNOT\_LEAVE、CODE\_ISSUE\_LIMIT 409；AGE\_RESTRICTED、ONBOARDING\_REQUIRED、NOT\_ROOM\_OWNER 403；CODE\_COOLDOWN（`details.retry_after_seconds`）、RATE\_LIMITED（带 `Retry-After` 头）429；ROOM\_NOT\_FOUND 404。
+**HTTP 状态映射**：CODE\_INVALID 404；ROOM\_FULL、ALREADY\_MEMBER（`details.room_id`）、ROOM\_LIMIT、OWNER\_CANNOT\_LEAVE、CODE\_ISSUE\_LIMIT 409；AGE\_RESTRICTED、ONBOARDING\_REQUIRED、NOT\_ROOM\_OWNER 403；CODE\_COOLDOWN（`details.retry_after_seconds`）、RATE\_LIMITED（带 `Retry-After` 头）、QUOTA\_EXCEEDED 429；ROOM\_NOT\_FOUND、DELIVERY\_NOT\_FOUND 404；POLISH\_NOT\_READY 409；CONTENT\_BLOCKED 422（v1.9）。
 
 ---
 
@@ -760,8 +793,9 @@ ALTER TABLE room_bans ADD CONSTRAINT pk_room_ban PRIMARY KEY (room_id, user_id);
 | S→C | presence.update | `room_id`、`user_id`、`status`（online / offline） | 否 |
 | C→S | pet.tap | `room_id`、`target_user_id`（须为该房间其他成员） | — |
 | S→C | pet.action | `room_id`、`from_user_id`、`target_user_id`、`action`（目前固定为 `tap`，各宠物的具体动作由前端动画实现）；发给除发起者外的全部成员 | 否 |
-| S→C | message.new | 发送者宠物、原文、基础译文、delivery\_id、是否已润色（B5） | 待 B5 定 |
-| S→C | message.polished | delivery\_id、润色文本、`polish_status`（`done` / `fallback`，v1.7：`fallback` 时润色文本为空，客户端继续显示基础译文并标“未润色”，见 10.3.7）（B5） | 待 B5 定 |
+| S→C | message.new | `room_id`、`message`（`MessageView`，见 7.4）；消息落库后发给每个接收者（各自的 delivery，译文可能还是 `pending`）和发送者本人（`delivery` 为空，用于同步其他设备）（v1.9） | 否 |
+| S→C | message.translated | 同上；某个 delivery 翻译结束（`done` 或 `failed`）时发给该接收者（v1.9） | 否 |
+| S→C | message.polished | 同上；某个 delivery 润色结束时发给该接收者，`polish_status` 为 `done` 或 `fallback`（v1.7：`fallback` 时润色文本为空，客户端继续显示基础译文并标“未润色”，见 10.3.7）（v1.9，B5b） | 否 |
 | S→C | checkin.updated / decor.unlocked | 能量、装扮（B6） | 待 B6 定 |
 | S→C | code.invalidated | `room_id`、`reason`（room_full / dissolved）；发给被作废码的持有者 | 否 |
 | S→C | resync | `room_id`（可选，缺省表示全部房间）；客户端对相应房间重新发 `room.sub` | 否 |
@@ -770,6 +804,8 @@ ALTER TABLE room_bans ADD CONSTRAINT pk_room_ban PRIMARY KEY (room_id, user_id);
 | 双向 | ping / pong | 使用 WS 控制帧心跳，服务端每 25 秒 ping 一次，应用层不重复实现 | — |
 
 **seq 规则（v1.4）**：只有发给全房在席成员的状态事件带 seq，同一房间所有订阅者看到的 seq 序列一致。客户端收到快照后把 `last_seq` 设为快照的 seq；之后丢弃 seq ≤ `last_seq` 的事件；不带 seq 的事件直接应用；成员事件按 `user_id` 幂等处理（快照与紧随其后的暂存事件可能重复描述同一变化）；发现 seq 缺口或收到 `resync`，对该房间重新发 `room.sub`。Redis 故障时 `member.*` 也可能不带 seq。
+
+**消息事件规则（v1.9）**：`message.new`、`message.translated`、`message.polished` 都不带 seq，只投给订阅了该房间的连接（被移除时 Hub 取消订阅，所以被移除的人收不到之后的消息事件）。三者都按 `message.id` 插入或更新，到达顺序无关；delivery 状态只前进不后退：`translation_status` 按 `pending < failed < done`，`polish_status` 按 `none < pending < done / fallback`，收到比本地更旧的状态就忽略。重新订阅后用 `GET /rooms/{id}/messages?after=` 补断线期间的消息。
 
 **关闭码**：1001 服务重启；1008 刷帧超限、慢客户端或订阅积压；1009 帧超过 4KB；4001 同一用户连接数超限，被新连接替换；**4401 access token 已到期，刷新后立即重连**（v1.5）。
 
@@ -781,30 +817,42 @@ ALTER TABLE room_bans ADD CONSTRAINT pk_room_ban PRIMARY KEY (room_id, user_id);
 
 ### 10.1 调用链
 
+v1.9 定稿：
+
 ```
-请求 → 配额检查 → 缓存命中？→ 是：直接返回
-                    ↓ 否
-        全局并发信号量 → 熔断器(供应商A) → 超时控制
-                    ↓ 失败或熔断打开
-        供应商B → 机器翻译兜底 → 原文 + “未润色”标记
+（润色：配额 / 每分钟上限 / 全局预算在 api 入口检查；翻译：超过 2 倍预算直接 failed）
+请求 → 缓存命中？→ 是：直接返回（不计成本、不计配额）
+         ↓ 否
+   本进程并发上限（16）→ 熔断器(主供应商) → 超时 → 主供应商（默认 Gemini）
+         ↓ 失败、超时、429 或熔断打开
+   熔断器(备用) → 超时 → 备用供应商（默认 Claude；未配置 key 则没有这一步）
+         ↓ 失败
+   翻译：failed，卡片显示原文 + “暂无法翻译”，之后自动重试（7.4）
+   润色：fallback，卡片显示基础译文 + “未润色”
 ```
+
+MVP 不接机器翻译兜底（v1.9）：又是一家供应商、一笔费用，两家 LLM 同时失败的概率很低。
 
 ### 10.2 关键设计
 
 | 项 | 设计 |
 | :-- | :-- |
-| 抽象 | `Translator` 与 `Polisher` 两个接口，供应商可配置替换，业务层不感知具体模型 |
-| 模型分层 | 基础翻译用低成本模型；润色用质量更高的模型；均通过 `app_config` 切换 |
+| 抽象 | `Translator` 与 `Polisher` 两个接口，供应商可配置替换，业务层不感知具体模型；`pkg/llm` 下 `gemini`、`claude`、`fake` 三个实现（v1.9） |
+| 供应商（v1.9） | 主供应商由 `AI_PRIMARY` 决定（默认 `gemini`），另一家当备用。上线前用 10.3.9 的评测集比较两家，再定谁当主力 |
+| 模型分层 | 基础翻译用低成本模型；润色用质量更高的模型。v1.9：模型名都在环境变量里（15.4），代码不写死；Claude 默认翻译与润色都用 `claude-haiku-5-5`（调用时 `effort=low`）；Gemini 在 AI Studio 里选当时免费层可用的型号 |
 | 提示词管理 | 提示词模板带版本号（`prompt_version`），按语言 × MBTI 维度组织（拼装方式见 10.3.8），版本号进入缓存键，改提示词即自然失效旧缓存 |
-| 输出约束 | 要求模型只返回结构化结果（译文 + 风险标记）；解析失败视为一次失败，走降级 |
+| 输出约束 | 要求模型只返回结构化结果 `{ text, risk }`（译文 + 风险标记）；Gemini 用 JSON schema 约束的响应格式，Claude 用 `output_config.format`（v1.9）；解析失败视为一次失败，走降级；`risk` 在 B6 接入后置审核 |
+| 基础翻译要求（v1.9） | 只翻译不改写；数字、时间、人名、链接、emoji 原样保留；礼貌体同 10.3.5；用户内容只放在 user 段并用分隔标记包起来，原文中的任何指令都不执行 |
 | 事实保护 | 润色提示词明确要求不得增删事实、数字、时间、人名；后端对数字、时间、链接等做一致性校验，不一致则回退到基础译文（校验项见 10.3.7） |
-| 缓存键 | 基础翻译：`tr:{sha256(规范化原文)}:{src}:{tgt}:{pv}`，TTL 7 天；润色：`po:{sha256}:{src}:{tgt}:{接收者MBTI}:{档位}:{pv}`，TTL 7 天（仅按接收者 MBTI 分桶，把键空间压到 16 档以提高命中；v1.7 加入档位） |
+| 缓存键 | 基础翻译：`tr:{sha256(规范化原文)}:{src}:{tgt}:{pv}`，TTL 7 天；润色：`po:{sha256(规范化基础译文)}:{src}:{tgt}:{接收者MBTI}:{档位}:{pv}`，TTL 7 天（仅按接收者 MBTI 分桶，把键空间压到 16 档以提高命中；v1.7 加入档位）。规范化 = Unicode NFC、去首尾空白、连续空白合为一个（v1.9）。Redis 不可用时直通 |
 | 短语模板 | 早安/晚安/谢谢等高频短语由服务端维护多语言模板并随版本下发给客户端缓存，发送时只传 `phrase_id`，完全不触发 AI |
 | 超时 | 单次调用基础翻译 3 秒、润色 6 秒；超时即视为失败 |
-| 熔断 | 每个供应商一个 gobreaker：最近 20 次请求失败率 ≥ 50% 打开，30 秒后半开探测 |
-| 配额 | 每用户每日润色次数默认 30【假设】、每分钟 6 次；全局设日预算，超预算自动关闭润色只保留基础翻译 |
-| 成本统计 | 每次调用记录 token 与估算成本，写 `ai_usage_daily`，按语言、功能拆分，供看板使用 |
-| 隐私 | 发给供应商的内容只含当前文本，不带用户标识；与供应商确认不将数据用于训练 |
+| 熔断 | 每个供应商一个 gobreaker：最近 20 次请求失败率 ≥ 50% 打开，30 秒后半开探测；翻译与润色共用该供应商的熔断器 |
+| 并发 | 每个进程最多同时 16 个 AI 调用（v1.9，多节点时按节点算） |
+| 配额 | 每用户每日润色次数默认 30【假设】（按用户自己的时区算“每日”）、每分钟 6 次；发送方开关每条消息扣发送方 1 次，接收方按钮扣接收方 1 次（v1.9）；全局设日预算 `AI_DAILY_BUDGET_USD`，翻译与润色的估算成本都累加进去（`ai:cost:{yyyymmdd}`），超预算关闭润色、保留基础翻译，**超过 2 倍预算连翻译也停止**（新消息直接 `failed`，显示原文，打 error 日志）【假设，v1.9】；Redis 不可用时退化为进程内计数 |
+| 成本统计 | 每次真实调用按返回的 token 数和代码里的价目表估算成本（Gemini 免费层记 0），写 `ai_usage_daily`（B5b），按功能拆分，供看板使用；校验回退按校验项分类记日志与指标 |
+| 隐私 | 发给供应商的内容只有原文、基础译文、语言和接收方 MBTI，不带用户标识、昵称；生产环境必须使用承诺不将数据用于训练的服务 |
+| Gemini 免费层（v1.9） | 免费层的输入输出会被 Google 用来改进产品，并可能有人工审阅，**只能用于开发、只发测试消息**。`GEMINI_FREE_TIER` 默认 true；`APP_ENV=production` 且 Gemini 在链上时必须为 false，否则拒绝启动。有真实用户前，升级 Gemini 付费层，或把 `AI_PRIMARY` 改为 `claude` |
 
 ### 10.3 MBTI 语气重构逻辑（v1.7 新增）
 
@@ -942,14 +990,17 @@ MVP 的礼貌等级固定如上；PRD 8.2 提到的“用户可设置敬语等�
 | :-- | :-- | :-- | :-- |
 | `presence:u:{uid}` | zset | 在线状态：成员为连接 id，分数为过期时间；未过期成员数 > 0 即在线（v1.4） | 成员 70 秒，心跳刷新；键 140 秒，留给离线扫描（v1.8） |
 | `room:{rid}:seq` | counter | 房间事件序号 | 无 |
-| `room:{rid}:events` | stream | 断线重放，最多 500 条（v1.4：B4 不使用，B5 再评估） | 24 小时 |
 | `ws:events` | pub/sub | 跨节点事件分发 | — |
 | `rl:join:u:{uid}`、`rl:join:ip:{ip}` | 令牌桶 / 计数 | 验证码输入限流 | 滑动窗口 |
 | `cd:join:u:{uid}` | string | 输错冷却标记 | 30 分钟 |
 | `rl:msg:u:{uid}`、`rl:polish:u:{uid}` | 令牌桶 | 消息与润色限流 | — |
-| `quota:polish:{uid}:{yyyymmdd}` | counter | 每日润色配额 | 到次日 |
+| `quota:polish:{uid}:{yyyymmdd}` | counter | 每日润色配额（日期按用户时区） | 到次日 |
+| `ai:cost:{yyyymmdd}` | counter | 当日（UTC）AI 估算成本，单位微美元；润色关闭线与翻译硬上限（v1.9） | 2 天 |
 | `tr:*`、`po:*` | string | 翻译与润色缓存 | 7 天 |
+| `asynq:*` | 多种 | asynq 任务队列（`translate`、`polish`、`default`）；丢失后由补偿扫描从数据库补回（v1.9） | 由 asynq 管理 |
 | `cfg:app` | string | 运营配置缓存 | 30 秒 |
+
+v1.9：删除原 `room:{rid}:events`（断线重放用的 Stream）。消息断线后从数据库拉取（7.4），状态事件靠订阅快照（7.3），都不需要它。
 
 约定：Redis 只存**可丢失**数据。Redis 整体丢失后，系统应能自动恢复（限流计数清零、presence 重建、缓存回源），不允许出现业务数据丢失。
 
@@ -972,14 +1023,14 @@ MVP 的礼貌等级固定如上；PRD 8.2 提到的“用户可设置敬语等�
 
 | 故障 | 表现 | 降级行为 |
 | :-- | :-- | :-- |
-| 主 LLM 超时/熔断 | 翻译变慢 | 切备用供应商 → 机翻 → 原文 + 未翻译标记，用户可手动重试 |
-| AI 日预算耗尽 | — | 关闭润色，保留基础翻译与短语 |
-| Redis 故障 | 限流与缓存失效，跨节点事件分发中断 | 限流改用进程内令牌桶（偏严）；缓存直通；WS 事件由本机 Hub 直接推送（不带 seq），presence 改用进程内连接计数，单节点下实时功能不受影响；Redis 恢复后向本机连接发 `resync`（v1.4）；**消息收发不受影响** |
-| 队列积压 | 译文延迟 | 先发原文卡片（标记翻译中），译文到达后用 `message.polished` 同类事件补发 |
+| 主 LLM 超时/熔断 | 翻译变慢 | 切备用供应商 → 都失败则原文 + “暂无法翻译”，后台自动重试 24 小时（v1.9：不接机翻，不提供手动重试） |
+| AI 日预算耗尽 | — | 关闭润色，保留基础翻译与短语；超过 2 倍预算连翻译也停止，新消息显示原文（v1.9） |
+| Redis 故障 | 限流与缓存失效，跨节点事件分发中断，asynq 停止 | 限流、润色配额、预算改用进程内计数（偏严）；缓存直通；WS 事件由本机 Hub 直接推送（不带 seq），presence 改用进程内连接计数，单节点下实时功能不受影响；Redis 恢复后向本机连接发 `resync`（v1.4）；**消息收发不受影响**：无法入队时 api 在本进程内翻译并本机推送，积下的由 worker 补偿扫描补上（v1.9） |
+| 队列积压 | 译文延迟 | 接收者已经先看到原文卡片（标记翻译中），译文到达后以 `message.translated` 更新（v1.9） |
 | 数据库慢 | 全面变慢 | 只读路径加超时；拒绝非核心写入（打卡、装扮）并提示稍后再试 |
 | 推送通道故障 | 无推送 | 不影响应用内消息，记录失败，重试 3 次后放弃 |
 
-降级开关全部放在 `app_config`，**不需要发版即可切换**，这是单人运维时最重要的应急能力。
+降级开关全部放在 `app_config`，**不需要发版即可切换**，这是单人运维时最重要的应急能力。v1.9：B5 还没有 `app_config` 表，润色总开关先用环境变量 `AI_POLISH_ENABLED`（改后重启生效），需要热切换时再建表。
 
 ---
 
@@ -1062,18 +1113,22 @@ GOOGLE_CLIENT_ID=                          # Google Cloud「Web 应用」类型 
 DEV_LOGIN_ENABLED=true                     # 仅 local 允许为 true；APP_ENV 不是 local 时若为 true，启动直接失败
 
 # ===== AI 网关 =====
-AI_PROVIDER=fake                           # fake | live；本地默认 fake，不花钱
+AI_PROVIDER=fake                           # fake | live；本地默认 fake，不花钱；production 必须为 live
 FAKE_AI_LATENCY_MS=300                     # 仅 fake：模拟延迟
-FAKE_AI_FAIL_RATE=0                        # 仅 fake：模拟失败比例 0~1，用于降级演练
-LLM_PRIMARY_BASE_URL=
-LLM_PRIMARY_API_KEY=
-LLM_PRIMARY_MODEL_TRANSLATE=
-LLM_PRIMARY_MODEL_POLISH=
-LLM_SECONDARY_BASE_URL=
-LLM_SECONDARY_API_KEY=
-MT_FALLBACK_API_KEY=
-AI_DAILY_BUDGET_USD=5
+FAKE_AI_FAIL_RATE=0                        # 仅 fake：假主供应商的失败比例 0~1，用于降级演练
+FAKE_AI_SECONDARY_FAIL_RATE=0              # 仅 fake：假备用供应商的失败比例 0~1（v1.9）
+AI_PRIMARY=gemini                          # gemini | claude，另一家当备用（v1.9）
+GEMINI_API_KEY=                            # Gemini 当主时必填；当备用时可空（空着就没有备用）
+GEMINI_MODEL_TRANSLATE=                    # 配了 GEMINI_API_KEY 就必填，在 AI Studio 选
+GEMINI_MODEL_POLISH=
+GEMINI_FREE_TIER=true                      # 免费层数据会被 Google 用于改进产品；production 且 Gemini 在链上时必须为 false
+ANTHROPIC_API_KEY=                         # Claude 当主时必填；当备用时可空。在 Claude Console 申请，与 Claude Code 订阅分开计费
+CLAUDE_MODEL_TRANSLATE=claude-haiku-5-5
+CLAUDE_MODEL_POLISH=claude-haiku-5-5
+AI_POLISH_ENABLED=true                     # 润色总开关（B5 没有 app_config 表，改后重启生效）
 AI_POLISH_DAILY_QUOTA=30
+AI_DAILY_BUDGET_USD=5                      # 超过关闭润色；超过 2 倍连翻译也停止
+WORKER_CONCURRENCY=10                      # asynq 并发数
 
 # ===== 推送 / 存储 / 监控 =====
 FCM_CREDENTIALS_FILE=                      # 留空则推送只打日志，不真正发送
@@ -1093,9 +1148,9 @@ OWNER_REGEN_DAILY_LIMIT=3       # 房主每日自助补码上限
 
 | 项 | 本地 | 预发 / 线上 |
 | :-- | :-- | :-- |
-| 必填（缺则启动失败） | `DATABASE_URL`、`REDIS_URL`、`JWT_SIGNING_KEY` | 同左；`AI_PROVIDER=live` 时还需 `LLM_PRIMARY_*`、`S3_*`、FCM 凭据 |
+| 必填（缺则启动失败） | `DATABASE_URL`、`REDIS_URL`、`JWT_SIGNING_KEY` | 同左；`AI_PROVIDER=live` 时还需主供应商的 key 与模型名（v1.9）、`S3_*`、FCM 凭据 |
 | 登录 | `DEV_LOGIN_ENABLED=true`，用开发登录 | 必须为 false，配置 `APPLE_CLIENT_ID`、`GOOGLE_CLIENT_ID` |
-| AI | `AI_PROVIDER=fake` | `live`，使用真实供应商密钥；预发用测试额度 |
+| AI | `AI_PROVIDER=fake`；要看真实效果时改 `live`，Gemini 用免费层（只发测试消息），Claude 用小额充值的 key（v1.9） | `live`，使用真实供应商密钥；预发用测试额度；线上 Gemini 必须是付费层，或改由 Claude 当主力 |
 | 推送 | 留空，只打日志 | FCM 凭据 |
 | 存储 | MinIO | 云对象存储 |
 | 密钥来源 | `.env` 文件 | 平台环境变量 / 密钥服务 |
@@ -1107,7 +1162,9 @@ OWNER_REGEN_DAILY_LIMIT=3       # 房主每日自助补码上限
 - 启动自检，任一不满足就拒绝启动：
   - `APP_ENV` 必填且只能是 `local | staging | production`，**不设默认值**（缺失时若默认成 local 会悄悄放宽下面的检查）。
   - 非 local：`DEV_LOGIN_ENABLED` 必须为 false、`JWT_SIGNING_KEY` 不少于 32 位、`DATABASE_URL` 不得使用 `sslmode=disable`。
-  - `production`：`AI_PROVIDER` 必须为 live。
+  - `production`：`AI_PROVIDER` 必须为 live；Gemini 在链上时 `GEMINI_FREE_TIER` 必须为 false（v1.9）。
+  - `AI_PROVIDER=live`：主供应商（`AI_PRIMARY`）的 key 与模型名必填；备用的 key 可空（v1.9）。
+- API key 只来自环境变量，不进日志、不进仓库；`.env.example` 只放空值（v1.9）。
 - 监听地址 `APP_HOST`：local 默认 `127.0.0.1`（开发登录无需密码，不应暴露到局域网），其余环境默认 `0.0.0.0`。
 - 鉴权：每个受保护请求在验签后都会查一次 `users.status`，被封号或删除的账号立即失效（返回 403 `ACCOUNT_DISABLED`），不等 access token 过期。
 - 反向代理：路由默认**不信任任何代理**（`X-Forwarded-For` 可被客户端伪造）。部署到 Caddy 后面时必须把代理地址加入可信列表，否则按 IP 限流会把所有用户算成同一个 IP。
@@ -1175,7 +1232,7 @@ volumes:
 
 1. `cp .env.example .env`（本地默认值可直接使用）。
 2. `task up`，再 `task migrate`，再 `task seed`（Windows 用 go-task；对应 `make` 写法见上表）。
-3. 运行 `task dev`（worker 尚未实现，消息阶段再加 `task worker`）。
+3. 运行 `task dev`；另开一个终端运行 `task worker`（v1.9：B5 起消息翻译在 worker 里执行；不开 worker 时消息照常送达，但一直停在“翻译中”）。
 4. `curl localhost:8090/healthz` 与 `/readyz` 返回正常。
 
 **本地替代外部依赖**
@@ -1183,7 +1240,7 @@ volumes:
 | 线上依赖 | 本地做法 |
 | :-- | :-- |
 | Apple / Google 登录 | `POST /auth/login/dev`（body 只含邮箱，直接签发 token）；只在 `APP_ENV=local` 且 `DEV_LOGIN_ENABLED=true` 时注册该路由【假设，本地与自动化测试专用】 |
-| LLM / 机翻 | `AI_PROVIDER=fake`：返回“\[目标语言\] 原文”，可用 `FAKE_AI_LATENCY_MS`、`FAKE_AI_FAIL_RATE` 模拟慢与失败 |
+| LLM | `AI_PROVIDER=fake`：主、备两个假供应商；翻译返回“\[目标语言\] 原文”，润色返回“\[MBTI\] 基础译文”；可用 `FAKE_AI_LATENCY_MS`、`FAKE_AI_FAIL_RATE`、`FAKE_AI_SECONDARY_FAIL_RATE` 模拟慢与失败（v1.9）。要看真实效果时改 `live` 并填 Gemini / Claude 的 key |
 | FCM 推送 | 不配置凭据，推送只打印日志 |
 | 对象存储 | MinIO（控制台 `localhost:9001`） |
 | 内容审核 API | 只启用本地词库 |
@@ -1200,9 +1257,9 @@ volumes:
 1. 用开发登录给 A、B 各拿一个 token。
 2. 用 `wscat -c ws://localhost:8090/api/v1/ws -H "Authorization: Bearer <token>"` 模拟两个客户端订阅同一小屋。
 3. B 使用 `DEVA2345` 入房，A 的连接应收到 `member.joined`，B 收到奖励验证码。
-4. A 发一条消息，B 的连接应收到 `message.new`，含原文与基础译文。
-5. 停掉 Redis：消息收发仍应正常，限流退化为进程内。
-6. 设置 `FAKE_AI_FAIL_RATE=1` 重启 worker：消息应以原文 + 未翻译标记送达。
+4. A 发一条消息：B 的连接先收到 `message.new`（原文，译文 `pending`），随后收到 `message.translated`（基础译文）；A 的连接也收到自己的 `message.new`。
+5. 停掉 Redis：消息收发仍应正常，限流退化为进程内，译文由 api 进程内翻译后推送。
+6. 设置 `FAKE_AI_FAIL_RATE=1` 重启 worker：译文仍由假备用供应商给出；再加 `FAKE_AI_SECONDARY_FAIL_RATE=1`：消息以原文 + `failed` 送达，把两个比例改回 0 重启后，补偿扫描在约 10 分钟内补上译文（v1.9）。
 7. 重启 api：客户端应收到 `server.restart` 并重连。
 
 **让手机或模拟器访问本机后端**：端口以 `.env` 的 `APP_PORT` 为准（默认 8090）。Android 模拟器用 `10.0.2.2:8090`，iOS 模拟器用 `localhost:8090`，真机用电脑的局域网 IP（同一 Wi-Fi，`APP_HOST=0.0.0.0`，防火墙放行 8090）；Android 真机也可用 `adb reverse tcp:8090 tcp:8090`。
@@ -1225,7 +1282,8 @@ volumes:
 | :-- | :-- |
 | 单元测试 | 验证码生成与格式化、MBTI→宠物映射、语气路由、限流逻辑、短语模板 |
 | 并发集成测试 | 100 协程抢同一房间最后一席；同一用户重复提交同一验证码（幂等）；奖励只发一次；房间满员后其余验证码自动作废；同一用户并发加入两间房（断言最多 2 间）；房主踢人/解散/补码与入房并发（不超员、不死锁，见 7.8） |
-| AI 网关测试 | 用假供应商注入延迟与失败：超时、熔断打开与恢复、降级链路、缓存命中 |
+| AI 网关测试 | 用假供应商注入延迟与失败：超时、熔断打开与恢复、降级链路、缓存命中；Gemini 与 Claude 客户端用本地假 HTTP 服务器测请求格式、解析、超时与 429，自动化测试不访问外网、不花钱（v1.9） |
+| 消息测试（v1.9） | 幂等（同一 `client_msg_id` 并发只写一条）；接收者在发送时确定；被移除者收不到之后的消息事件、拉不到消息；未成年人不能私聊；补偿扫描能捡起停住的翻译；润色配额不重复扣；10.3.7 五项校验各有用例 |
 | 契约测试 | 以 `openapi.yaml` 为准校验响应结构，前端同步使用生成的客户端 |
 | 压测（k6） | ① 5 万 WS 长连接 + 心跳；② 房间内消息广播；③ 验证码 500 QPS 峰值；④ AI 调用打到限流边界；压测在预发环境，用假供应商，避免真实花费 |
 | 故障演练 | 手动停 Redis、停主 LLM、杀 api 进程，验证第 12 章降级行为 |
@@ -1240,7 +1298,7 @@ volumes:
 | B2 | 登录（Apple/Google）、token、onboarding、宠物映射 | 前端可注册 |
 | B3 | 验证码生成、入房事务、奖励发放、限流冷却（含登录限流）、房主踢人/解散/自助补码/退出（7.8）、并发测试；分 B3a（入房主路径）与 B3b（房主管理）两段交付 | **核心机制跑通** |
 | B4 | WS Hub、presence（在线 / 离线）、事件分发与 Redis 故障兜底、订阅快照、`pet.tap`；断线重放改为每次订阅下发快照（v1.4） | 小屋实时同步 |
-| B5 | 消息收发、短语模板、AI 网关（缓存/熔断/降级/配额） | 跨语言消息可用 |
+| B5 | 消息收发、短语模板、AI 网关（缓存/熔断/降级/配额）；v1.9 分两段：**B5a** 消息与翻译（迁移 0004、短语、发送与拉取、`message.new` / `message.translated`、worker、Gemini + Claude 翻译网关、重试与补偿扫描、成本累加与翻译硬上限），**B5b** 润色与成本（两个润色入口、`message.polished`、10.3 提示词与校验、配额与预算、`ai_usage_daily`、评测工具）；审核、屏蔽、推送、已读不在 B5 | 跨语言消息可用 |
 | B6 | 内容审核、举报屏蔽、未成年人规则、打卡与装扮（房主解散已提前到 B3） | 合规与养成 |
 | B7 | 推送、Widget 快照、分享卡片数据、账号删除 | 功能补齐 |
 | B8 | 压测、故障演练、监控告警、备份恢复演练、灰度准备 | 可灰度上线 |
@@ -1259,8 +1317,9 @@ volumes:
 4. 未成年人与成年人双向隔离：未成年人只能进入全员未成年的房间，成年人也不能进入含未成年成员的房间。
 5. 登录方式 MVP 只做 Apple + Google。
 6. **中国大陆**：已确认暂不首发。本文按海外单区域部署设计；大陆的独立部署、备案、生成式 AI 服务合规、厂商推送通道均不在 MVP 范围，后续进入大陆时再评估。
-7. 供应商选择（LLM、机翻、审核）尚未定，本文只定义抽象接口。
+7. 供应商选择：LLM 开发期定为 Gemini 主力 + Claude 备用（v1.9），上线前用评测集再定谁当主力；不接机器翻译；内容审核供应商尚未定，本文只定义抽象接口。
 8. MBTI 语气重构（10.3，v1.7）：只按接收方 MBTI 调整，不用发送方 MBTI 和双方关系；MVP 只开放“轻”档；敬语等级固定，用户自定义延后；极短文本不调用模型；改写越界直接回退基础译文、不换供应商重试；评测门槛的各项数值。
+9. 消息与 AI 网关（v1.9，B5）：落库即推原文卡片；翻译失败不提供手动重试，24 小时内自动重试；源语言取发送者母语，不做语言识别；发送方润色开关每条消息扣 1 次、失败不退；超过 2 倍日预算停止翻译；纯 emoji / 标点的文本不翻译；已读与 30 天清理移到 B7。
 
 ### 18.2 主要风险
 
@@ -1269,7 +1328,8 @@ volumes:
 | 单人开发周期超期 | 严格按优先级砍功能，核心只保验证码、小屋、跨语言消息三件事 |
 | 单点故障（单机阶段） | 备份演练、降级开关、外部探活；放量前切托管数据库 |
 | 语气重构改坏原意或显得刻板（v1.7） | 只开放“轻”档；程序校验回退（10.3.7）；评测达标才上线、按点踩率调整（10.3.9）；输出不提 MBTI |
-| AI 成本失控 | 手动润色、缓存、短语模板、每日预算熔断 |
+| AI 成本失控 | 手动润色、缓存、短语模板、每日预算熔断；超过 2 倍预算连翻译也停止（v1.9） |
+| 开发期免费 AI 额度带到线上（v1.9） | Gemini 免费层数据会被用于改进 Google 的产品；`GEMINI_FREE_TIER` 在 production 下必须为 false，否则拒绝启动 |
 | 验证码被黑产囤积 | 关系树风控、设备限制、码有效期、奖励上限 |
 | 长连接数超预期 | 压测确定单节点上限，事件分发已支持多节点 |
 
