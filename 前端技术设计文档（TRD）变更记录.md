@@ -4,6 +4,12 @@
 
 ---
 
+## V1.9 变更说明
+
+对齐后端 TRD v1.9 的 B5 消息协议与 PRD v1.8。① **原文卡片先到**（4.5②、11.4、第 18 章）：接收者先收到 `message.new`（原文，译文 `pending`，卡片显示“翻译中”骨架屏），翻译结束收到新事件 `message.translated`，润色结束收到 `message.polished`。② **消息事件的 reducer 规则**（第 7 章规则 10）：三种事件都不带 seq，负载都是完整的 `MessageView`，按 `message.id` 插入或更新，与到达顺序无关；delivery 状态只前进不后退。发送者本人也会收到自己的 `message.new`（带 `client_msg_id`），用于替换 outbox 的本地气泡和同步其他设备。③ **重新订阅后补消息**（第 7 章规则 11、9.2、第 12 章）：每次收到 `room.snapshot` 都用 `GET /rooms/{id}/messages?after=<本地最新消息 id>` 补齐；拉取结果一律从旧到新，支持 `before` / `after` 双向翻页。④ **翻译失败不提供手动重试**（11.4、第 18 章、21.1）：卡片显示原文 + “暂无法翻译”，服务端 24 小时内自动重试，成功后自动换成译文。⑤ **润色改为异步**（8.2、11.4）：`POST /deliveries/{id}/polish` 立即返回 202，结果走 `message.polished`，取消原先放宽到 12 秒的超时；按钮只在文本消息、翻译完成、尚未润色时显示；发送时润色次数已用完（`polish_requested=false`）消息照常发出并轻提示。⑥ **新增错误码文案**（8.2）：`QUOTA_EXCEEDED` 按 `details.reason` 分四种，`POLISH_NOT_READY`、`DELIVERY_NOT_FOUND`、`CONTENT_BLOCKED`。⑦ 发消息的幂等以请求体 `client_msg_id` 为准（8.1）；未成年人不显示私聊入口（11.4）；已读延到 B7（21.1）。
+
+---
+
 ## V1.8 变更说明
 
 前后端代码审查发现的问题，对齐后端 TRD v1.8，PRD 不变。① **网络不好不再被登出**（8.1）：v1.7 的 `AuthInterceptor` 只要刷新失败就清空 token 并回到登录页，地铁里刷新超时或服务端回 5xx 都会把用户踢下线。现在只有服务端明确拒绝（400 / 401 / 403：`REFRESH_INVALID`、`REFRESH_REUSED`、`ACCOUNT_DISABLED` 等）才结束会话；网络错误与 5xx 保留 token，原请求以这次刷新的失败（如 `NETWORK`）报错，下一个请求或用户重试时再刷新。启动恢复会话时因此显示“可重试”，不会误回登录页。② **两个 token 一次写入**（8.1、第 12 章）：v1.7 分两次写 access 与 refresh，中间被杀会留下“新 access + 已作废的 refresh”，下次刷新被后端当成重放、整族吊销。现在两者以 JSON 存在同一个键 `auth_tokens` 里；旧版本的两个键在第一次读取时迁移并删除。配合后端 v1.8 的 60 秒重试宽限，刷新响应在路上丢失也不再导致登出。③ **新增 `err_NOT_READY` 文案**（8.2）：后端在服务重启或 Google 公钥暂时不可达时返回 503 `NOT_READY`，界面提示“服务暂时不可用，请稍后重试”，不再落到通用错误文案。

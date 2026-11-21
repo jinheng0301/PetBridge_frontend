@@ -2,9 +2,9 @@
 
 | 项目 | 内容 |
 | :-- | :-- |
-| 版本 | v1.8（草案，待自评审）<br>• v1.8 较 v1.7：刷新 token 失败只在服务端拒绝时登出，两个 token 存在同一个键里一次写入，新增 `NOT_READY` 文案。<br>• v1.7 较 v1.6：对齐后端 TRD v1.7 的 MBTI 语气重构规则，信使卡片处理润色回退（“未润色”）。<br>• v1.6 较 v1.5：F0 联调后补齐实现细节：界面语言的取值顺序、启动时网络失败可重试、Google 取消与无账号不报错、设备时区回落、可空枚举的契约写法。<br>• v1.5 较 v1.4：对齐后端 TRD v1.5 的 WebSocket 加固：处理关闭码 4401、升级 429 / 503 与 `room.sub` 限流。<br>• v1.4 较 v1.3：对齐后端 B4 的 WebSocket 协议，reducer 改为以订阅快照为准，presence 只有在线 / 离线、离线显示为睡觉。<br>• v1.3 较 v1.2：对齐 PRD v1.5 与后端 TRD v1.3，F0 登录与 onboarding 设计定稿，首页改为四个 Tab，契约生成改用 swagger_parser。 |
-| 对应 PRD | 《跨国 MBTI 情感 AI 电子宠物 PRD v1.7》 |
-| 配套文档 | 《后端 TRD（Go）v1.8》：REST 接口见其第 8 章，WebSocket 协议见其第 9 章，本文以其为准 |
+| 版本 | v1.9（草案，待自评审）<br>• v1.9 较 v1.8：对齐后端 TRD v1.9 的 B5 消息协议：原文卡片先到、译文与润色另发事件，消息事件按 id 插入或更新、状态只前进，重连后用 `after` 补消息，翻译失败不提供手动重试，润色改为异步、新增错误码文案。<br>• v1.8 较 v1.7：刷新 token 失败只在服务端拒绝时登出，两个 token 存在同一个键里一次写入，新增 `NOT_READY` 文案。<br>• v1.7 较 v1.6：对齐后端 TRD v1.7 的 MBTI 语气重构规则，信使卡片处理润色回退（“未润色”）。<br>• v1.6 较 v1.5：F0 联调后补齐实现细节：界面语言的取值顺序、启动时网络失败可重试、Google 取消与无账号不报错、设备时区回落、可空枚举的契约写法。<br>• v1.5 较 v1.4：对齐后端 TRD v1.5 的 WebSocket 加固：处理关闭码 4401、升级 429 / 503 与 `room.sub` 限流。<br>• v1.4 较 v1.3：对齐后端 B4 的 WebSocket 协议，reducer 改为以订阅快照为准，presence 只有在线 / 离线、离线显示为睡觉。<br>• v1.3 较 v1.2：对齐 PRD v1.5 与后端 TRD v1.3，F0 登录与 onboarding 设计定稿，首页改为四个 Tab，契约生成改用 swagger_parser。 |
+| 对应 PRD | 《跨国 MBTI 情感 AI 电子宠物 PRD v1.8》 |
+| 配套文档 | 《后端 TRD（Go）v1.9》：REST 接口见其第 8 章，WebSocket 协议见其第 9 章，本文以其为准 |
 | 技术栈 | Flutter 3.x 稳定版 / Dart 3 |
 | 平台 | iOS 15+、Android 8+（竖屏，手机优先，不适配平板） |
 | 开发模式 | **单人全栈开发**，选型以“一个人能长期维护”为第一约束 |
@@ -244,15 +244,15 @@ sequenceDiagram
     C->>Repo: sendMessage(...)
     Repo->>API: POST /rooms/{id}/messages（Idempotency-Key = client_msg_id）
     alt 成功 202
-        API-->>C: message_id
-        C->>O: 标记已发送
+        API-->>C: MessageView（发送者视角，含 message.id；polish_requested=false 时提示润色次数已用完）
+        C->>O: 标记已发送，按 client_msg_id 把本地气泡换成服务端消息
     else 网络错误 / 5xx
         API-->>API: RetryInterceptor 复用同一幂等键重试（最多 2 次）
         API-->>C: 仍失败 → 保持 pending，网络恢复后补发；3 次失败标记 failed 显示重试入口
     end
-    Note over WS,Red: 译文就绪后服务端推送 message.new
+    Note over WS,Red: 接收者：先收到 message.new（原文，翻译中），再收到 message.translated（译文）（v1.9）
     WS-->>Red: events 流
-    Red->>C: 更新消息的译文与「已润色」状态
+    Red->>C: 按 message.id 插入或更新，状态只前进
     C-->>UI: 信使卡片刷新
 ```
 
@@ -276,8 +276,8 @@ sequenceDiagram
         Red->>RoomC: 更新成员、presence、能量、装扮
         Red->>Rooms: member_count 变化
         Rooms->>Sess: 重新派生 solo / inRoom
-    else message.new / message.polished
-        Red->>ChatC: 写入或更新消息
+    else message.new / message.translated / message.polished
+        Red->>ChatC: 按 message.id 插入或更新消息（v1.9，见第 7 章规则 10）
     else pet.action
         Red->>RoomC: 在对应座位播放互动动画
     else room.kicked（不依赖 seq，收到即处理；reason=left 时不提示）
@@ -481,6 +481,8 @@ unauthenticated ──登录成功──► needsOnboarding ──完成──�
 7. 每次 `last_seq` 变化写入 prefs（节流，最多每秒一次）。
 8. 收到 `room.kicked`（被房主移除、房间被解散，或自己在另一台设备上退出 `reason=left`）：取消该房间订阅，从 `roomsProvider` 移除，清除该房间的本地消息缓存与 `last_seq`，并重新计算会话状态（可能退回 `solo`）；该事件不依赖 `seq`，收到即处理。`left` 不弹提示，其余只提示“你已离开该小屋”。
 9. 收到 `error` 帧：按 `ref` 找到对应的客户端帧；`room.sub` 得到 `ROOM_NOT_FOUND` 时，按房间已不存在处理（同规则 8，但不提示）（v1.4）。
+10. **消息事件**（v1.9）：`message.new`、`message.translated`、`message.polished` 都不带 seq，负载都是完整的 `MessageView`，交给 `chatControllerProvider` 按 `message.id` **插入或更新**，与到达顺序无关（`message.translated` 可能比 `message.new` 先到）。delivery 状态只前进不后退：`translation_status` 按 `pending < failed < done`，`polish_status` 按 `none < pending < done / fallback`，收到比本地更旧的状态就忽略。发送者本人收到的 `message.new` 带 `client_msg_id`、`delivery` 为空，用它把 outbox 里的本地气泡替换成服务端消息（其他设备则直接插入）。
+11. **重新订阅后补消息**（v1.9）：每次对某房间收到 `room.snapshot`（包括断线重连、`resync`、seq 缺口引起的重新订阅），都对该房间调用 `GET /rooms/{id}/messages?after=<本地最新消息 id>` 补齐断线期间的消息；`has_more` 为 true 时继续翻页。本地没有缓存时取最新一页。
 
 ---
 
@@ -491,15 +493,15 @@ unauthenticated ──登录成功──► needsOnboarding ──完成──�
 | 拦截器 | 职责 |
 | :-- | :-- |
 | `AuthInterceptor` | 附加 access token；收到 401 时**单飞刷新**：多个并发请求共享同一次 refresh，成功后重放。服务端拒绝刷新（400 / 401 / 403）时清空 token、登出并回到登录页；网络错误或 5xx 时保留 token，原请求以该失败（如 `NETWORK`）报错，之后再刷新（v1.8） |
-| `IdempotencyInterceptor` | 对 `POST /rooms/join`、`/rooms/{id}/messages` 等写请求带 `Idempotency-Key` / `client_msg_id`；**重试时复用同一个键**，由 controller 生成、拦截器透传 |
+| `IdempotencyInterceptor` | 对 `POST /rooms/join`、`/rooms/{id}/messages` 等写请求带 `Idempotency-Key` / `client_msg_id`；**重试时复用同一个键**，由 controller 生成、拦截器透传。v1.9：发消息的幂等以请求体里的 `client_msg_id` 为准（1–64 个字母、数字、`-`、`_`，用 UUID 即可），服务端不读 `Idempotency-Key` 头 |
 | `RetryInterceptor` | 仅对网络错误、5xx、带幂等键的请求重试，最多 2 次，指数退避 + 抖动；4xx 业务错误不重试 |
 | `ErrorMapInterceptor` | 把 `{error:{code}}` 映射为 `AppFailure(code, retryAfter?)`，UI 只认 `code` |
 | `LogInterceptor` | 仅 debug；release 不记录请求体与响应体 |
 
 ### 8.2 约定
 
-- 超时：连接 5 秒、接收 10 秒；润色相关请求单独放宽到 12 秒（服务端 6 秒超时 + 排队）。
-- 错误码映射到本地化文案：`err.CODE_INVALID`、`err.ROOM_FULL` 等，文案放 ARB，**不显示服务端 `message`**。503 `NOT_READY`（服务重启、登录提供方暂时不可达）显示 `err_NOT_READY`“服务暂时不可用，请稍后重试”（v1.8）。
+- 超时：连接 5 秒、接收 10 秒。v1.9：润色改为异步（`POST /deliveries/{id}/polish` 立即返回 202，结果走 `message.polished`），不再需要单独放宽超时。
+- 错误码映射到本地化文案：`err.CODE_INVALID`、`err.ROOM_FULL` 等，文案放 ARB，**不显示服务端 `message`**。503 `NOT_READY`（服务重启、登录提供方暂时不可达）显示 `err_NOT_READY`“服务暂时不可用，请稍后重试”（v1.8）。v1.9 新增：`QUOTA_EXCEEDED` 按 `details.reason` 分四条文案（`daily_quota` 今天的润色次数用完了，明天再来；`minute_limit` 太频繁，稍后再试；`global_budget` / `disabled` 润色暂时不可用）；`POLISH_NOT_READY`、`DELIVERY_NOT_FOUND` 一般不会出现，落到通用文案并刷新消息；`CONTENT_BLOCKED` 显示“消息未能送达”（B6 起才会出现）。
 - `request_id` 随错误上报到 Sentry，便于和后端日志对上。
 - 契约生成：用 `swagger_parser` 从后端仓库的 `api/openapi.yaml` 生成 `lib/gen/`（`dart run swagger_parser` + `build_runner`），CI 中校验生成结果无差异。
 - 可空枚举（v1.6）：openapi 3.0.3 里 `nullable: true` 的枚举字段必须把 `null` 写进 `enum` 列表（如 Profile 的 `native_lang`、`age_band`），否则生成的模型遇到 `null` 解析失败，未 onboarding 用户的 `/me` 会报错；`contract_decode_test` 覆盖这种情况。
@@ -525,7 +527,7 @@ disconnected ─► connecting ─► connected ─(收到 hello)─► ready �
 | 心跳 | 使用连接层 `pingInterval`（25 秒，与服务端 `hello` 下发值一致）；应用层不重复实现心跳 |
 | 重连退避 | 1、2、4、8、16、30 秒，叠加 0–30% 抖动；连接稳定超过 60 秒后重置退避 |
 | 前后台 | 进入后台 30 秒后主动断开以省电；回到前台立即重连并 `room.sub`（带各房间 `last_seq`） |
-| `resync` | 对相应房间重新发 `room.sub`，用新快照覆盖本地状态；消息阶段（F3）另行拉取最近消息（v1.4：不再拉 `GET /rooms/{id}`） |
+| `resync` | 对相应房间重新发 `room.sub`，用新快照覆盖本地状态（v1.4：不再拉 `GET /rooms/{id}`）；收到快照后用 `GET /rooms/{id}/messages?after=` 补消息（v1.9，见第 7 章规则 11） |
 | `server.restart` | 随机等待 1–10 秒再重连，避免服务重启时所有客户端同时涌入；升级返回 503 `NOT_READY` 时同样处理（v1.5） |
 | 限流（v1.5） | 升级返回 429 `RATE_LIMITED` 时按 `Retry-After` 等待；`room.sub` 收到 `error{RATE_LIMITED}` 时 1 秒后再订阅；缺口或 `resync` 引起的重新订阅要合并，同一房间 1 秒内不重复发 |
 | 协议版本 | `hello.proto` 高于客户端支持的主版本，或 `hello.min_app_version` 高于当前 App 版本，或 REST 返回 HTTP 426 `UPGRADE_REQUIRED` → 弹出强制更新页（接口约定见后端 TRD 第 8、9 章） |
@@ -793,14 +795,15 @@ flowchart LR
 
 - 场景在“小屋”Tab，聊天在“聊天”Tab（v1.3 起分开，原“上半场景、下半聊天”作废）；两个 Tab 共用顶部的房间切换，切到哪间房两边一起变。
 - 输入栏：母语输入、**常用短语快捷条**（读取 `phraseTemplatesProvider`，点击发送 `phrase_id`，不触发 AI）、“AI 润色”开关（默认关）、发送按钮。
-- 发送：生成 `client_msg_id`，先在列表中以“发送中”状态上屏，REST 成功改为“已发送”，失败显示重试（复用同一个 `client_msg_id`）。
-- 列表：倒序 `ListView`，向上滚动用 `before` 游标分页；本地 drift 缓存最近 30 天（与后端保留期一致）。
+- 发送：生成 `client_msg_id`，先在列表中以“发送中”状态上屏，REST 成功改为“已发送”，失败显示重试（复用同一个 `client_msg_id`）。打开了“AI 润色”开关、但响应里 `polish_requested=false` 时，轻提示“今天的润色次数用完了”，消息照常发出（v1.9）。
+- 私聊（v1.9）：只能发给同一小屋的其他成员；未成年人账号不显示私聊入口（服务端对未成年人私聊返回 `AGE_RESTRICTED`）。
+- 列表：倒序 `ListView`，向上滚动用 `before` 游标分页，补新消息用 `after`（第 7 章规则 11）；服务端返回的 `items` 一律从旧到新；本地 drift 缓存最近 30 天（与后端保留期一致）。
 - **信使卡片**（`CourierCard`）：
   - 头部为发送者的宠物与昵称，递送动画；
   - 正文区在三种内容间切换：基础译文 / AI 润色译文 / 原文，切换完全在本地；
-  - 未润色时显示“让 AI 润色”按钮，点击调用 `POST /deliveries/{id}/polish`，进入加载态，结果由 `message.polished` 事件更新；
+  - “让 AI 润色”按钮只在 `kind=text`、`translation_status=done`、`polish_status=none` 时显示；点击调用 `POST /deliveries/{id}/polish`，立即返回 202，卡片进入加载态（`polish_status=pending`），结果由 `message.polished` 事件更新（v1.9）。发送方打开了润色开关的消息，卡片一到就是 `pending`，不显示按钮；
   - `message.polished` 的 `polish_status` 为 `fallback` 时（v1.7），润色结果没通过服务端校验：保持显示基础译文，润色一栏标“未润色”，不再显示“让 AI 润色”按钮（同一条再点大概率还是同样结果）；
-  - 翻译未完成显示骨架屏；AI 不可用时显示原文 + “暂无法翻译”标记 + 重试入口。
+  - 卡片状态（v1.9）：`translation_status=pending` 显示原文 + 译文骨架屏（“翻译中”）；`failed` 显示原文 + “暂无法翻译”标记，**不提供重试按钮**，服务端会在 24 小时内自动重试，成功后以 `message.translated` 自动换成译文；`done` 显示基础译文。同语言与短语消息到达时就是 `done`。
 - 长按宠物或消息：举报 / 屏蔽。
 
 ### 11.5 打卡与装扮
@@ -831,7 +834,7 @@ flowchart LR
 | `shared_preferences` | UI 语言、推送开关、Widget 隐私模式、各房间 `last_seq`、onboarding 完成标记、短语模板版本 | 轻量键值 |
 | `drift`（SQLite） | `messages_cache`、`outbox`、`phrases_cache` | 见下 |
 
-**消息缓存**：按 `room_id + message_id` 存最近 30 天，进房时先读本地渲染，再增量拉取，让界面秒开。
+**消息缓存**：按 `room_id + message_id` 存最近 30 天，进房时先读本地渲染，再用 `GET /rooms/{id}/messages?after=<本地最新消息 id>` 增量拉取，让界面秒开；消息 id 是 UUIDv7，按 id 排序即按时间排序（v1.9）。WS 事件与拉取结果走同一个“按 id 插入或更新、状态只前进”的合并逻辑（第 7 章规则 10）。
 
 **离线发送队列（outbox）**：
 
@@ -959,8 +962,10 @@ Android：Jetpack Glance（或 RemoteViews）读取共享存储渲染
 | 离线 | 顶部细条提示“当前离线”；消息可发送并进入队列；已缓存内容可浏览 |
 | WS 断线 | 3 秒后显示轻量“重连中”；自动重连与补发，无需用户操作 |
 | 发送失败 | 消息气泡下显示重试；不弹阻断式对话框 |
-| 翻译不可用 | 卡片显示原文 + “暂无法翻译” + 重试，不丢消息 |
-| 润色额度用尽 | 按钮置灰并提示“明天再来”（`QUOTA_EXCEEDED`） |
+| 翻译中 | 卡片先显示原文，译文一栏为骨架屏（v1.9） |
+| 翻译不可用 | 卡片显示原文 + “暂无法翻译”，不丢消息；不提供重试按钮，服务端自动重试，成功后卡片自动换成译文（v1.9） |
+| 润色额度用尽 | 按钮置灰并提示“明天再来”（`QUOTA_EXCEEDED`，`reason=daily_quota`）；`minute_limit` 提示稍后再试，`global_budget` / `disabled` 提示润色暂时不可用（v1.9） |
+| 发送时润色次数已用完 | 消息照常发出，轻提示“今天的润色次数用完了”（响应里 `polish_requested=false`，v1.9） |
 | 润色被服务端回退（`polish_status = fallback`，v1.7） | 卡片显示基础译文，润色一栏标“未润色”，不弹提示、不提供重试 |
 | 验证码冷却 | 倒计时展示，输入框禁用 |
 | 房间已满 | 友好提示，并提供“用我自己的验证码邀请朋友”入口 |
@@ -1122,6 +1127,8 @@ flutter run -d <真机ID> --dart-define-from-file=env/local.json
 10. 美术资源规范（第 10.3 节）需先于美术开工与你确认，避免返工。
 11. **Apple 登录延后**（v1.3）：目前没有 Mac 与 Apple 开发者账号，开发期只在 Android 上测试。App Store 要求提供第三方登录的 App 同时提供 Apple 登录，所以**上架 iOS 前必须补齐**，不能砍。
 12. 宠物资源按 `pet_type`（如 `happy_shiba`）命名，而不是按 MBTI：后端 `MemberInfo` 只返回 `pet_type`（v1.3）。
+13. **翻译失败不提供手动重试**（v1.9，对应 PRD v1.8）：服务端 24 小时内自动重试，卡片收到 `message.translated` 后自动换成译文；发送失败（outbox）的重试入口不受影响。
+14. 已读状态（`POST /deliveries/{id}/read`）随 B7 / Widget 一起做（v1.9），F3 的未读角标先在本地计算。
 
 ### 21.2 主要风险
 
