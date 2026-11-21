@@ -1,18 +1,21 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:petbridge/app/app.dart';
 import 'package:petbridge/core/storage/prefs_store.dart';
 import 'package:petbridge/features/auth/application/session.dart';
 import 'package:petbridge/features/auth/application/session_controller.dart';
 import 'package:petbridge/features/auth/presentation/login_page.dart';
 import 'package:petbridge/features/home/presentation/me_tab.dart';
+import 'package:petbridge/features/room/data/room_repository.dart';
 
 import '../../helpers/fakes.dart';
 import '../../helpers/pump_app.dart';
 
 void main() {
   late FakeSessionController session;
+  late MockRoomRepository rooms;
 
   const me = Me(
     id: 'u1',
@@ -24,11 +27,14 @@ void main() {
 
   Future<void> pumpHome(WidgetTester tester) async {
     session = FakeSessionController(const SessionReady(me));
+    rooms = MockRoomRepository();
+    when(() => rooms.listMine()).thenAnswer((_) async => []);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           sessionControllerProvider.overrideWith(() => session),
           prefsStoreProvider.overrideWithValue(stubPrefs()),
+          roomRepositoryProvider.overrideWithValue(rooms),
         ],
         child: const PetBridgeApp(),
       ),
@@ -88,5 +94,22 @@ void main() {
 
     expect(session.calls, ['logout']);
     expect(find.byType(LoginPage), findsOneWidget);
+  });
+
+  testWidgets('refreshes rooms on resume', (tester) async {
+    await pumpHome(tester);
+    clearInteractions(rooms);
+
+    const [
+      AppLifecycleState.inactive,
+      AppLifecycleState.hidden,
+      AppLifecycleState.paused,
+      AppLifecycleState.hidden,
+      AppLifecycleState.inactive,
+      AppLifecycleState.resumed,
+    ].forEach(tester.binding.handleAppLifecycleStateChanged);
+    await tester.pumpAndSettle();
+
+    verify(() => rooms.listMine()).called(1);
   });
 }
