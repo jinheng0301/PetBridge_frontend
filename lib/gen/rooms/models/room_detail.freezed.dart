@@ -27,20 +27,20 @@ $RoomDetailCopyWith<RoomDetail> get copyWith => _$RoomDetailCopyWithImpl<RoomDet
 @override
 bool operator ==(Object other) {
   final _this = this as RoomDetail;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RoomDetail&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.isOwner, _this.isOwner) || other.isOwner == _this.isOwner)&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.memberCount, _this.memberCount) || other.memberCount == _this.memberCount)&&(identical(other.capacity, _this.capacity) || other.capacity == _this.capacity)&&const DeepCollectionEquality().equals(other.members, _this.members)&&const DeepCollectionEquality().equals(other.additionalProperties, _this.additionalProperties));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RoomDetail&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.isOwner, _this.isOwner) || other.isOwner == _this.isOwner)&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.memberCount, _this.memberCount) || other.memberCount == _this.memberCount)&&(identical(other.capacity, _this.capacity) || other.capacity == _this.capacity)&&const DeepCollectionEquality().equals(other.members, _this.members)&&(identical(other.regenRemainingToday, _this.regenRemainingToday) || other.regenRemainingToday == _this.regenRemainingToday)&&const DeepCollectionEquality().equals(other.additionalProperties, _this.additionalProperties));
 }
 
 
 @override
 int get hashCode {
   final _this = this as RoomDetail;
-  return Object.hash(runtimeType,_this.id,_this.isOwner,_this.status,_this.memberCount,_this.capacity,const DeepCollectionEquality().hash(_this.members),const DeepCollectionEquality().hash(_this.additionalProperties));
+  return Object.hash(runtimeType,_this.id,_this.isOwner,_this.status,_this.memberCount,_this.capacity,const DeepCollectionEquality().hash(_this.members),_this.regenRemainingToday,const DeepCollectionEquality().hash(_this.additionalProperties));
 }
 
 @override
 String toString() {
   final _this = this as RoomDetail;
-  return 'RoomDetail(id: ${_this.id}, isOwner: ${_this.isOwner}, status: ${_this.status}, memberCount: ${_this.memberCount}, capacity: ${_this.capacity}, members: ${_this.members}, additionalProperties: ${_this.additionalProperties})';
+  return 'RoomDetail(id: ${_this.id}, isOwner: ${_this.isOwner}, status: ${_this.status}, memberCount: ${_this.memberCount}, capacity: ${_this.capacity}, members: ${_this.members}, regenRemainingToday: ${_this.regenRemainingToday}, additionalProperties: ${_this.additionalProperties})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $RoomDetailCopyWith<$Res>  {
   factory $RoomDetailCopyWith(RoomDetail value, $Res Function(RoomDetail) _then) = _$RoomDetailCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(required: true, disallowNullValue: true) String id,@JsonKey(name: "is_owner", required: true, disallowNullValue: true) bool isOwner,@JsonKey(required: true, disallowNullValue: true, fromJson: RoomDetail._read_status, toJson: RoomDetail._write_status) RoomDetailStatus status,@JsonKey(name: "member_count", required: true, disallowNullValue: true, fromJson: RoomDetail._read_memberCount, toJson: RoomDetail._write_memberCount) int memberCount,@JsonKey(required: true, disallowNullValue: true, fromJson: RoomDetail._read_capacity, toJson: RoomDetail._write_capacity) int capacity,@JsonKey(required: true, disallowNullValue: true) List<MemberInfo> members,@JsonKey(readValue: RoomDetail._extras, fromJson: RoomDetail._readExtras, includeToJson: false) Map<String, Object?> additionalProperties
+@JsonKey(required: true, disallowNullValue: true) String id,@JsonKey(name: "is_owner", required: true, disallowNullValue: true) bool isOwner,@JsonKey(required: true, disallowNullValue: true, fromJson: RoomDetail._read_status, toJson: RoomDetail._write_status) RoomDetailStatus status,@JsonKey(name: "member_count", required: true, disallowNullValue: true, fromJson: RoomDetail._read_memberCount, toJson: RoomDetail._write_memberCount) int memberCount,@JsonKey(required: true, disallowNullValue: true, fromJson: RoomDetail._read_capacity, toJson: RoomDetail._write_capacity) int capacity,@JsonKey(required: true, disallowNullValue: true) List<MemberInfo> members,@JsonKey(name: "regen_remaining_today", required: true, fromJson: RoomDetail._read_regenRemainingToday, toJson: RoomDetail._write_regenRemainingToday) int? regenRemainingToday,@JsonKey(readValue: RoomDetail._extras, fromJson: RoomDetail._readExtras, includeToJson: false) Map<String, Object?> additionalProperties
 });
 
 
@@ -68,7 +68,7 @@ class _$RoomDetailCopyWithImpl<$Res>
 
 /// Create a copy of RoomDetail
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? isOwner = null,Object? status = null,Object? memberCount = null,Object? capacity = null,Object? members = null,Object? additionalProperties = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? isOwner = null,Object? status = null,Object? memberCount = null,Object? capacity = null,Object? members = null,Object? regenRemainingToday = freezed,Object? additionalProperties = null,}) {
   return _then(RoomDetail(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,isOwner: null == isOwner ? _self.isOwner : isOwner // ignore: cast_nullable_to_non_nullable
@@ -76,7 +76,8 @@ as bool,status: null == status ? _self.status : status // ignore: cast_nullable_
 as RoomDetailStatus,memberCount: null == memberCount ? _self.memberCount : memberCount // ignore: cast_nullable_to_non_nullable
 as int,capacity: null == capacity ? _self.capacity : capacity // ignore: cast_nullable_to_non_nullable
 as int,members: null == members ? _self.members : members // ignore: cast_nullable_to_non_nullable
-as List<MemberInfo>,additionalProperties: null == additionalProperties ? _self.additionalProperties : additionalProperties // ignore: cast_nullable_to_non_nullable
+as List<MemberInfo>,regenRemainingToday: freezed == regenRemainingToday ? _self.regenRemainingToday : regenRemainingToday // ignore: cast_nullable_to_non_nullable
+as int?,additionalProperties: null == additionalProperties ? _self.additionalProperties : additionalProperties // ignore: cast_nullable_to_non_nullable
 as Map<String, Object?>,
   ));
 }

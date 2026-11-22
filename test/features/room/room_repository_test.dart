@@ -40,6 +40,7 @@ void main() {
             'status': 'open',
             'member_count': 3,
             'capacity': 5,
+            'regen_remaining_today': null,
             'members': [
               _member('u3', 3),
               _member('u1', 1, role: 'owner', nickname: 'Hikari'),
@@ -76,6 +77,7 @@ void main() {
             'status': 'full',
             'member_count': 1,
             'capacity': 1,
+            'regen_remaining_today': 0,
             'members': [
               _member('u1', 1, role: 'owner', nickname: null, petType: null),
             ],

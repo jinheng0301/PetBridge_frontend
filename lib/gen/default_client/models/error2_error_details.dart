@@ -5,7 +5,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'error2_error_details.freezed.dart';
 part 'error2_error_details.g.dart';
 
-/// fields on VALIDATION_FAILED from onboarding; room_id on ALREADY_MEMBER; retry_after_seconds on CODE_COOLDOWN.
+/// fields on VALIDATION_FAILED from onboarding and messages; room_id on ALREADY_MEMBER; retry_after_seconds on CODE_COOLDOWN.
 @Freezed(fromJson: false, toJson: false)
 @JsonSerializable(
   explicitToJson: true,

@@ -48,6 +48,15 @@ class const RoomDetail({
   @JsonKey(required: true, disallowNullValue: true)
   required final List<MemberInfo> members,
 
+  /// Own room only (is_owner true): OWNER_REGEN_DAILY_LIMIT minus the owner_regen codes issued today in the owner's time zone, never below 0; null for rooms joined from others. Covers the daily limit only: room_full, enough_unused and lifetime_limit still come from POST /rooms/{id}/codes, which stays authoritative. Not part of room.snapshot.
+  @JsonKey(
+    name: "regen_remaining_today",
+    required: true,
+    fromJson: RoomDetail._read_regenRemainingToday,
+    toJson: RoomDetail._write_regenRemainingToday,
+  )
+  required final int? regenRemainingToday,
+
   @JsonKey(
     readValue: RoomDetail._extras,
     fromJson: RoomDetail._readExtras,
@@ -62,6 +71,7 @@ class const RoomDetail({
     "member_count",
     "capacity",
     "members",
+    "regen_remaining_today",
   };
 
   factory RoomDetail.fromJson(Map<String, Object?> json) =>
@@ -74,6 +84,8 @@ class const RoomDetail({
   static Object? _write_memberCount(int value) => value;
   static int _read_capacity(Object? value) => value as int;
   static Object? _write_capacity(int value) => value;
+  static int? _read_regenRemainingToday(Object? value) => value as int?;
+  static Object? _write_regenRemainingToday(int? value) => value;
   static Object? _extras(Map map, String _) => {
     for (final entry in map.entries)
       if (!_knownKeys.contains(entry.key)) entry.key as String: entry.value,

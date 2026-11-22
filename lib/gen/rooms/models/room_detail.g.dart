@@ -16,6 +16,7 @@ RoomDetail _$RoomDetailFromJson(Map<String, dynamic> json) {
       'member_count',
       'capacity',
       'members',
+      'regen_remaining_today',
     ],
     disallowNullValues: const [
       'id',
@@ -35,6 +36,9 @@ RoomDetail _$RoomDetailFromJson(Map<String, dynamic> json) {
     members: (json['members'] as List<dynamic>)
         .map((e) => MemberInfo.fromJson(e as Map<String, dynamic>))
         .toList(),
+    regenRemainingToday: RoomDetail._read_regenRemainingToday(
+      json['regen_remaining_today'],
+    ),
     additionalProperties:
         RoomDetail._extras(json, 'additionalProperties') == null
         ? const {}
@@ -52,4 +56,7 @@ Map<String, dynamic> _$RoomDetailToJson(RoomDetail instance) =>
       'member_count': ?RoomDetail._write_memberCount(instance.memberCount),
       'capacity': ?RoomDetail._write_capacity(instance.capacity),
       'members': instance.members.map((e) => e.toJson()).toList(),
+      'regen_remaining_today': RoomDetail._write_regenRemainingToday(
+        instance.regenRemainingToday,
+      ),
     };

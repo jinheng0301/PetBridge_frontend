@@ -129,7 +129,7 @@ abstract class RoomsClient {
 
   /// Rooms I am in
   ///
-  /// Every room the caller is an active member of, own room first. Members who left are not listed. [] before onboarding.
+  /// Every room the caller is an active member of, own room first. Members who left are not listed. The own room carries regen_remaining_today. [] before onboarding.
   @GET('/api/v1/rooms/mine')
   Future<ListMyRoomsResponse200> listMyRooms({
     @Extras()

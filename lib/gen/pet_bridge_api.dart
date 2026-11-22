@@ -8,7 +8,9 @@ import 'exports.dart'
         ApiClient,
         AuthClient,
         CodesClient,
+        ConfigClient,
         MeClient,
+        MessagesClient,
         RealtimeClient,
         RoomsClient;
 
@@ -19,7 +21,7 @@ final class PetBridgeApi {
   static const String title = "PetBridge API";
 
   /// API version from info.version.
-  static const String apiVersion = "0.4.0";
+  static const String apiVersion = "0.5.0";
 
   /// Exact Swagger or OpenAPI version.
   static const String specVersion = "3.0.3";
@@ -30,7 +32,9 @@ final class PetBridgeApi {
   late final clients.ApiClient api = clients.ApiClient(_client);
   late final clients.AuthClient auth = clients.AuthClient(_client);
   late final clients.CodesClient codes = clients.CodesClient(_client);
+  late final clients.ConfigClient config = clients.ConfigClient(_client);
   late final clients.MeClient me = clients.MeClient(_client);
+  late final clients.MessagesClient messages = clients.MessagesClient(_client);
   late final clients.RealtimeClient realtime = clients.RealtimeClient(_client);
   late final clients.RoomsClient rooms = clients.RoomsClient(_client);
 }

@@ -48,4 +48,22 @@ void main() {
     expect(json, containsPair('age_band', '18_plus'));
     expect(json, containsPair('tz', 'Asia/Tokyo'));
   });
+
+  test('RoomDetail decodes regen_remaining_today, null for joined rooms', () {
+    Map<String, Object?> room({required bool own, int? left}) => {
+      'id': '6f1c2a9e-3b7d-4c1e-9a2f-1d2e3f4a5b6c',
+      'is_owner': own,
+      'status': 'open',
+      'member_count': 1,
+      'capacity': 5,
+      'members': const <Object?>[],
+      'regen_remaining_today': left,
+    };
+
+    expect(
+      RoomDetail.fromJson(room(own: true, left: 2)).regenRemainingToday,
+      2,
+    );
+    expect(RoomDetail.fromJson(room(own: false)).regenRemainingToday, isNull);
+  });
 }
