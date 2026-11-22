@@ -2,7 +2,7 @@
 
 | 项目 | 内容 |
 | :-- | :-- |
-| 版本 | v1.10（草案，待自评审）<br>• v1.10 较 v1.9：配合前端 F1，`GET /rooms/mine` 的自己小屋增加 `regen_remaining_today`（今日剩余补码次数）。<br>• v1.9 较 v1.8：B5 消息与 AI 网关设计定稿：落库即推原文卡片、译文与润色另发事件，断线后从数据库补消息，Gemini 主力 + Claude 备用，不接机翻，翻译失败自动重试，每日预算与翻译硬上限，B5 拆为 B5a / B5b。<br>• v1.8 较 v1.7：refresh token 轮换加 60 秒重试宽限，Google 公钥拉取失败返回 503，`ROOM_CAPACITY` 生效，presence 补发进程崩溃后的离线。<br>• v1.7 较 v1.6：新增 10.3 MBTI 语气重构逻辑，润色只按接收方 MBTI 调整，失败回退基础译文。<br>• v1.6 较 v1.5：F0 联调后修正契约中可空枚举的写法，补充本机集成测试须串行运行。<br>• v1.5 较 v1.4：B4 安全审查后加固 WebSocket：连接在 access token 到期时关闭（4401），连接与订阅限流。<br>• v1.4 较 v1.3：B4 WebSocket 协议定稿，断线恢复改为每次订阅下发快照，presence 只有在线 / 离线，Redis 故障时本机兜底推送。<br>• v1.3 较 v1.2：对齐 PRD v1.5 与前端 TRD v1.3，Google 登录接入真实校验，Apple 登录延后，本地端口统一为 8090。<br>• v1.2 较 v1.1：对齐 PRD v1.4，新增房主管理，修正消息表分区方案，补充本地运行说明。 |
+| 版本 | v1.11（草案，待自评审）<br>• v1.11 较 v1.10：B5a 总审阅后修正：付费 Gemini 按配置的价格计入成本，production 缺价格拒绝启动；asynq 共用应用的 Redis 客户端，入队最多等 1 秒。<br>• v1.10 较 v1.9：配合前端 F1，`GET /rooms/mine` 的自己小屋增加 `regen_remaining_today`（今日剩余补码次数）。<br>• v1.9 较 v1.8：B5 消息与 AI 网关设计定稿：落库即推原文卡片、译文与润色另发事件，断线后从数据库补消息，Gemini 主力 + Claude 备用，不接机翻，翻译失败自动重试，每日预算与翻译硬上限，B5 拆为 B5a / B5b。<br>• v1.8 较 v1.7：refresh token 轮换加 60 秒重试宽限，Google 公钥拉取失败返回 503，`ROOM_CAPACITY` 生效，presence 补发进程崩溃后的离线。<br>• v1.7 较 v1.6：新增 10.3 MBTI 语气重构逻辑，润色只按接收方 MBTI 调整，失败回退基础译文。<br>• v1.6 较 v1.5：F0 联调后修正契约中可空枚举的写法，补充本机集成测试须串行运行。<br>• v1.5 较 v1.4：B4 安全审查后加固 WebSocket：连接在 access token 到期时关闭（4401），连接与订阅限流。<br>• v1.4 较 v1.3：B4 WebSocket 协议定稿，断线恢复改为每次订阅下发快照，presence 只有在线 / 离线，Redis 故障时本机兜底推送。<br>• v1.3 较 v1.2：对齐 PRD v1.5 与前端 TRD v1.3，Google 登录接入真实校验，Apple 登录延后，本地端口统一为 8090。<br>• v1.2 较 v1.1：对齐 PRD v1.4，新增房主管理，修正消息表分区方案，补充本地运行说明。 |
 | 对应 PRD | 《跨国 MBTI 情感 AI 电子宠物 PRD v1.8》 |
 | 配套文档 | 《前端 TRD（Flutter）v1.10》：WebSocket 协议、API 调用方式以本文第 8、9 章为准 |
 | 语言 / 运行时 | Go 1.26（以 `go.mod` 为准） |
@@ -599,7 +599,7 @@ v1.9 按 B5 设计（`docs/superpowers/specs/2026-11-21-b5-messaging-ai-gateway-
        同语言、短语（按接收者语言取模板）、去掉空白标点 emoji 后为空的文本 → base_text 直接确定，done
        其余 → pending；polish_requested 时 polish_status = pending
   6. 提交后：给每个接收者和发送者本人各发一条 message.new（各自视角；发送者的 delivery 为空）
-     有 pending 就入队 translate:{message_id}（TaskID 去重）；入队失败 → 本进程内翻译（协程池 4 个）
+     有 pending 就入队 translate:{message_id}（TaskID 去重）；入队最多等 1 秒（v1.11），失败或超时 → 本进程内翻译（协程池 4 个）
   7. 返回 202 + 发送者视角的 MessageView；同一 client_msg_id 重放直接返回原消息，不扣配额、不发事件
 
 异步段（worker）
@@ -852,7 +852,7 @@ MVP 不接机器翻译兜底（v1.9）：又是一家供应商、一笔费用，
 | 熔断 | 每个供应商一个 gobreaker：最近 20 次请求失败率 ≥ 50% 打开，30 秒后半开探测；翻译与润色共用该供应商的熔断器 |
 | 并发 | 每个进程最多同时 16 个 AI 调用（v1.9，多节点时按节点算） |
 | 配额 | 每用户每日润色次数默认 30【假设】（按用户自己的时区算“每日”）、每分钟 6 次；发送方开关每条消息扣发送方 1 次，接收方按钮扣接收方 1 次（v1.9）；全局设日预算 `AI_DAILY_BUDGET_USD`，翻译与润色的估算成本都累加进去（`ai:cost:{yyyymmdd}`），超预算关闭润色、保留基础翻译，**超过 2 倍预算连翻译也停止**（新消息直接 `failed`，显示原文，打 error 日志）【假设，v1.9】；Redis 不可用时退化为进程内计数 |
-| 成本统计 | 每次真实调用按返回的 token 数和代码里的价目表估算成本（Gemini 免费层记 0），写 `ai_usage_daily`（B5b），按功能拆分，供看板使用；校验回退按校验项分类记日志与指标 |
+| 成本统计 | 每次真实调用按返回的 token 数和价目表估算成本（Gemini 免费层记 0）。价目表 = 代码内置（目前只有 `claude-haiku-5-5`）+ 环境变量 `GEMINI_PRICE_IN_USD_PER_M` / `GEMINI_PRICE_OUT_USD_PER_M`（Gemini 模型名来自配置，代码里无法写死价格，v1.11）；production 下链上任何付费供应商查不到价格就拒绝启动，否则预算与硬上限看不到这部分花费（v1.11）；写 `ai_usage_daily`（B5b），按功能拆分，供看板使用；校验回退按校验项分类记日志与指标 |
 | 隐私 | 发给供应商的内容只有原文、基础译文、语言和接收方 MBTI，不带用户标识、昵称；生产环境必须使用承诺不将数据用于训练的服务 |
 | Gemini 免费层（v1.9） | 免费层的输入输出会被 Google 用来改进产品，并可能有人工审阅，**只能用于开发、只发测试消息**。`GEMINI_FREE_TIER` 默认 true；`APP_ENV=production` 且 Gemini 在链上时必须为 false，否则拒绝启动。有真实用户前，升级 Gemini 付费层，或把 `AI_PRIMARY` 改为 `claude` |
 
@@ -999,7 +999,7 @@ MVP 的礼貌等级固定如上；PRD 8.2 提到的“用户可设置敬语等�
 | `quota:polish:{uid}:{yyyymmdd}` | counter | 每日润色配额（日期按用户时区） | 到次日 |
 | `ai:cost:{yyyymmdd}` | counter | 当日（UTC）AI 估算成本，单位微美元；润色关闭线与翻译硬上限（v1.9） | 2 天 |
 | `tr:*`、`po:*` | string | 翻译与润色缓存 | 7 天 |
-| `asynq:*` | 多种 | asynq 任务队列（`translate`、`polish`、`default`）；丢失后由补偿扫描从数据库补回（v1.9） | 由 asynq 管理 |
+| `asynq:*` | 多种 | asynq 任务队列（`translate`、`polish`、`default`）；丢失后由补偿扫描从数据库补回（v1.9）；api 的 asynq 客户端共用应用的 Redis 连接（2 秒超时、不重试，v1.11） | 由 asynq 管理 |
 | `cfg:app` | string | 运营配置缓存 | 30 秒 |
 
 v1.9：删除原 `room:{rid}:events`（断线重放用的 Stream）。消息断线后从数据库拉取（7.4），状态事件靠订阅快照（7.3），都不需要它。
@@ -1127,6 +1127,8 @@ GEMINI_FREE_TIER=true                      # 免费层数据会被 Google 用于
 ANTHROPIC_API_KEY=                         # Claude 当主时必填；当备用时可空。在 Claude Console 申请，与 Claude Code 订阅分开计费
 CLAUDE_MODEL_TRANSLATE=claude-haiku-5-5
 CLAUDE_MODEL_POLISH=claude-haiku-5-5
+GEMINI_PRICE_IN_USD_PER_M=                 # 付费 Gemini 每百万输入 token 的美元价格；production 且 Gemini 付费时必填（v1.11）
+GEMINI_PRICE_OUT_USD_PER_M=                # 同上，输出 token
 AI_POLISH_ENABLED=true                     # 润色总开关（B5 没有 app_config 表，改后重启生效）
 AI_POLISH_DAILY_QUOTA=30
 AI_DAILY_BUDGET_USD=5                      # 超过关闭润色；超过 2 倍连翻译也停止
@@ -1164,7 +1166,7 @@ OWNER_REGEN_DAILY_LIMIT=3       # 房主每日自助补码上限
 - 启动自检，任一不满足就拒绝启动：
   - `APP_ENV` 必填且只能是 `local | staging | production`，**不设默认值**（缺失时若默认成 local 会悄悄放宽下面的检查）。
   - 非 local：`DEV_LOGIN_ENABLED` 必须为 false、`JWT_SIGNING_KEY` 不少于 32 位、`DATABASE_URL` 不得使用 `sslmode=disable`。
-  - `production`：`AI_PROVIDER` 必须为 live；Gemini 在链上时 `GEMINI_FREE_TIER` 必须为 false（v1.9）。
+  - `production`：`AI_PROVIDER` 必须为 live；Gemini 在链上时 `GEMINI_FREE_TIER` 必须为 false（v1.9）；链上每家付费供应商都要查得到价格：付费 Gemini 必须配齐两个 `GEMINI_PRICE_*`，Claude 的 `CLAUDE_MODEL_TRANSLATE` 必须在内置价目表里（v1.11）。
   - `AI_PROVIDER=live`：主供应商（`AI_PRIMARY`）的 key 与模型名必填；备用的 key 可空（v1.9）。
 - API key 只来自环境变量，不进日志、不进仓库；`.env.example` 只放空值（v1.9）。
 - 监听地址 `APP_HOST`：local 默认 `127.0.0.1`（开发登录无需密码，不应暴露到局域网），其余环境默认 `0.0.0.0`。

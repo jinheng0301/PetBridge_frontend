@@ -4,6 +4,12 @@
 
 ---
 
+## V1.11 变更说明
+
+B5a 实现后的全分支总审阅发现的问题，PRD 与前端 TRD 不变。① **付费 Gemini 计入成本**（10.2、15.4）：Gemini 的模型名来自配置，代码内置价目表里没有它的价格，付费 Gemini 的调用一直记为 0 元，每日预算与 2 倍翻译硬上限都看不到这部分花费。新增 `GEMINI_PRICE_IN_USD_PER_M`、`GEMINI_PRICE_OUT_USD_PER_M`（每百万 token 的美元价格）；`APP_ENV=production` 时，链上每家付费供应商都必须查得到价格（付费 Gemini 配齐这两个变量，Claude 的 `CLAUDE_MODEL_TRANSLATE` 必须在内置价目表里），否则拒绝启动；非 production 查不到价格仍记 0 并打一次警告。② **Redis 卡住时发消息不再等几秒**（7.4、第 11 章）：asynq 原先自己建一个 Redis 客户端（5 秒连接超时、会重试），入队也没有超时，Redis 无响应时发消息要等 5～20 秒才改走进程内翻译。现在 api 的 asynq 客户端共用应用已有的 Redis 连接（2 秒超时、不重试），入队最多等 1 秒，超时即走进程内翻译。③ `AI_DAILY_BUDGET_USD` 与两个 `FAKE_AI_*_FAIL_RATE` 拒绝 `NaN` 与无穷大（15.4）。
+
+---
+
 ## V1.10 变更说明
 
 配合前端 F1（前端 TRD v1.10），PRD 不变。PRD F2.9 要求背包显示房主今日剩余补码次数，但补码接口只在用完时返回 `CODE_ISSUE_LIMIT`（`daily_limit`），客户端拿不到这个数字。现在 `GET /rooms/mine` 中自己的小屋增加 `regen_remaining_today`，取值为 `OWNER_REGEN_DAILY_LIMIT` 减去房主时区今天已补码的次数（不小于 0），与补码校验第 4 步共用计数；他人小屋为 `null`，`room.snapshot` 不带这个字段（7.8、第 8 章、第 9 章）。它只反映每日次数，其他拒绝原因仍以补码接口为准。
