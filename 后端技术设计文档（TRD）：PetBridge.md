@@ -2,7 +2,7 @@
 
 | 项目 | 内容 |
 | :-- | :-- |
-| 版本 | v1.11（草案，待自评审）<br>• v1.11 较 v1.10：B5a 总审阅后修正：付费 Gemini 按配置的价格计入成本，production 缺价格拒绝启动；asynq 共用应用的 Redis 客户端，入队最多等 1 秒。<br>• v1.10 较 v1.9：配合前端 F1，`GET /rooms/mine` 的自己小屋增加 `regen_remaining_today`（今日剩余补码次数）。<br>• v1.9 较 v1.8：B5 消息与 AI 网关设计定稿：落库即推原文卡片、译文与润色另发事件，断线后从数据库补消息，Gemini 主力 + Claude 备用，不接机翻，翻译失败自动重试，每日预算与翻译硬上限，B5 拆为 B5a / B5b。<br>• v1.8 较 v1.7：refresh token 轮换加 60 秒重试宽限，Google 公钥拉取失败返回 503，`ROOM_CAPACITY` 生效，presence 补发进程崩溃后的离线。<br>• v1.7 较 v1.6：新增 10.3 MBTI 语气重构逻辑，润色只按接收方 MBTI 调整，失败回退基础译文。<br>• v1.6 较 v1.5：F0 联调后修正契约中可空枚举的写法，补充本机集成测试须串行运行。<br>• v1.5 较 v1.4：B4 安全审查后加固 WebSocket：连接在 access token 到期时关闭（4401），连接与订阅限流。<br>• v1.4 较 v1.3：B4 WebSocket 协议定稿，断线恢复改为每次订阅下发快照，presence 只有在线 / 离线，Redis 故障时本机兜底推送。<br>• v1.3 较 v1.2：对齐 PRD v1.5 与前端 TRD v1.3，Google 登录接入真实校验，Apple 登录延后，本地端口统一为 8090。<br>• v1.2 较 v1.1：对齐 PRD v1.4，新增房主管理，修正消息表分区方案，补充本地运行说明。 |
+| 版本 | v1.12（草案，待自评审）<br>• v1.12 较 v1.11：B5b 润色与成本落地：重放在扣配额前判定，接收方按钮先认领再扣配额，网关缓存先于预算检查，润色校验的长度下限与数字规范化细则，`ai_usage_daily` 按用户记账，新增评测工具 `polisheval`。<br>• v1.11 较 v1.10：B5a 总审阅后修正：付费 Gemini 按配置的价格计入成本，production 缺价格拒绝启动；asynq 共用应用的 Redis 客户端，入队最多等 1 秒。<br>• v1.10 较 v1.9：配合前端 F1，`GET /rooms/mine` 的自己小屋增加 `regen_remaining_today`（今日剩余补码次数）。<br>• v1.9 较 v1.8：B5 消息与 AI 网关设计定稿：落库即推原文卡片、译文与润色另发事件，断线后从数据库补消息，Gemini 主力 + Claude 备用，不接机翻，翻译失败自动重试，每日预算与翻译硬上限，B5 拆为 B5a / B5b。<br>• v1.8 较 v1.7：refresh token 轮换加 60 秒重试宽限，Google 公钥拉取失败返回 503，`ROOM_CAPACITY` 生效，presence 补发进程崩溃后的离线。<br>• v1.7 较 v1.6：新增 10.3 MBTI 语气重构逻辑，润色只按接收方 MBTI 调整，失败回退基础译文。<br>• v1.6 较 v1.5：F0 联调后修正契约中可空枚举的写法，补充本机集成测试须串行运行。<br>• v1.5 较 v1.4：B4 安全审查后加固 WebSocket：连接在 access token 到期时关闭（4401），连接与订阅限流。<br>• v1.4 较 v1.3：B4 WebSocket 协议定稿，断线恢复改为每次订阅下发快照，presence 只有在线 / 离线，Redis 故障时本机兜底推送。<br>• v1.3 较 v1.2：对齐 PRD v1.5 与前端 TRD v1.3，Google 登录接入真实校验，Apple 登录延后，本地端口统一为 8090。<br>• v1.2 较 v1.1：对齐 PRD v1.4，新增房主管理，修正消息表分区方案，补充本地运行说明。 |
 | 对应 PRD | 《跨国 MBTI 情感 AI 电子宠物 PRD v1.8》 |
 | 配套文档 | 《前端 TRD（Flutter）v1.10》：WebSocket 协议、API 调用方式以本文第 8、9 章为准 |
 | 语言 / 运行时 | Go 1.26（以 `go.mod` 为准） |
@@ -594,12 +594,16 @@ v1.9 按 B5 设计（`docs/superpowers/specs/2026-11-21-b5-messaging-ai-gateway-
      私聊对象是同房间其他在席成员，且双方都是成年人（否则 AGE_RESTRICTED）；屏蔽关系 B6 加
   2. 限流：每用户每分钟 20 条、每日 1000 条（RATE_LIMITED）
   3. 前置审核：Moderator（B5 全部放行；B6 接本地词库，命中高危 → CONTENT_BLOCKED，疑似 → mod_status=review）
-  4. polish=true 时扣发送者 1 次润色配额（不论几个接收者）；配额不足不拒绝消息，只是 polish_requested=false
+  4. 先按 (sender_id, client_msg_id) 查重放：已存在直接返回原消息，不扣配额（v1.12）
+     polish=true 且是文本时扣发送者 1 次润色配额（不论几个接收者）；配额不足不拒绝消息，只是 polish_requested=false；
+     极短文本（10.3.1）不扣配额，polish_requested=true（v1.12）
   5. 一个事务：以 (sender_id, client_msg_id) 幂等写 messages；为每个接收者写一行 deliveries
        同语言、短语（按接收者语言取模板）、去掉空白标点 emoji 后为空的文本 → base_text 直接确定，done
-       其余 → pending；polish_requested 时 polish_status = pending
+       其余 → pending；polish_requested 时 polish_status = pending、polish_by = 发送者；
+       基础译文发送时已确定且是极短文本的那一行直接 polish done、polished_text = 基础译文（v1.12）
   6. 提交后：给每个接收者和发送者本人各发一条 message.new（各自视角；发送者的 delivery 为空）
      有 pending 就入队 translate:{message_id}（TaskID 去重）；入队最多等 1 秒（v1.11），失败或超时 → 本进程内翻译（协程池 4 个）
+     翻译已 done、润色 pending 的行入队 polish:{delivery_id}；入队失败不在本进程润色，交给补偿扫描（v1.12）
   7. 返回 202 + 发送者视角的 MessageView；同一 client_msg_id 重放直接返回原消息，不扣配额、不发事件
 
 异步段（worker）
@@ -622,8 +626,8 @@ v1.9 按 B5 设计（`docs/superpowers/specs/2026-11-21-b5-messaging-ai-gateway-
 **`MessageView`**（REST 响应与三种消息事件共用）：`id`、`room_id`、`sender{user_id, nickname, pet_type}`、`scope`、`to_user_id`、`kind`、`phrase_id`、`src_lang`、`text`（原文）、`client_msg_id`（只在发送者自己的视图里有）、`polish_requested`、`created_at`、`delivery`（发送者为空；接收者为自己那一行：`id`、`target_lang`、`base_text`、`translation_status`、`polished_text`、`polish_status`）。
 
 **润色的两个入口**【假设】（B5b）：
-- **发送方开关**：`polish=true`，扣发送者 1 次（第 4 步），每个接收者的翻译完成后各自润色；翻译最终放弃时润色记为 `fallback`，配额不退。
-- **接收方按钮**：`POST /deliveries/{id}/polish`，只有该接收者能调用（否则 `DELIVERY_NOT_FOUND`）；扣接收者 1 次，返回 202 与当前视图，结果以 `message.polished` 通知。已经 `pending` / `done` / `fallback` 时直接返回、不再扣；翻译未完成或是短语消息返回 `POLISH_NOT_READY`；配额、每分钟上限、全局预算或开关不允许时返回 `QUOTA_EXCEEDED`（`details.reason`：`daily_quota` / `minute_limit` / `global_budget` / `disabled`）。
+- **发送方开关**：`polish=true`，扣发送者 1 次（第 4 步），每个接收者的翻译完成后各自润色；翻译最终放弃时润色记为 `fallback`，配额不退。同一 `client_msg_id` 并发首发时两次请求都可能扣配额（最多多扣 1 次），不退还（v1.12）。
+- **接收方按钮**：`POST /deliveries/{id}/polish`，只有该接收者、且仍在席时能调用（否则 `DELIVERY_NOT_FOUND`）；把该行从 `none` 认领为 `pending` 与扣配额放在同一个事务里，扣配额被拒就整体回滚（该行仍是 `none`）；并发的另一次点击被这一行的锁挡住，等前一次结束后再判断，所以连点、并发点击只扣 1 次，也不会有人先拿到 `pending`、该行随后又退回 `none`；入队失败仍返回 202，由补偿扫描在 2 分钟后捡起（v1.12）；扣接收者 1 次，返回 202 与当前视图，结果以 `message.polished` 通知。已经 `pending` / `done` / `fallback` 时直接返回、不再扣；翻译未完成或是短语消息返回 `POLISH_NOT_READY`；配额、每分钟上限、全局预算或开关不允许时返回 `QUOTA_EXCEEDED`（`details.reason`：`daily_quota` / `minute_limit` / `global_budget` / `disabled`）。
 - 两个入口共用缓存与配额；极短文本（10.3.1）不调用模型、不扣配额。
 
 **卡片切换“润色译文 / 基础译文 / 原文”完全在客户端完成**：`MessageView` 里同时有原文、基础译文与润色译文。
@@ -822,8 +826,10 @@ v1.9 按 B5 设计（`docs/superpowers/specs/2026-11-21-b5-messaging-ai-gateway-
 v1.9 定稿：
 
 ```
-（润色：配额 / 每分钟上限 / 全局预算在 api 入口检查；翻译：超过 2 倍预算直接 failed）
+（润色：配额 / 每分钟上限 / 全局预算在 api 入口检查）
 请求 → 缓存命中？→ 是：直接返回（不计成本、不计配额）
+         ↓ 否
+   当日成本 ≥ 上限？（翻译：2 倍预算；润色：1 倍预算）→ 是：翻译 failed / 润色 fallback，不调用供应商
          ↓ 否
    本进程并发上限（16）→ 熔断器(主供应商) → 超时 → 主供应商（默认 Gemini）
          ↓ 失败、超时、429 或熔断打开
@@ -834,6 +840,8 @@ v1.9 定稿：
 ```
 
 MVP 不接机器翻译兜底（v1.9）：又是一家供应商、一笔费用，两家 LLM 同时失败的概率很低。
+
+v1.12：缓存检查在预算检查之前，翻译与润色都一样。缓存命中不花钱，超过预算也照样返回（B5a 时翻译是先查硬上限）。润色供应商回了结果但没通过 10.3.7 第 2–5 项时：这次调用照样计入成本，不写缓存，也不换下一家供应商。
 
 ### 10.2 关键设计
 
@@ -852,7 +860,7 @@ MVP 不接机器翻译兜底（v1.9）：又是一家供应商、一笔费用，
 | 熔断 | 每个供应商一个 gobreaker：最近 20 次请求失败率 ≥ 50% 打开，30 秒后半开探测；翻译与润色共用该供应商的熔断器 |
 | 并发 | 每个进程最多同时 16 个 AI 调用（v1.9，多节点时按节点算） |
 | 配额 | 每用户每日润色次数默认 30【假设】（按用户自己的时区算“每日”）、每分钟 6 次；发送方开关每条消息扣发送方 1 次，接收方按钮扣接收方 1 次（v1.9）；全局设日预算 `AI_DAILY_BUDGET_USD`，翻译与润色的估算成本都累加进去（`ai:cost:{yyyymmdd}`），超预算关闭润色、保留基础翻译，**超过 2 倍预算连翻译也停止**（新消息直接 `failed`，显示原文，打 error 日志）【假设，v1.9】；Redis 不可用时退化为进程内计数 |
-| 成本统计 | 每次真实调用按返回的 token 数和价目表估算成本（Gemini 免费层记 0）。价目表 = 代码内置（目前只有 `claude-haiku-5-5`）+ 环境变量 `GEMINI_PRICE_IN_USD_PER_M` / `GEMINI_PRICE_OUT_USD_PER_M`（Gemini 模型名来自配置，代码里无法写死价格，v1.11）；production 下链上任何付费供应商查不到价格就拒绝启动，否则预算与硬上限看不到这部分花费（v1.11）；写 `ai_usage_daily`（B5b），按功能拆分，供看板使用；校验回退按校验项分类记日志与指标 |
+| 成本统计 | 每次真实调用按返回的 token 数和价目表估算成本（Gemini 免费层记 0）。价目表 = 代码内置（目前只有 `claude-haiku-5-5`）+ 环境变量 `GEMINI_PRICE_IN_USD_PER_M` / `GEMINI_PRICE_OUT_USD_PER_M`（Gemini 模型名来自配置，代码里无法写死价格，v1.11）；production 下链上任何付费供应商查不到价格就拒绝启动，否则预算与硬上限看不到这部分花费（v1.11）；写 `ai_usage_daily`（v1.12 已实现：`day` 为 UTC 日期，与 `ai:cost` 一致；翻译记在发送者名下，每种目标语言一次真实调用记一次；润色记在 `polish_by` 名下；缓存命中不写；`user_id` 不加外键，账号删除时另行处理），按功能拆分，供看板使用；付费 Gemini 的价格同时用于翻译与润色两个模型（v1.12）；校验回退按校验项分类记日志与指标 |
 | 隐私 | 发给供应商的内容只有原文、基础译文、语言和接收方 MBTI，不带用户标识、昵称；生产环境必须使用承诺不将数据用于训练的服务 |
 | Gemini 免费层（v1.9） | 免费层的输入输出会被 Google 用来改进产品，并可能有人工审阅，**只能用于开发、只发测试消息**。`GEMINI_FREE_TIER` 默认 true；`APP_ENV=production` 且 Gemini 在链上时必须为 false，否则拒绝启动。有真实用户前，升级 Gemini 付费层，或把 `AI_PRIMARY` 改为 `claude` |
 
@@ -870,7 +878,7 @@ MVP 不接机器翻译兜底（v1.9）：又是一家供应商、一笔费用，
 | 其他输入 | 原文（只用来核对语义，不改写）、目标语言、接收方 MBTI、润色档位、`prompt_version` |
 | 不作为输入【假设】 | 发送方 MBTI、双方关系、聊天历史、任何用户标识 |
 | 输出 | JSON：`{ "text": 润色译文, "risk": "none" / "review" / "block" }`，`risk` 交给后置审核（7.4 第 9 步） |
-| 极短文本【假设】 | 去掉标点与 emoji 后不超过 3 个字（英文不超过 2 个词），如“好”“OK”“谢谢！”：不调用模型，润色结果直接等于基础译文，不消耗配额。改写空间太小，强行改容易改出新意思 |
+| 极短文本【假设】 | 去掉标点与 emoji 后不超过 3 个字（英文不超过 2 个词），如“好”“OK”“谢谢！”：不调用模型，润色结果直接等于基础译文，不消耗配额。改写空间太小，强行改容易改出新意思。v1.12：文本里有汉字、假名或韩文就按字数算，否则按词数算（中英混排的句子不会被误判为极短） |
 
 **为什么只看接收方**：重构的目的是让接收方读着舒服，所以按接收方的沟通偏好调整。发送方自己的语气已经在原文和基础译文里，发送方身份由信使卡片上的宠物呈现（PRD F4.2 ③）。只看接收方，润色缓存才能压到 16 档（10.2）。双方关系和聊天历史会让每条消息的输入都不一样，缓存基本失效，还要把更多用户内容发给供应商，所以 MVP 不用。
 
@@ -943,10 +951,10 @@ MVP 的礼貌等级固定如上；PRD 8.2 提到的“用户可设置敬语等�
 模型返回后、后置审核之前，按顺序检查，任何一项不通过就丢弃润色结果：
 
 1. 能解析成约定的 JSON，`text` 不为空
-2. 数字、日期时间、金额、链接、@ 提及：与基础译文抽出来的集合一致（先把全角数字、中日韩数字写法规范化再比）
-3. 长度变化在档位范围内（10.3.4）
+2. 数字、日期时间、金额、链接、@ 提及：与基础译文抽出来的集合一致（先把全角数字、中日韩数字写法规范化再比）。v1.12 细则：数字按整体比较（`15:00`、`3.5`、`11/22` 各算一个）；中日文数字只有紧跟单位字（点、时、分、秒、日、号、月、年、岁、元、円、块、个、人、시、분、일、월、년、원 等）时才换算成阿拉伯数字，所以“一下”“一起”不算数字；单独一个“一”也不算（“一点”“一个”多半不是数字）；“十分”在中文是“非常”、在日文是“足够”，也不算，除非它前面是点、時、时（三点十分）或后面是钟、鐘、後、后、前、間、间（十分钟）；@ 提及：拉丁字母写的账号在换成别的文字处结束，紧贴着后文的中日韩名字只比较前两个字；货币符号 `$ ¥ € £ ₩` 按个数比较
+3. 长度变化在档位范围内（10.3.4）；v1.12：另设 4 个字符的下限，即允许相差 max(档位比例 × 基础译文字数, 4) 个字符，否则短句加一个语气词就会回退
 4. 没有新增 emoji 或颜文字
-5. 不含 MBTI 的四字母类型名
+5. 不含 MBTI 的四字母类型名（v1.12：只拦截基础译文里没有的类型名，用户自己写了“我是 INTJ”可以保留）
 
 不通过时：`deliveries.polished_text` 留空，`polish_status = fallback`，`message.polished` 带上 `polish_status = fallback`，卡片继续显示基础译文并标“未润色”。第 1 项属于供应商调用失败，按 10.1 走降级链并计入熔断；第 2～5 项是改写越界，直接回退，不换供应商重试（大概率还会这样改，且成本翻倍）【假设】。回退计入润色配额，记录到 `ai_usage_daily`，按校验项分类统计。人名无法可靠抽取，不在程序校验里，靠提示词和评测集覆盖。
 
@@ -974,7 +982,7 @@ MVP 的礼貌等级固定如上；PRD 8.2 提到的“用户可设置敬语等�
 | 自动检查 | 每句跑 16 型；10.3.7 校验通过率不低于 98% |
 | 人工评审 | 每种语言由母语者抽 16 型 × 10 句，按“原意保持 / 自然度 / 风格贴合”各打 1～5 分；原意保持平均不低于 4.5，另两项不低于 4 |
 | 区分度 | 相反类型（如 ISTJ 与 ENFP）的结果要读得出语气差别；读不出差别不算错，只说明旋钮太弱 |
-| 何时重跑 | 每次升 `prompt_version` 或换润色模型，都要先跑评测，达标才上线 |
+| 何时重跑 | 每次升 `prompt_version` 或换润色模型，都要先跑评测，达标才上线。v1.12：评测集与工具在 `cmd/tools/polisheval`（每种语言 41 句，9 类），`task polisheval -- -provider claude` 输出各语言的校验通过率，并导出供母语者打分的 CSV；当前润色提示词版本为 `p1` |
 | 上线后 | PRD F4.8 的点踩按 `prompt_version` × 目标语言 × 接收方 MBTI 统计，点踩率明显偏高的组合优先调整 |
 
 #### 10.3.10 MVP 不做的事
@@ -1166,8 +1174,9 @@ OWNER_REGEN_DAILY_LIMIT=3       # 房主每日自助补码上限
 - 启动自检，任一不满足就拒绝启动：
   - `APP_ENV` 必填且只能是 `local | staging | production`，**不设默认值**（缺失时若默认成 local 会悄悄放宽下面的检查）。
   - 非 local：`DEV_LOGIN_ENABLED` 必须为 false、`JWT_SIGNING_KEY` 不少于 32 位、`DATABASE_URL` 不得使用 `sslmode=disable`。
-  - `production`：`AI_PROVIDER` 必须为 live；Gemini 在链上时 `GEMINI_FREE_TIER` 必须为 false（v1.9）；链上每家付费供应商都要查得到价格：付费 Gemini 必须配齐两个 `GEMINI_PRICE_*`，Claude 的 `CLAUDE_MODEL_TRANSLATE` 必须在内置价目表里（v1.11）。
-  - `AI_PROVIDER=live`：主供应商（`AI_PRIMARY`）的 key 与模型名必填；备用的 key 可空（v1.9）。
+  - `production`：`AI_PROVIDER` 必须为 live；Gemini 在链上时 `GEMINI_FREE_TIER` 必须为 false（v1.9）；链上每家付费供应商都要查得到价格：付费 Gemini 必须配齐两个 `GEMINI_PRICE_*`，Claude 的 `CLAUDE_MODEL_TRANSLATE` 必须在内置价目表里（v1.11），`CLAUDE_MODEL_POLISH` 也一样（v1.12）。
+  - 任何环境：`GEMINI_PRICE_IN_USD_PER_M` 与 `GEMINI_PRICE_OUT_USD_PER_M` 必须同时配或同时不配；`AI_POLISH_DAILY_QUOTA` 为 0–10000 的整数（v1.12）。
+  - `AI_PROVIDER=live`：主供应商（`AI_PRIMARY`）的 key 与模型名必填；备用的 key 可空（v1.9）；配了 `GEMINI_API_KEY` 时 `GEMINI_MODEL_POLISH` 也必填（v1.12）。
 - API key 只来自环境变量，不进日志、不进仓库；`.env.example` 只放空值（v1.9）。
 - 监听地址 `APP_HOST`：local 默认 `127.0.0.1`（开发登录无需密码，不应暴露到局域网），其余环境默认 `0.0.0.0`。
 - 鉴权：每个受保护请求在验签后都会查一次 `users.status`，被封号或删除的账号立即失效（返回 403 `ACCOUNT_DISABLED`），不等 access token 过期。
@@ -1236,7 +1245,8 @@ volumes:
 
 1. `cp .env.example .env`（本地默认值可直接使用）。
 2. `task up`，再 `task migrate`，再 `task seed`（Windows 用 go-task；对应 `make` 写法见上表）。
-3. 运行 `task dev`；另开一个终端运行 `task worker`（v1.9：B5 起消息翻译在 worker 里执行；不开 worker 时消息照常送达，但一直停在“翻译中”）。
+3. 运行 `task dev`；另开一个终端运行 `task worker`（v1.9：B5 起消息翻译在 worker 里执行；不开 worker 时消息照常送达，但一直停在“翻译中”；v1.12：润色同样在 worker 里执行）。
+   想看润色在真实模型上的效果，可以不启动服务，直接运行 `task polisheval -- -provider claude -lang zh-Hans -n 10 -types ISTJ,ENFP`（只读 `ANTHROPIC_API_KEY` / `GEMINI_API_KEY` 等几个环境变量，开始前打印调用次数，v1.12）。
 4. `curl localhost:8090/healthz` 与 `/readyz` 返回正常。
 
 **本地替代外部依赖**
@@ -1244,7 +1254,7 @@ volumes:
 | 线上依赖 | 本地做法 |
 | :-- | :-- |
 | Apple / Google 登录 | `POST /auth/login/dev`（body 只含邮箱，直接签发 token）；只在 `APP_ENV=local` 且 `DEV_LOGIN_ENABLED=true` 时注册该路由【假设，本地与自动化测试专用】 |
-| LLM | `AI_PROVIDER=fake`：主、备两个假供应商；翻译返回“\[目标语言\] 原文”，润色返回“\[MBTI\] 基础译文”；可用 `FAKE_AI_LATENCY_MS`、`FAKE_AI_FAIL_RATE`、`FAKE_AI_SECONDARY_FAIL_RATE` 模拟慢与失败（v1.9）。要看真实效果时改 `live` 并填 Gemini / Claude 的 key |
+| LLM | `AI_PROVIDER=fake`：主、备两个假供应商；翻译返回“\[目标语言\] 原文”，润色返回“基础译文 ~”（v1.12：原来的“\[MBTI\] 基础译文”必然触发 10.3.7 第 5 项校验，假 AI 下会永远回退）；可用 `FAKE_AI_LATENCY_MS`、`FAKE_AI_FAIL_RATE`、`FAKE_AI_SECONDARY_FAIL_RATE` 模拟慢与失败（v1.9）。要看真实效果时改 `live` 并填 Gemini / Claude 的 key |
 | FCM 推送 | 不配置凭据，推送只打印日志 |
 | 对象存储 | MinIO（控制台 `localhost:9001`） |
 | 内容审核 API | 只启用本地词库 |
@@ -1302,7 +1312,7 @@ volumes:
 | B2 | 登录（Apple/Google）、token、onboarding、宠物映射 | 前端可注册 |
 | B3 | 验证码生成、入房事务、奖励发放、限流冷却（含登录限流）、房主踢人/解散/自助补码/退出（7.8）、并发测试；分 B3a（入房主路径）与 B3b（房主管理）两段交付 | **核心机制跑通** |
 | B4 | WS Hub、presence（在线 / 离线）、事件分发与 Redis 故障兜底、订阅快照、`pet.tap`；断线重放改为每次订阅下发快照（v1.4） | 小屋实时同步 |
-| B5 | 消息收发、短语模板、AI 网关（缓存/熔断/降级/配额）；v1.9 分两段：**B5a** 消息与翻译（迁移 0004、短语、发送与拉取、`message.new` / `message.translated`、worker、Gemini + Claude 翻译网关、重试与补偿扫描、成本累加与翻译硬上限），**B5b** 润色与成本（两个润色入口、`message.polished`、10.3 提示词与校验、配额与预算、`ai_usage_daily`、评测工具）；审核、屏蔽、推送、已读不在 B5 | 跨语言消息可用 |
+| B5 | 消息收发、短语模板、AI 网关（缓存/熔断/降级/配额）；v1.9 分两段：**B5a** 消息与翻译（迁移 0004、短语、发送与拉取、`message.new` / `message.translated`、worker、Gemini + Claude 翻译网关、重试与补偿扫描、成本累加与翻译硬上限），**B5b** 润色与成本（两个润色入口、`message.polished`、10.3 提示词与校验、配额与预算、`ai_usage_daily`、评测工具）；审核、屏蔽、推送、已读不在 B5。v1.12：B5b 完成 | 跨语言消息可用 |
 | B6 | 内容审核、举报屏蔽、未成年人规则、打卡与装扮（房主解散已提前到 B3） | 合规与养成 |
 | B7 | 推送、Widget 快照、分享卡片数据、账号删除 | 功能补齐 |
 | B8 | 压测、故障演练、监控告警、备份恢复演练、灰度准备 | 可灰度上线 |
