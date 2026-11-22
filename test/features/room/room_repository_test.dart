@@ -91,4 +91,35 @@ void main() {
     expect(m.nickname, isNull);
     expect(m.petType, isNull);
   });
+
+  test('listMine maps regen_remaining_today', () async {
+    final adapter = FakeAdapter(
+      (_) async => jsonBody(200, {
+        'data': [
+          {
+            'id': 'own',
+            'is_owner': true,
+            'status': 'open',
+            'member_count': 1,
+            'capacity': 5,
+            'regen_remaining_today': 2,
+            'members': [_member('u1', 1, role: 'owner')],
+          },
+          {
+            'id': 'other',
+            'is_owner': false,
+            'status': 'open',
+            'member_count': 2,
+            'capacity': 5,
+            'regen_remaining_today': null,
+            'members': [_member('u9', 1, role: 'owner'), _member('u1', 2)],
+          },
+        ],
+      }),
+    );
+
+    final rooms = await _repo(adapter).listMine();
+
+    expect(rooms.map((r) => r.regenRemainingToday), [2, null]);
+  });
 }

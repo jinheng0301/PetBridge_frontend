@@ -31,6 +31,7 @@ class ApiRoomRepository implements RoomRepository {
     memberCount: r.memberCount,
     capacity: r.capacity,
     members: membersFrom(r.members),
+    regenRemainingToday: r.regenRemainingToday,
   );
 }
 

@@ -53,8 +53,9 @@ class Room {
   /// Sorted by seat.
   final List<RoomMember> members;
 
-  /// How many more codes the owner may issue today; `null` for rooms the
-  /// user does not own, or while the server does not send it yet.
+  /// How many more codes the owner may issue today (daily limit only; the
+  /// server still decides on `POST /rooms/{id}/codes`). `null` for rooms
+  /// the user does not own.
   final int? regenRemainingToday;
 
   RoomMember? get owner => ownerOf(members);
