@@ -9,6 +9,7 @@ import 'package:petbridge/features/auth/application/session_controller.dart';
 import 'package:petbridge/features/auth/presentation/login_page.dart';
 import 'package:petbridge/features/home/presentation/me_tab.dart';
 import 'package:petbridge/features/invite/data/invite_repository.dart';
+import 'package:petbridge/features/pet/presentation/pet_view.dart';
 import 'package:petbridge/features/room/application/realtime_coordinator.dart';
 import 'package:petbridge/features/room/data/room_repository.dart';
 
@@ -88,8 +89,9 @@ void main() {
     expect(find.byType(MeTab), findsOneWidget);
     expect(find.text('Aki'), findsOneWidget);
     expect(find.text('ENFP'), findsOneWidget);
-    // Once in the pet circle, once in the "Pet" row.
-    expect(find.text(en.pet_happy_shiba_name), findsNWidgets(2));
+    expect(find.byType(PetView), findsOneWidget);
+    // The drawn pet has no text; the name is in the "Pet" row.
+    expect(find.text(en.pet_happy_shiba_name), findsOneWidget);
   });
 
   testWidgets('logout returns to login', (tester) async {

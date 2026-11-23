@@ -37,6 +37,8 @@ class RevealPage extends ConsumerWidget {
           const SizedBox(height: 8),
           PetView(petType: petType, size: 180),
           const SizedBox(height: 16),
+          Text(petName(l, petType), style: theme.textTheme.headlineSmall),
+          const SizedBox(height: 4),
           Text(mbti, style: theme.textTheme.titleLarge),
           const SizedBox(height: 12),
           Text(

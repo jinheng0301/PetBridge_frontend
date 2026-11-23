@@ -63,7 +63,7 @@ class PosterCanvas extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               if (isKnownPet(petType))
-                PetView(petType: petType, size: 120)
+                PetView(petType: petType, size: 120, animate: false)
               else
                 const SizedBox.square(dimension: 120),
               const Spacer(),
