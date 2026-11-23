@@ -369,23 +369,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get room_title_friend => 'A friend\'s room';
 
   @override
-  String get room_me => 'Me';
-
-  @override
-  String get room_owner_tag => 'Owner';
-
-  @override
-  String room_free_seats(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count seats left',
-      one: '1 seat left',
-    );
-    return '$_temp0';
-  }
-
-  @override
   String room_count(int count, int capacity) {
     return '$count/$capacity';
   }
@@ -394,16 +377,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get room_invite => 'Invite friends';
 
   @override
-  String get room_solo_hint => 'Your pet is waiting for new friends';
-
-  @override
-  String get room_locked_title => 'Your room isn\'t unlocked yet';
-
-  @override
-  String get room_locked_body => 'Enter a friend\'s code, or share yours';
-
-  @override
   String get room_join_button => 'Enter a code';
+
+  @override
+  String get room_solo_card =>
+      'You\'re the only one here. Invite friends, or use a code to visit a friend\'s room.';
+
+  @override
+  String get room_seat_invite => '+ Invite';
+
+  @override
+  String get room_reconnecting => 'Reconnecting…';
 
   @override
   String get join_title => 'Enter invite code';

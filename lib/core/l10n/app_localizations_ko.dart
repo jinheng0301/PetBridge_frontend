@@ -341,17 +341,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get room_title_friend => '친구의 방';
 
   @override
-  String get room_me => '나';
-
-  @override
-  String get room_owner_tag => '방장';
-
-  @override
-  String room_free_seats(int count) {
-    return '빈자리 $count개';
-  }
-
-  @override
   String room_count(int count, int capacity) {
     return '$count/$capacity';
   }
@@ -360,16 +349,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String get room_invite => '친구 초대';
 
   @override
-  String get room_solo_hint => '펫이 새 친구를 기다리고 있어요';
-
-  @override
-  String get room_locked_title => '아직 방이 열리지 않았어요';
-
-  @override
-  String get room_locked_body => '친구의 코드를 입력하거나 내 코드를 공유해 보세요';
-
-  @override
   String get room_join_button => '코드 입력';
+
+  @override
+  String get room_solo_card => '방에 나 혼자 있어요. 친구를 초대하거나 코드로 친구의 방에 가 보세요.';
+
+  @override
+  String get room_seat_invite => '＋ 초대';
+
+  @override
+  String get room_reconnecting => '다시 연결하는 중…';
 
   @override
   String get join_title => '초대 코드 입력';

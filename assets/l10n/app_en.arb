@@ -449,23 +449,6 @@
   "@room_title_friend": {
     "description": "Title of someone else's room when the owner has no nickname."
   },
-  "room_me": "Me",
-  "@room_me": {
-    "description": "The user in a member list."
-  },
-  "room_owner_tag": "Owner",
-  "@room_owner_tag": {
-    "description": "Tag next to the room owner."
-  },
-  "room_free_seats": "{count, plural, =1{1 seat left} other{{count} seats left}}",
-  "@room_free_seats": {
-    "description": "Free seats in the room.",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "room_count": "{count}/{capacity}",
   "@room_count": {
     "description": "Members over capacity.",
@@ -482,21 +465,21 @@
   "@room_invite": {
     "description": "Button to the backpack to share a code."
   },
-  "room_solo_hint": "Your pet is waiting for new friends",
-  "@room_solo_hint": {
-    "description": "Solo state caption."
-  },
-  "room_locked_title": "Your room isn't unlocked yet",
-  "@room_locked_title": {
-    "description": "Solo state: room locked."
-  },
-  "room_locked_body": "Enter a friend's code, or share yours",
-  "@room_locked_body": {
-    "description": "Solo state: how to unlock."
-  },
   "room_join_button": "Enter a code",
   "@room_join_button": {
     "description": "Opens the join page."
+  },
+  "room_solo_card": "You're the only one here. Invite friends, or use a code to visit a friend's room.",
+  "@room_solo_card": {
+    "description": "Solo state card under the room scene: the user is alone in their own room."
+  },
+  "room_seat_invite": "+ Invite",
+  "@room_seat_invite": {
+    "description": "Label on an empty seat in the user's own room; opens the backpack to share a code."
+  },
+  "room_reconnecting": "Reconnecting…",
+  "@room_reconnecting": {
+    "description": "Pill shown while the realtime connection has been down for a few seconds."
   },
   "join_title": "Enter invite code",
   "@join_title": {

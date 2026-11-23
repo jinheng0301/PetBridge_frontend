@@ -338,17 +338,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get room_title_friend => '友だちのお部屋';
 
   @override
-  String get room_me => 'わたし';
-
-  @override
-  String get room_owner_tag => 'オーナー';
-
-  @override
-  String room_free_seats(int count) {
-    return '空席あと $count';
-  }
-
-  @override
   String room_count(int count, int capacity) {
     return '$count/$capacity';
   }
@@ -357,16 +346,17 @@ class AppLocalizationsJa extends AppLocalizations {
   String get room_invite => '友だちを招待';
 
   @override
-  String get room_solo_hint => 'ペットが新しい友だちを待っています';
-
-  @override
-  String get room_locked_title => 'お部屋はまだ開いていません';
-
-  @override
-  String get room_locked_body => '友だちの招待コードを入力するか、自分のコードをシェアしましょう';
-
-  @override
   String get room_join_button => '招待コードを入力';
+
+  @override
+  String get room_solo_card =>
+      'お部屋にいるのはあなただけです。友だちを招待するか、招待コードで友だちのお部屋へ行きましょう。';
+
+  @override
+  String get room_seat_invite => '＋ 招待';
+
+  @override
+  String get room_reconnecting => '再接続しています…';
 
   @override
   String get join_title => '招待コードを入力';

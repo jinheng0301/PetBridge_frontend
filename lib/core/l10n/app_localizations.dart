@@ -746,24 +746,6 @@ abstract class AppLocalizations {
   /// **'A friend\'s room'**
   String get room_title_friend;
 
-  /// The user in a member list.
-  ///
-  /// In en, this message translates to:
-  /// **'Me'**
-  String get room_me;
-
-  /// Tag next to the room owner.
-  ///
-  /// In en, this message translates to:
-  /// **'Owner'**
-  String get room_owner_tag;
-
-  /// Free seats in the room.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =1{1 seat left} other{{count} seats left}}'**
-  String room_free_seats(int count);
-
   /// Members over capacity.
   ///
   /// In en, this message translates to:
@@ -776,29 +758,29 @@ abstract class AppLocalizations {
   /// **'Invite friends'**
   String get room_invite;
 
-  /// Solo state caption.
-  ///
-  /// In en, this message translates to:
-  /// **'Your pet is waiting for new friends'**
-  String get room_solo_hint;
-
-  /// Solo state: room locked.
-  ///
-  /// In en, this message translates to:
-  /// **'Your room isn\'t unlocked yet'**
-  String get room_locked_title;
-
-  /// Solo state: how to unlock.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter a friend\'s code, or share yours'**
-  String get room_locked_body;
-
   /// Opens the join page.
   ///
   /// In en, this message translates to:
   /// **'Enter a code'**
   String get room_join_button;
+
+  /// Solo state card under the room scene: the user is alone in their own room.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re the only one here. Invite friends, or use a code to visit a friend\'s room.'**
+  String get room_solo_card;
+
+  /// Label on an empty seat in the user's own room; opens the backpack to share a code.
+  ///
+  /// In en, this message translates to:
+  /// **'+ Invite'**
+  String get room_seat_invite;
+
+  /// Pill shown while the realtime connection has been down for a few seconds.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconnecting…'**
+  String get room_reconnecting;
 
   /// Join page app bar title
   ///

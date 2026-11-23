@@ -5,24 +5,25 @@ import 'package:petbridge/app/router/routes.dart';
 import 'package:petbridge/config/error_codes.dart';
 import 'package:petbridge/core/l10n/app_localizations.dart';
 import 'package:petbridge/core/network/app_failure.dart';
-import 'package:petbridge/features/auth/application/session.dart';
-import 'package:petbridge/features/auth/application/session_controller.dart';
-import 'package:petbridge/features/pet/presentation/pet_catalog.dart';
-import 'package:petbridge/features/pet/presentation/pet_view.dart';
+import 'package:petbridge/features/room/application/realtime_coordinator.dart';
 import 'package:petbridge/features/room/application/room.dart';
+import 'package:petbridge/features/room/application/room_view.dart';
 import 'package:petbridge/features/room/application/rooms_provider.dart';
+import 'package:petbridge/features/room/presentation/room_backdrop.dart';
+import 'package:petbridge/features/room/presentation/room_scene.dart';
 import 'package:petbridge/features/room/presentation/room_title.dart';
+import 'package:petbridge/features/room/presentation/room_top_bar.dart';
 
-/// The room tab. In F1 it is a member list; F2 replaces the list with the
-/// room scene and adds the manage / leave entries.
+/// The room tab: the selected room drawn live with its pets, a top bar to
+/// switch rooms, and while the user is alone a card pointing to the join
+/// page and the backpack. Not a list, so no pull-down refresh; the rooms
+/// reload on app resume and on member changes (realtime coordinator).
 class RoomTab extends ConsumerWidget {
   const new({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l = AppLocalizations.of(context);
     final rooms = ref.watch(roomsProvider);
-    final mode = ref.watch(roomModeProvider);
     final selected = ref.watch(selectedRoomProvider);
 
     final Widget body;
@@ -30,185 +31,189 @@ class RoomTab extends ConsumerWidget {
       body = _LoadFailed(failure: AppFailure.from(rooms.error!));
     } else if (!rooms.hasValue) {
       body = const Center(child: CircularProgressIndicator());
-    } else if (mode == RoomMode.solo || selected == null) {
-      body = const _Solo();
+    } else if (selected == null) {
+      // Every onboarded user has a room; this only shows if the list is
+      // somehow empty.
+      body = const Column(
+        children: [
+          Expanded(child: RoomBackdrop()),
+          _SoloCard(),
+        ],
+      );
     } else {
-      body = _InRoom(rooms: rooms.requireValue, selected: selected);
+      body = _Room(rooms: rooms.requireValue, room: selected);
     }
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          mode == RoomMode.inRoom && selected != null
-              ? '${roomTitle(l, selected)} '
-                    '${l.room_count(selected.memberCount, selected.capacity)}'
-              : l.home_tab_room,
-          key: const Key('room-title'),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-      body: RefreshIndicator(
-        onRefresh: () => _refresh(context, ref),
-        child: body,
-      ),
-    );
-  }
-
-  static Future<void> _refresh(BuildContext context, WidgetRef ref) async {
-    final l = AppLocalizations.of(context);
-    final messenger = ScaffoldMessenger.of(context);
-    try {
-      await ref.read(roomsProvider.notifier).refresh();
-    } on AppFailure catch (f) {
-      messenger.showSnackBar(SnackBar(content: Text(localizedError(l, f))));
-    }
+    return Scaffold(body: body);
   }
 }
 
-class _Solo extends ConsumerWidget {
-  const new();
+class _Room extends ConsumerWidget {
+  const new({required this.rooms, required this.room});
+
+  final List<Room> rooms;
+  final Room room;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final session = ref.watch(sessionControllerProvider);
-    final me = session is SessionReady ? session.me : null;
-    final petType = me?.petType;
+    final view = ref.watch(roomViewProvider(room.id));
+    // Watched, never kept: the coordinator is rebuilt per session.
+    final coordinator = ref.watch(realtimeCoordinatorProvider);
+    final reconnecting = ref.watch(wsReconnectingProvider);
+    final solo = ref.watch(roomModeProvider) == RoomMode.solo;
+    final meId = ref.watch(readyUserIdProvider) ?? '';
+    if (view == null) return const Center(child: CircularProgressIndicator());
 
-    return ListView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(24),
+    void goToBag() => context.go(Routes.homeBag);
+
+    final scene = Stack(
       children: [
-        const SizedBox(height: 16),
-        if (petType != null && isKnownPet(petType))
-          Center(child: PetView(petType: petType)),
-        const SizedBox(height: 16),
-        Text(
-          [?me?.nickname, ?me?.mbti].join(' · '),
-          textAlign: TextAlign.center,
-          style: theme.textTheme.titleMedium,
-        ),
-        const SizedBox(height: 4),
-        Text(
-          l.room_solo_hint,
-          textAlign: TextAlign.center,
-          style: theme.textTheme.bodySmall,
-        ),
-        const SizedBox(height: 48),
-        DecoratedBox(
-          decoration: BoxDecoration(
-            border: Border.all(color: theme.colorScheme.outlineVariant),
-            borderRadius: BorderRadius.circular(12),
+        Positioned.fill(
+          child: RoomScene(
+            // A fresh scene per room: no cute counts carried across.
+            key: ValueKey(room.id),
+            view: view,
+            meId: meId,
+            actions: coordinator.petActions(room.id),
+            onTapPet: (userId) =>
+                ref.read(realtimeCoordinatorProvider).tapPet(room.id, userId),
+            // The card already offers the invite while the user is alone.
+            onInvite: view.isOwner && !solo ? goToBag : null,
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
+        ),
+        Positioned(
+          left: 0,
+          right: 0,
+          top: 0,
+          child: SafeArea(
+            bottom: false,
             child: Column(
               children: [
-                const Icon(Icons.lock_outline),
-                const SizedBox(height: 8),
-                Text(l.room_locked_title, style: theme.textTheme.titleSmall),
-                const SizedBox(height: 4),
-                Text(l.room_locked_body, textAlign: TextAlign.center),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 9, 12, 0),
+                  child: RoomTopBar(
+                    title: roomTitle(l, room),
+                    memberCount: view.memberCount,
+                    capacity: view.capacity,
+                    canSwitch: rooms.length > 1,
+                    onSwitch: () => _switchRoom(ref),
+                  ),
+                ),
+                if (reconnecting) ...[
+                  const SizedBox(height: 6),
+                  const _ReconnectingPill(),
+                ],
               ],
             ),
           ),
         ),
-        const SizedBox(height: 16),
-        FilledButton(
-          onPressed: () => context.push(Routes.join),
-          child: Text(l.room_join_button),
-        ),
       ],
     );
-  }
-}
 
-class _InRoom extends ConsumerWidget {
-  const new({required this.rooms, required this.selected});
-
-  final List<Room> rooms;
-  final Room selected;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = AppLocalizations.of(context);
-    final session = ref.watch(sessionControllerProvider);
-    final myId = session is SessionReady ? session.me.id : null;
-
-    return ListView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(16),
+    if (!solo) return scene;
+    return Column(
       children: [
-        if (rooms.length > 1) ...[
-          SegmentedButton<String>(
-            showSelectedIcon: false,
-            segments: [
-              for (final r in rooms)
-                ButtonSegment(
-                  value: r.id,
-                  label: Text(
-                    '${roomTitle(l, r)} '
-                    '${l.room_count(r.memberCount, r.capacity)}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-            ],
-            selected: {selected.id},
-            onSelectionChanged: (ids) =>
-                ref.read(selectedRoomIdProvider.notifier).select(ids.first),
-          ),
-          const SizedBox(height: 16),
-        ],
-        Card(
-          child: Column(
-            children: [
-              for (final m in selected.members)
-                ListTile(
-                  leading: _MemberPet(petType: m.petType),
-                  title: Text(
-                    m.userId == myId ? l.room_me : (m.nickname ?? ''),
-                    key: const Key('member-name'),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  trailing: m.role == RoomRole.owner
-                      ? Chip(label: Text(l.room_owner_tag))
-                      : null,
-                ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-        if (selected.freeSeats > 0)
-          Text(
-            l.room_free_seats(selected.freeSeats),
-            textAlign: TextAlign.center,
-          ),
-        if (selected.isOwner && selected.freeSeats > 0) ...[
-          const SizedBox(height: 16),
-          OutlinedButton(
-            onPressed: () => context.go(Routes.homeBag),
-            child: Text(l.room_invite),
-          ),
-        ],
+        Expanded(child: scene),
+        const _SoloCard(),
       ],
     );
   }
+
+  /// Moves to the next listed room (the user is in at most two).
+  void _switchRoom(WidgetRef ref) {
+    final i = rooms.indexWhere((r) => r.id == room.id);
+    final next = rooms[(i + 1) % rooms.length];
+    ref.read(selectedRoomIdProvider.notifier).select(next.id);
+  }
 }
 
-class _MemberPet extends StatelessWidget {
-  const new({required this.petType});
-
-  final String? petType;
+class _ReconnectingPill extends StatelessWidget {
+  const new();
 
   @override
   Widget build(BuildContext context) {
-    final p = petType;
-    if (p != null && isKnownPet(p)) return PetView(petType: p, size: 40);
-    return const CircleAvatar(child: Icon(Icons.pets));
+    return DecoratedBox(
+      key: const Key('room-reconnecting'),
+      decoration: const ShapeDecoration(
+        color: Color(0xFFFFF4C2),
+        shape: StadiumBorder(),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        child: Text(
+          AppLocalizations.of(context).room_reconnecting,
+          style: Theme.of(context).textTheme.labelSmall
+              ?.copyWith(color: const Color(0xFF7A5B00)),
+        ),
+      ),
+    );
+  }
+}
+
+/// Under the scene while the user is alone: enter a friend's code, or
+/// invite friends from the backpack.
+class _SoloCard extends StatelessWidget {
+  const new();
+
+  /// The floor colour, so the card sits on the room's floor.
+  static const _floor = Color(0xFFE2B582);
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return ColoredBox(
+      color: _floor,
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+          child: Card(
+            key: const Key('room-solo-card'),
+            margin: EdgeInsets.zero,
+            color: const Color(0xF2FFFFFF),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(l.room_solo_card),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: FilledButton.tonal(
+                          onPressed: () => context.push(Routes.join),
+                          child: Text(
+                            l.room_join_button,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: FilledButton(
+                          onPressed: () => context.go(Routes.homeBag),
+                          child: Text(
+                            l.room_invite,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -220,26 +225,27 @@ class _LoadFailed extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
-    return ListView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(24),
-      children: [
-        const SizedBox(height: 80),
-        Text(localizedError(l, failure), textAlign: TextAlign.center),
-        const SizedBox(height: 16),
-        Center(
-          child: FilledButton(
-            onPressed: () async {
-              try {
-                await ref.read(roomsProvider.notifier).refresh();
-              } on AppFailure {
-                // Still failing; the error stays on screen.
-              }
-            },
-            child: Text(l.common_retry),
-          ),
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(localizedError(l, failure), textAlign: TextAlign.center),
+            const SizedBox(height: 16),
+            FilledButton(
+              onPressed: () async {
+                try {
+                  await ref.read(roomsProvider.notifier).refresh();
+                } on AppFailure {
+                  // Still failing; the error stays on screen.
+                }
+              },
+              child: Text(l.common_retry),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
