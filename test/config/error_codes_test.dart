@@ -42,4 +42,18 @@ void main() {
       );
     }
   });
+
+  test('room admin errors have their own text', () {
+    for (final code in const [
+      'NOT_ROOM_OWNER',
+      'OWNER_CANNOT_LEAVE',
+      'ROOM_NOT_FOUND',
+    ]) {
+      expect(
+        localizedError(l, AppFailure(code)),
+        isNot(l.err_UNKNOWN),
+        reason: code,
+      );
+    }
+  });
 }

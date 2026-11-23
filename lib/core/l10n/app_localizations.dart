@@ -728,6 +728,24 @@ abstract class AppLocalizations {
   /// **'Can\'t create a code right now.'**
   String get err_CODE_ISSUE_LIMIT;
 
+  /// Owner-only action refused; shown to a non-owner.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re not the owner of this room.'**
+  String get err_NOT_ROOM_OWNER;
+
+  /// Owner tried to leave their own room.
+  ///
+  /// In en, this message translates to:
+  /// **'The owner can\'t leave their own room. Dissolve it from the manage page instead.'**
+  String get err_OWNER_CANNOT_LEAVE;
+
+  /// The room is gone (dissolved or never joined).
+  ///
+  /// In en, this message translates to:
+  /// **'This room no longer exists.'**
+  String get err_ROOM_NOT_FOUND;
+
   /// Title of the user's own room.
   ///
   /// In en, this message translates to:

@@ -330,6 +330,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String get err_CODE_ISSUE_LIMIT => '지금은 코드를 만들 수 없어요.';
 
   @override
+  String get err_NOT_ROOM_OWNER => '이 방의 방장이 아니에요.';
+
+  @override
+  String get err_OWNER_CANNOT_LEAVE => '방장은 자기 방을 나갈 수 없어요. 관리 페이지에서 해산해 주세요.';
+
+  @override
+  String get err_ROOM_NOT_FOUND => '이 방은 더 이상 없어요.';
+
+  @override
   String get room_title_mine => '내 방';
 
   @override

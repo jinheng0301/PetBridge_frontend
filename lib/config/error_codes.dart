@@ -23,5 +23,8 @@ String localizedError(AppLocalizations l, AppFailure f) => switch (f.code) {
   'CODE_COOLDOWN' => l.err_CODE_COOLDOWN,
   'ONBOARDING_REQUIRED' => l.err_ONBOARDING_REQUIRED,
   'CODE_ISSUE_LIMIT' => l.err_CODE_ISSUE_LIMIT,
+  'NOT_ROOM_OWNER' => l.err_NOT_ROOM_OWNER,
+  'OWNER_CANNOT_LEAVE' => l.err_OWNER_CANNOT_LEAVE,
+  'ROOM_NOT_FOUND' => l.err_ROOM_NOT_FOUND,
   _ => l.err_UNKNOWN,
 };

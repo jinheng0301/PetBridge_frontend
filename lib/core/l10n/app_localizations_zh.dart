@@ -326,6 +326,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get err_CODE_ISSUE_LIMIT => '暂时无法生成验证码。';
 
   @override
+  String get err_NOT_ROOM_OWNER => '你不是这个小屋的房主。';
+
+  @override
+  String get err_OWNER_CANNOT_LEAVE => '房主不能退出自己的小屋，可以在管理页解散。';
+
+  @override
+  String get err_ROOM_NOT_FOUND => '这个小屋已经不存在了。';
+
+  @override
   String get room_title_mine => '我的小屋';
 
   @override
@@ -820,6 +829,15 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get err_CODE_ISSUE_LIMIT => '暂时无法生成验证码。';
 
   @override
+  String get err_NOT_ROOM_OWNER => '你不是这个小屋的房主。';
+
+  @override
+  String get err_OWNER_CANNOT_LEAVE => '房主不能退出自己的小屋，可以在管理页解散。';
+
+  @override
+  String get err_ROOM_NOT_FOUND => '这个小屋已经不存在了。';
+
+  @override
   String get room_title_mine => '我的小屋';
 
   @override
@@ -1312,6 +1330,15 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get err_CODE_ISSUE_LIMIT => '暫時無法產生驗證碼。';
+
+  @override
+  String get err_NOT_ROOM_OWNER => '你不是這個小屋的房主。';
+
+  @override
+  String get err_OWNER_CANNOT_LEAVE => '房主不能退出自己的小屋，可以在管理頁解散。';
+
+  @override
+  String get err_ROOM_NOT_FOUND => '這個小屋已經不存在了。';
 
   @override
   String get room_title_mine => '我的小屋';

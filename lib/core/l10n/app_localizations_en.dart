@@ -358,6 +358,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get err_CODE_ISSUE_LIMIT => 'Can\'t create a code right now.';
 
   @override
+  String get err_NOT_ROOM_OWNER => 'You\'re not the owner of this room.';
+
+  @override
+  String get err_OWNER_CANNOT_LEAVE =>
+      'The owner can\'t leave their own room. Dissolve it from the manage page instead.';
+
+  @override
+  String get err_ROOM_NOT_FOUND => 'This room no longer exists.';
+
+  @override
   String get room_title_mine => 'My room';
 
   @override

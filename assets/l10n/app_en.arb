@@ -432,6 +432,18 @@
   "@err_CODE_ISSUE_LIMIT": {
     "description": "Code regeneration refused; generic text."
   },
+  "err_NOT_ROOM_OWNER": "You're not the owner of this room.",
+  "@err_NOT_ROOM_OWNER": {
+    "description": "Owner-only action refused; shown to a non-owner."
+  },
+  "err_OWNER_CANNOT_LEAVE": "The owner can't leave their own room. Dissolve it from the manage page instead.",
+  "@err_OWNER_CANNOT_LEAVE": {
+    "description": "Owner tried to leave their own room."
+  },
+  "err_ROOM_NOT_FOUND": "This room no longer exists.",
+  "@err_ROOM_NOT_FOUND": {
+    "description": "The room is gone (dissolved or never joined)."
+  },
   "room_title_mine": "My room",
   "@room_title_mine": {
     "description": "Title of the user's own room."

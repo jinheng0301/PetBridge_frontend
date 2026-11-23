@@ -327,6 +327,15 @@ class AppLocalizationsJa extends AppLocalizations {
   String get err_CODE_ISSUE_LIMIT => '今は招待コードを作れません。';
 
   @override
+  String get err_NOT_ROOM_OWNER => 'あなたはこのお部屋の持ち主ではありません。';
+
+  @override
+  String get err_OWNER_CANNOT_LEAVE => '持ち主は自分のお部屋を退出できません。管理ページで解散してください。';
+
+  @override
+  String get err_ROOM_NOT_FOUND => 'このお部屋はもう存在しません。';
+
+  @override
   String get room_title_mine => 'わたしのお部屋';
 
   @override
