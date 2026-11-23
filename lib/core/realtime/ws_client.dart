@@ -52,6 +52,7 @@ class WsClient {
   bool _running = false;
   bool _paused = false;
   bool _halted = false;
+  bool _disposed = false;
 
   /// Bumped whenever the current connect attempt or connection is abandoned,
   /// so its late results are ignored.
@@ -78,7 +79,7 @@ class WsClient {
   bool get halted => _halted;
 
   void start() {
-    if (_running) return;
+    if (_running || _disposed) return;
     _running = true;
     _paused = false;
     _halted = false;
@@ -109,6 +110,15 @@ class WsClient {
     final conn = _conn;
     _drop(closeConn: false);
     await conn?.close();
+  }
+
+  /// [stop]s for good and ends [states] and [frames]; [start] does nothing
+  /// afterwards.
+  Future<void> dispose() async {
+    if (_disposed) return;
+    _disposed = true;
+    await stop();
+    await Future.wait([_states.close(), _frames.close()]);
   }
 
   /// Sends a client frame and returns its id, or `null` when not `ready`.
@@ -217,7 +227,7 @@ class WsClient {
       return;
     }
     if (frame.t == 'server.restart') _restartAnnounced = true;
-    _frames.add(frame);
+    if (!_frames.isClosed) _frames.add(frame);
   }
 
   void _onHello(WsFrame hello) {
@@ -305,7 +315,7 @@ class WsClient {
   void _setState(WsConnState next) {
     if (next == _state) return;
     _state = next;
-    _states.add(next);
+    if (!_states.isClosed) _states.add(next);
   }
 }
 

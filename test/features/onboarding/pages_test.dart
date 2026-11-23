@@ -17,6 +17,7 @@ import 'package:petbridge/features/onboarding/application/ui_locale.dart';
 import 'package:petbridge/features/onboarding/data/onboarding_repository.dart';
 import 'package:petbridge/features/onboarding/presentation/pages/mbti_page.dart';
 import 'package:petbridge/features/onboarding/presentation/pages/too_young_page.dart';
+import 'package:petbridge/features/room/application/realtime_coordinator.dart';
 
 import '../../helpers/fakes.dart';
 import '../../helpers/pump_app.dart';
@@ -53,6 +54,8 @@ void main() {
           deviceTimeZoneProvider.overrideWithValue(() async => 'UTC'),
           prefsStoreProvider.overrideWithValue(stubPrefs()),
           systemLocaleProvider.overrideWithValue(system),
+          // No real socket in widget tests.
+          wsClientProvider.overrideWithValue(null),
         ],
         child: const PetBridgeApp(),
       ),

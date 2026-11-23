@@ -4,6 +4,7 @@ import 'package:petbridge/app/router/app_router.dart';
 import 'package:petbridge/app/theme/app_theme.dart';
 import 'package:petbridge/core/l10n/app_localizations.dart';
 import 'package:petbridge/features/onboarding/application/ui_locale.dart';
+import 'package:petbridge/features/room/application/realtime_coordinator.dart';
 
 /// Localization delegates for the app. The material and cupertino ones
 /// come from `material_ui` / `cupertino_ui`; gen-l10n's default list uses
@@ -14,12 +15,14 @@ const List<LocalizationsDelegate<dynamic>> appLocalizationsDelegates = [
   ...GlobalMaterialLocalizations.delegates,
 ];
 
-/// Root widget: router, theme and the UI language.
+/// Root widget: router, theme and the UI language. Also keeps the realtime
+/// coordinator (socket, room subscriptions, lifecycle) alive.
 class PetBridgeApp extends ConsumerWidget {
   const new({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(realtimeCoordinatorProvider);
     return MaterialApp.router(
       routerConfig: ref.watch(routerProvider),
       locale: ref.watch(uiLocaleProvider),

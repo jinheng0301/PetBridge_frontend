@@ -424,4 +424,27 @@ void main() {
       finish(async, c);
     });
   });
+
+  test('dispose closes the socket and ends the streams', () {
+    fakeAsync((async) {
+      final c = build();
+      var statesDone = false;
+      var framesDone = false;
+      c.states.listen(null, onDone: () => statesDone = true);
+      c.frames.listen(null, onDone: () => framesDone = true);
+      startReady(async, c);
+
+      unawaited(c.dispose());
+      async.flushMicrotasks();
+
+      expect(transport.last.closedWith, 1000);
+      expect(c.state, WsConnState.disconnected);
+      expect(statesDone, isTrue);
+      expect(framesDone, isTrue);
+
+      c.start();
+      async.flushMicrotasks();
+      expect(transport.calls, hasLength(1));
+    });
+  });
 }

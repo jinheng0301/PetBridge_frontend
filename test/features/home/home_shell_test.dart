@@ -9,6 +9,7 @@ import 'package:petbridge/features/auth/application/session_controller.dart';
 import 'package:petbridge/features/auth/presentation/login_page.dart';
 import 'package:petbridge/features/home/presentation/me_tab.dart';
 import 'package:petbridge/features/invite/data/invite_repository.dart';
+import 'package:petbridge/features/room/application/realtime_coordinator.dart';
 import 'package:petbridge/features/room/data/room_repository.dart';
 
 import '../../helpers/fakes.dart';
@@ -40,6 +41,8 @@ void main() {
           prefsStoreProvider.overrideWithValue(stubPrefs()),
           roomRepositoryProvider.overrideWithValue(rooms),
           inviteRepositoryProvider.overrideWithValue(invites),
+          // No real socket in widget tests.
+          wsClientProvider.overrideWithValue(null),
         ],
         child: const PetBridgeApp(),
       ),
