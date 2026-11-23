@@ -5,17 +5,14 @@ import 'package:petbridge/config/env.dart';
 import 'package:petbridge/core/network/app_failure.dart';
 import 'package:petbridge/core/network/interceptors/auth_interceptor.dart';
 import 'package:petbridge/core/network/interceptors/error_map_interceptor.dart';
+import 'package:petbridge/core/network/token_refresher.dart';
 import 'package:petbridge/core/storage/secure_store.dart';
 
 /// Generated clients already put `/api/v1` in every path, so Dio's base
 /// URL is only the scheme, host and port of [Env.apiBaseUrl].
 String apiOrigin(String apiBaseUrl) => Uri.parse(apiBaseUrl).origin;
 
-Dio buildDio({
-  required SecureStore store,
-  required RefreshFn refresh,
-  required void Function() onSessionExpired,
-}) {
+Dio buildDio({required SecureStore store, required TokenRefresher refresher}) {
   final dio = Dio(
     BaseOptions(
       baseUrl: apiOrigin(Env.apiBaseUrl),
@@ -24,12 +21,7 @@ Dio buildDio({
     ),
   );
   dio.interceptors.addAll([
-    AuthInterceptor(
-      store: store,
-      refresh: refresh,
-      onSessionExpired: onSessionExpired,
-      retryDio: dio,
-    ),
+    AuthInterceptor(refresher: refresher, retryDio: dio, store: store),
     ErrorMapInterceptor(),
     // Bodies stay out of logs (requestBody/responseBody default to false).
     if (kDebugMode) LogInterceptor(),
@@ -50,8 +42,7 @@ final onSessionExpiredProvider = Provider<void Function()>((ref) => () {});
 final dioProvider = Provider<Dio>((ref) {
   final dio = buildDio(
     store: ref.watch(secureStoreProvider),
-    refresh: (rt) => ref.read(refreshFnProvider)(rt),
-    onSessionExpired: () => ref.read(onSessionExpiredProvider)(),
+    refresher: ref.watch(tokenRefresherProvider),
   );
   ref.onDispose(dio.close);
   return dio;

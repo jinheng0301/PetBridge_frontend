@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:petbridge/core/network/app_failure.dart';
 import 'package:petbridge/core/network/interceptors/auth_interceptor.dart';
 import 'package:petbridge/core/network/interceptors/error_map_interceptor.dart';
+import 'package:petbridge/core/network/token_refresher.dart';
 import 'package:petbridge/core/storage/secure_store.dart';
 
 import 'fake_adapter.dart';
@@ -51,10 +52,13 @@ void main() {
       ..httpClientAdapter = adapter
       ..interceptors.addAll([
         AuthInterceptor(
-          store: store,
-          refresh: refresh,
-          onSessionExpired: () => expired++,
+          refresher: TokenRefresher(
+            store: store,
+            refresh: refresh,
+            onSessionExpired: () => expired++,
+          ),
           retryDio: retryDio,
+          store: store,
         ),
         ErrorMapInterceptor(),
       ]);
