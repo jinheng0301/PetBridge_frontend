@@ -4,6 +4,12 @@
 
 ---
 
+## V1.11 变更说明
+
+F2（实时小屋、宠物绘制与房主管理）设计定稿，对齐 PRD v1.9 与后端 TRD v1.13；详细设计见 `docs/superpowers/specs/2026-11-23-f2-realtime-room-design.md`。后端接口不变。① **宠物由 Rive 改为代码绘制**（3、10.2、10.3、16）：团队暂无美术，16 只宠物用 `PetPainter` + `PetSpec` 画（圆滚滚 Q 版、同一套身体、无描边），MVP 姿态 `idle` / `sleep` / `cute`，第二版加 `eat` / `wash`（养成）；`PetView` 改为 `PetView(petType, pose, size)`，旧调用不用改；不再有 `.riv` 与资源体积预算，正式美术到位后可替换内部实现。WebSocket 也改用 `dart:io` 的 `WebSocket`，不新增依赖。② **不做 `/room/:id`**（6.2）：场景放在小屋 Tab，`/room/:id/manage` 保留。③ **第 7 章**：规则 7 删除（`last_seq` 只存内存，服务端每次订阅都给快照），其余规则编号不变；`roomControllerProvider` 改名 `roomLiveProvider`，F2 只含成员与 presence。④ **9.2**：前后台改为“`paused` 立即断开”，对齐 PRD F3.2“离开 App 时立即睡着”（原写“后台 30 秒后断开”与 PRD 冲突，按 PRD）；`4001` 与 `403 ONBOARDING_REQUIRED` 不重连；强制更新页放到 F6，F2 只停止重连并记日志。⑤ **11.4 / 11.6**：写入场景布局与座位比例、名牌、空位、⋯ 菜单、solo 卡片、轻触与长按弹层、重连提示、管理页；**名牌的母语国旗标识（PRD F3.4）延后，F2 不做**（用户决定，PRD 条文不变）。⑥ **19.4**：加入 `WS_URL` 与 `APP_VERSION`；真机环境文件仍用 `env/local.json`（已在 `.gitignore`），新增入库模板 `env/local.example.json`（局域网 IP 用 `192.168.x.x` 占位）。⑦ **第 20 章**：F2 分 F2a（实时与场景）与 F2b（管理与退出），验收设备为安卓模拟器 + 一台安卓真机。⑧ 顺带改正：11.6 引用 reducer 规则的编号由 5 改为 8（`room.kicked` 是规则 8）；文首“配套文档”后端 TRD 版本写为 v1.13。
+
+---
+
 ## V1.10 变更说明
 
 F1（验证码入房、背包与分享海报）设计定稿，对齐后端 TRD v1.10，PRD 不变；详细设计见 `docs/superpowers/specs/2026-11-21-f1-join-backpack-design.md`。① **排期调整**（第 20 章）：onboarding 与占位宠物已在 F0 完成，F1 改为验证码输入、背包、分享海报、小屋 Tab 成员列表；**房主管理（11.6）与退出小屋移到 F2**，与小屋场景一起做。② **`solo` / `inRoom` 不并进会话**（6.1、第 7 章）：会话保持四态，`solo` / `inRoom` 由 `roomsProvider` 派生的 `roomModeProvider` 给出；两者可去的页面相同，并进会话只会让启动等 `/rooms/mine`、并且要处理它失败时会话怎么办。F1 没有 WebSocket，房间数据在进入 `ready`、入房成功、回到前台、下拉刷新时拉取。③ **小屋 Tab 先用成员列表占位**（11.4）：入房结果要能直接看到；接口没有房间名，标题用“我的小屋”或“{房主昵称}的小屋”。④ **路由按实际路径改**（6.2、11.0）：背包 `/home/bag`，分享海报 `/share/:code`。⑤ **输码页细节**（11.0、11.2）：成功态在同一页，没有奖励码时不显示礼盒；`ALREADY_MEMBER` 可跳到该房间；`RATE_LIMITED` 按 `Retry-After` 倒计时；粘贴支持分享链接；冷却倒计时在 App 生命周期内保留。⑥ **背包与海报**（11.0、11.3）：显示绑定小屋人数与剩余有效期，右上角可进输码页；生成验证码显示今日剩余次数（后端 v1.10 新字段 `regen_remaining_today`），为 0 或满员时置灰；海报可保存到相册（`gal`，Android 8–9 需存储权限）与系统分享，对应 PRD F2.5、F2.9。⑦ `SHARE_BASE_URL` 在 F1 加入，先用占位地址（19.4）；F1 的 golden 只做分享海报（19.2）。
