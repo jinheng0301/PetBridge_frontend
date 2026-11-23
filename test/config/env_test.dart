@@ -10,4 +10,9 @@ void main() {
   test('shareBaseUrl defaults to placeholder', () {
     expect(Env.shareBaseUrl, 'https://petbridge.example.com');
   });
+
+  test('wsUrl defaults to emulator host', () {
+    expect(Env.wsUrl, 'ws://10.0.2.2:8090/api/v1/ws');
+    expect(Env.appVersion, '1.0.0');
+  });
 }

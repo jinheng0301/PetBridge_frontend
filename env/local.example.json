@@ -1,0 +1,9 @@
+{
+  "ENV": "dev",
+  "API_BASE_URL": "http://192.168.x.x:8090/api/v1",
+  "WS_URL": "ws://192.168.x.x:8090/api/v1/ws",
+  "GOOGLE_SERVER_CLIENT_ID": "234594731344-fkbbq90jse9giqlmlkrn3qgjn3om9c8r.apps.googleusercontent.com",
+  "DEV_LOGIN": true,
+  "APPLE_LOGIN_ENABLED": false,
+  "SHARE_BASE_URL": "https://petbridge.example.com"
+}

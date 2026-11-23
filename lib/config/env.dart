@@ -8,6 +8,18 @@ abstract final class Env {
     defaultValue: 'http://10.0.2.2:8090/api/v1',
   );
 
+  /// Realtime room socket.
+  static const String wsUrl = String.fromEnvironment(
+    'WS_URL',
+    defaultValue: 'ws://10.0.2.2:8090/api/v1/ws',
+  );
+
+  /// Sent in the socket handshake.
+  static const String appVersion = String.fromEnvironment(
+    'APP_VERSION',
+    defaultValue: '1.0.0',
+  );
+
   static const String googleServerClientId = String.fromEnvironment(
     'GOOGLE_SERVER_CLIENT_ID',
   );
