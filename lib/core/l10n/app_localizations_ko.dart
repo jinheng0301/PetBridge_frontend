@@ -510,4 +510,49 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get share_failed => '포스터를 만들지 못했어요. 다시 시도해 주세요';
+
+  @override
+  String get manage_title => '룸 관리';
+
+  @override
+  String get manage_open => '룸 관리';
+
+  @override
+  String get manage_owner => '방장';
+
+  @override
+  String get manage_remove => '룸에서 내보내기';
+
+  @override
+  String get manage_remove_confirm_title => '룸에서 내보낼까요?';
+
+  @override
+  String manage_remove_confirm_body(String name) {
+    return '$name 님이 룸에서 나가며 다시 참여할 수 없어요.';
+  }
+
+  @override
+  String get manage_dissolve => '룸 해산';
+
+  @override
+  String get manage_dissolve_confirm_title => '룸을 해산할까요?';
+
+  @override
+  String get manage_dissolve_confirm_body =>
+      '모든 멤버가 나가고 사용하지 않은 초대 코드는 무효가 돼요. 룸은 남아 있어서 새 친구를 초대할 수 있어요.';
+
+  @override
+  String get room_leave => '룸 나가기';
+
+  @override
+  String get room_leave_confirm_title => '이 룸에서 나갈까요?';
+
+  @override
+  String get room_leave_confirm_body => '다시 참여하려면 새 초대 코드가 필요해요.';
+
+  @override
+  String get common_cancel => '취소';
+
+  @override
+  String get room_member_unknown => '친구';
 }

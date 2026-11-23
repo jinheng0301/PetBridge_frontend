@@ -561,4 +561,50 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get share_failed => 'Couldn\'t create the poster. Please try again.';
+
+  @override
+  String get manage_title => 'Manage room';
+
+  @override
+  String get manage_open => 'Manage room';
+
+  @override
+  String get manage_owner => 'Owner';
+
+  @override
+  String get manage_remove => 'Remove from room';
+
+  @override
+  String get manage_remove_confirm_title => 'Remove from room?';
+
+  @override
+  String manage_remove_confirm_body(String name) {
+    return '$name will leave your room and won\'t be able to join again.';
+  }
+
+  @override
+  String get manage_dissolve => 'Dissolve room';
+
+  @override
+  String get manage_dissolve_confirm_title => 'Dissolve your room?';
+
+  @override
+  String get manage_dissolve_confirm_body =>
+      'Everyone will leave and unused invite codes will stop working. Your room stays, so you can invite new friends.';
+
+  @override
+  String get room_leave => 'Leave room';
+
+  @override
+  String get room_leave_confirm_title => 'Leave this room?';
+
+  @override
+  String get room_leave_confirm_body =>
+      'You\'ll need a new invite code to join this room again.';
+
+  @override
+  String get common_cancel => 'Cancel';
+
+  @override
+  String get room_member_unknown => 'Friend';
 }

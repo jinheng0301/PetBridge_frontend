@@ -20,6 +20,10 @@ abstract final class Routes {
   static const join = '/join';
   static const share = '/share';
 
+  static const roomManage = '/room/:id/manage';
+
+  static String roomManagePath(String id) => '/room/$id/manage';
+
   static String sharePath(String code) => '$share/$code';
 }
 
@@ -37,6 +41,7 @@ String? redirectFor(Session s, String location) {
       location == Routes.home ||
           location.startsWith('${Routes.home}/') ||
           location == Routes.join ||
+          location.startsWith('/room/') ||
           location.startsWith('${Routes.share}/'),
       Routes.home,
     ),

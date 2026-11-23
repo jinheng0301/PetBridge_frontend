@@ -37,11 +37,8 @@ WsFrame _snapshot(int seq, {List<Map<String, Object?>>? members}) {
   );
 }
 
-WsFrame _joined(String id, int seat, {int? seq}) => WsFrame(
-  'member.joined',
-  seq: seq,
-  d: {'member': _member(id, seat)},
-);
+WsFrame _joined(String id, int seat, {int? seq}) =>
+    WsFrame('member.joined', seq: seq, d: {'member': _member(id, seat)});
 
 WsFrame _left(String id, {int? seq}) =>
     WsFrame('member.left', seq: seq, d: {'user_id': id});

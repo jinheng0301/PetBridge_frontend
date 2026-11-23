@@ -10,6 +10,7 @@ import 'package:petbridge/core/network/app_failure.dart';
 import 'package:petbridge/core/realtime/ws_client.dart';
 import 'package:petbridge/features/auth/application/session.dart';
 import 'package:petbridge/features/auth/application/session_controller.dart';
+import 'package:petbridge/features/pet/presentation/pet_catalog.dart';
 import 'package:petbridge/features/pet/presentation/pet_view.dart';
 import 'package:petbridge/features/room/application/realtime_coordinator.dart';
 import 'package:petbridge/features/room/application/room.dart';
@@ -80,6 +81,10 @@ void main() {
         GoRoute(path: Routes.home, builder: (_, _) => const RoomTab()),
         GoRoute(path: Routes.join, builder: (_, _) => const Text('JOIN')),
         GoRoute(path: Routes.homeBag, builder: (_, _) => const Text('BAG')),
+        GoRoute(
+          path: Routes.roomManage,
+          builder: (_, _) => const Text('MANAGE'),
+        ),
       ],
     );
     await tester.pumpWidget(
@@ -315,5 +320,170 @@ void main() {
     final title = tester.widget<Text>(find.byKey(const Key('room-title')));
     expect(title.data, en.room_title_of(long));
     expect(title.overflow, TextOverflow.ellipsis);
+  });
+
+  group('menu and member sheet', () {
+    final menu = find.byKey(const Key('room-menu'));
+
+    Future<void> openMenu(WidgetTester tester) async {
+      await tester.tap(menu);
+      await tester.pumpAndSettle();
+    }
+
+    void stubOwn() => when(() => repo.listMine()).thenAnswer(
+      (_) async => [
+        ownRoom([aki, member('u2', 2, nickname: 'Bo')]),
+      ],
+    );
+
+    void stubFriend() => when(() => repo.listMine()).thenAnswer(
+      (_) async => [
+        otherRoom([
+          member('u9', 1, nickname: 'Hikari', role: RoomRole.owner),
+          member('u1', 2),
+        ]),
+      ],
+    );
+
+    Finder inDialog(String label) => find.descendant(
+      of: find.byType(AlertDialog),
+      matching: find.text(label),
+    );
+
+    testWidgets('own room menu shows manage only', (tester) async {
+      stubOwn();
+      await pump(tester);
+      await openMenu(tester);
+
+      expect(find.text(en.manage_open), findsOneWidget);
+      expect(find.text(en.room_leave), findsNothing);
+
+      await tester.tap(find.text(en.manage_open));
+      await tester.pumpAndSettle();
+      expect(router.state.uri.path, Routes.roomManagePath('own'));
+    });
+
+    testWidgets('friend room menu shows leave only', (tester) async {
+      stubFriend();
+      await pump(tester);
+      await openMenu(tester);
+
+      expect(find.text(en.room_leave), findsOneWidget);
+      expect(find.text(en.manage_open), findsNothing);
+    });
+
+    testWidgets('leave asks to confirm then calls leave', (tester) async {
+      stubFriend();
+      when(() => repo.leave('other')).thenAnswer((_) async {});
+      await pump(tester);
+      await openMenu(tester);
+      await tester.tap(find.text(en.room_leave));
+      await tester.pumpAndSettle();
+
+      expect(find.text(en.room_leave_confirm_title), findsOneWidget);
+      verifyNever(() => repo.leave(any()));
+
+      await tester.tap(inDialog(en.room_leave));
+      await tester.pumpAndSettle();
+      verify(() => repo.leave('other')).called(1);
+    });
+
+    testWidgets('cancel does nothing', (tester) async {
+      stubFriend();
+      await pump(tester);
+      await openMenu(tester);
+      await tester.tap(find.text(en.room_leave));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(en.common_cancel));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AlertDialog), findsNothing);
+      verifyNever(() => repo.leave(any()));
+    });
+
+    testWidgets('leave failure shows snackbar', (tester) async {
+      stubFriend();
+      when(() => repo.leave('other'))
+          .thenThrow(const AppFailure(AppFailure.network));
+      await pump(tester);
+      await openMenu(tester);
+      await tester.tap(find.text(en.room_leave));
+      await tester.pumpAndSettle();
+      await tester.tap(inDialog(en.room_leave));
+      await tester.pumpAndSettle();
+
+      expect(find.text(en.err_NETWORK), findsOneWidget);
+    });
+
+    testWidgets('long press on member in own room opens sheet', (tester) async {
+      stubOwn();
+      await pump(tester);
+
+      await tester.longPress(pet('u2'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Bo · ${petName(en, 'thinker_owl')}'), findsOneWidget);
+      expect(find.text(en.manage_remove), findsOneWidget);
+    });
+
+    testWidgets('long press in friend room does nothing', (tester) async {
+      stubFriend();
+      await pump(tester);
+
+      await tester.longPress(pet('u9'));
+      await tester.pumpAndSettle();
+
+      expect(find.text(en.manage_remove), findsNothing);
+    });
+
+    testWidgets('long press on self does nothing', (tester) async {
+      stubOwn();
+      await pump(tester);
+
+      await tester.longPress(pet('u1'));
+      await tester.pumpAndSettle();
+
+      expect(find.text(en.manage_remove), findsNothing);
+    });
+
+    testWidgets('remove confirm uses pet name when nickname is empty', (
+      tester,
+    ) async {
+      when(() => repo.listMine()).thenAnswer(
+        (_) async => [
+          ownRoom([aki, member('u2', 2, nickname: '')]),
+        ],
+      );
+      await pump(tester);
+      await tester.longPress(pet('u2'));
+      await tester.pumpAndSettle();
+      final owl = petName(en, 'thinker_owl');
+      // The sheet title is the pet name alone, no dangling separator.
+      expect(
+        find.descendant(of: find.byType(BottomSheet), matching: find.text(owl)),
+        findsOneWidget,
+      );
+      await tester.tap(find.text(en.manage_remove));
+      await tester.pumpAndSettle();
+
+      expect(find.text(en.manage_remove_confirm_body(owl)), findsOneWidget);
+    });
+
+    testWidgets('remove asks to confirm then calls remove', (tester) async {
+      stubOwn();
+      when(() => repo.removeMember('own', 'u2')).thenAnswer((_) async {});
+      await pump(tester);
+      await tester.longPress(pet('u2'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(en.manage_remove));
+      await tester.pumpAndSettle();
+
+      expect(find.text(en.manage_remove_confirm_body('Bo')), findsOneWidget);
+      verifyNever(() => repo.removeMember(any(), any()));
+
+      await tester.tap(inDialog(en.manage_remove));
+      await tester.pumpAndSettle();
+      verify(() => repo.removeMember('own', 'u2')).called(1);
+    });
   });
 }

@@ -158,5 +158,19 @@
   "share_saved": "写真に保存しました",
   "share_denied": "保存するには写真へのアクセスを許可してください",
   "share_unavailable": "このコードはもうシェアできません",
-  "share_failed": "ポスターを作成できませんでした。もう一度お試しください"
+  "share_failed": "ポスターを作成できませんでした。もう一度お試しください",
+  "manage_title": "ルーム管理",
+  "manage_open": "ルーム管理",
+  "manage_owner": "オーナー",
+  "manage_remove": "ルームから外す",
+  "manage_remove_confirm_title": "ルームから外しますか？",
+  "manage_remove_confirm_body": "{name} はあなたのルームから出て、再び参加できなくなります。",
+  "manage_dissolve": "ルームを解散",
+  "manage_dissolve_confirm_title": "ルームを解散しますか？",
+  "manage_dissolve_confirm_body": "全員が退出し、未使用の招待コードは無効になります。ルームは残るので、新しい友だちを招待できます。",
+  "room_leave": "ルームを出る",
+  "room_leave_confirm_title": "このルームを出ますか？",
+  "room_leave_confirm_body": "もう一度参加するには新しい招待コードが必要です。",
+  "common_cancel": "キャンセル",
+  "room_member_unknown": "ともだち"
 }

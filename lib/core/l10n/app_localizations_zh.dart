@@ -506,6 +506,51 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get share_failed => '海报生成失败，请重试';
+
+  @override
+  String get manage_title => '管理小屋';
+
+  @override
+  String get manage_open => '管理小屋';
+
+  @override
+  String get manage_owner => '房主';
+
+  @override
+  String get manage_remove => '移除出小屋';
+
+  @override
+  String get manage_remove_confirm_title => '移除出小屋？';
+
+  @override
+  String manage_remove_confirm_body(String name) {
+    return '$name 将离开你的小屋，并且无法再次加入。';
+  }
+
+  @override
+  String get manage_dissolve => '解散小屋';
+
+  @override
+  String get manage_dissolve_confirm_title => '解散你的小屋？';
+
+  @override
+  String get manage_dissolve_confirm_body =>
+      '所有成员都会离开，未使用的验证码将作废。小屋会保留，你可以重新邀请新朋友。';
+
+  @override
+  String get room_leave => '退出小屋';
+
+  @override
+  String get room_leave_confirm_title => '退出这个小屋？';
+
+  @override
+  String get room_leave_confirm_body => '退出后需要新的验证码才能再次加入。';
+
+  @override
+  String get common_cancel => '取消';
+
+  @override
+  String get room_member_unknown => '朋友';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1009,6 +1054,51 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get share_failed => '海报生成失败，请重试';
+
+  @override
+  String get manage_title => '管理小屋';
+
+  @override
+  String get manage_open => '管理小屋';
+
+  @override
+  String get manage_owner => '房主';
+
+  @override
+  String get manage_remove => '移除出小屋';
+
+  @override
+  String get manage_remove_confirm_title => '移除出小屋？';
+
+  @override
+  String manage_remove_confirm_body(String name) {
+    return '$name 将离开你的小屋，并且无法再次加入。';
+  }
+
+  @override
+  String get manage_dissolve => '解散小屋';
+
+  @override
+  String get manage_dissolve_confirm_title => '解散你的小屋？';
+
+  @override
+  String get manage_dissolve_confirm_body =>
+      '所有成员都会离开，未使用的验证码将作废。小屋会保留，你可以重新邀请新朋友。';
+
+  @override
+  String get room_leave => '退出小屋';
+
+  @override
+  String get room_leave_confirm_title => '退出这个小屋？';
+
+  @override
+  String get room_leave_confirm_body => '退出后需要新的验证码才能再次加入。';
+
+  @override
+  String get common_cancel => '取消';
+
+  @override
+  String get room_member_unknown => '朋友';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -1512,4 +1602,49 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get share_failed => '海報生成失敗，請重試';
+
+  @override
+  String get manage_title => '管理小屋';
+
+  @override
+  String get manage_open => '管理小屋';
+
+  @override
+  String get manage_owner => '屋主';
+
+  @override
+  String get manage_remove => '移除出小屋';
+
+  @override
+  String get manage_remove_confirm_title => '移除出小屋？';
+
+  @override
+  String manage_remove_confirm_body(String name) {
+    return '$name 將離開你的小屋，並且無法再次加入。';
+  }
+
+  @override
+  String get manage_dissolve => '解散小屋';
+
+  @override
+  String get manage_dissolve_confirm_title => '解散你的小屋？';
+
+  @override
+  String get manage_dissolve_confirm_body =>
+      '所有成員都會離開，未使用的驗證碼將作廢。小屋會保留，你可以重新邀請新朋友。';
+
+  @override
+  String get room_leave => '退出小屋';
+
+  @override
+  String get room_leave_confirm_title => '退出這個小屋？';
+
+  @override
+  String get room_leave_confirm_body => '退出後需要新的驗證碼才能再次加入。';
+
+  @override
+  String get common_cancel => '取消';
+
+  @override
+  String get room_member_unknown => '朋友';
 }

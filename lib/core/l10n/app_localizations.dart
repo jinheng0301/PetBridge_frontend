@@ -1051,6 +1051,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t create the poster. Please try again.'**
   String get share_failed;
+
+  /// App bar title of the room manage page.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage room'**
+  String get manage_title;
+
+  /// Room menu item (own room) that opens the manage page.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage room'**
+  String get manage_open;
+
+  /// Badge next to the owner in the manage page member list.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get manage_owner;
+
+  /// Action to remove a member from the user's own room.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from room'**
+  String get manage_remove;
+
+  /// Title of the confirm dialog before removing a member.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from room?'**
+  String get manage_remove_confirm_title;
+
+  /// Body of the confirm dialog before removing a member; says they cannot join again.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} will leave your room and won\'t be able to join again.'**
+  String manage_remove_confirm_body(String name);
+
+  /// Button that dissolves the user's own room.
+  ///
+  /// In en, this message translates to:
+  /// **'Dissolve room'**
+  String get manage_dissolve;
+
+  /// Title of the confirm dialog before dissolving the room.
+  ///
+  /// In en, this message translates to:
+  /// **'Dissolve your room?'**
+  String get manage_dissolve_confirm_title;
+
+  /// Body of the dissolve confirm: everyone leaves, unused codes stop working, the room stays.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone will leave and unused invite codes will stop working. Your room stays, so you can invite new friends.'**
+  String get manage_dissolve_confirm_body;
+
+  /// Room menu item (friend's room) that leaves it.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave room'**
+  String get room_leave;
+
+  /// Title of the confirm dialog before leaving a room.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave this room?'**
+  String get room_leave_confirm_title;
+
+  /// Body of the confirm dialog before leaving a room.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll need a new invite code to join this room again.'**
+  String get room_leave_confirm_body;
+
+  /// Cancel button of confirm dialogs.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get common_cancel;
+
+  /// Name shown for a room member with no nickname and no known pet.
+  ///
+  /// In en, this message translates to:
+  /// **'Friend'**
+  String get room_member_unknown;
 }
 
 class _AppLocalizationsDelegate

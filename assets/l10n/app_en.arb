@@ -709,5 +709,66 @@
   "share_failed": "Couldn't create the poster. Please try again.",
   "@share_failed": {
     "description": "SnackBar when capturing, saving or sharing the poster fails"
+  },
+  "manage_title": "Manage room",
+  "@manage_title": {
+    "description": "App bar title of the room manage page."
+  },
+  "manage_open": "Manage room",
+  "@manage_open": {
+    "description": "Room menu item (own room) that opens the manage page."
+  },
+  "manage_owner": "Owner",
+  "@manage_owner": {
+    "description": "Badge next to the owner in the manage page member list."
+  },
+  "manage_remove": "Remove from room",
+  "@manage_remove": {
+    "description": "Action to remove a member from the user's own room."
+  },
+  "manage_remove_confirm_title": "Remove from room?",
+  "@manage_remove_confirm_title": {
+    "description": "Title of the confirm dialog before removing a member."
+  },
+  "manage_remove_confirm_body": "{name} will leave your room and won't be able to join again.",
+  "@manage_remove_confirm_body": {
+    "description": "Body of the confirm dialog before removing a member; says they cannot join again.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "manage_dissolve": "Dissolve room",
+  "@manage_dissolve": {
+    "description": "Button that dissolves the user's own room."
+  },
+  "manage_dissolve_confirm_title": "Dissolve your room?",
+  "@manage_dissolve_confirm_title": {
+    "description": "Title of the confirm dialog before dissolving the room."
+  },
+  "manage_dissolve_confirm_body": "Everyone will leave and unused invite codes will stop working. Your room stays, so you can invite new friends.",
+  "@manage_dissolve_confirm_body": {
+    "description": "Body of the dissolve confirm: everyone leaves, unused codes stop working, the room stays."
+  },
+  "room_leave": "Leave room",
+  "@room_leave": {
+    "description": "Room menu item (friend's room) that leaves it."
+  },
+  "room_leave_confirm_title": "Leave this room?",
+  "@room_leave_confirm_title": {
+    "description": "Title of the confirm dialog before leaving a room."
+  },
+  "room_leave_confirm_body": "You'll need a new invite code to join this room again.",
+  "@room_leave_confirm_body": {
+    "description": "Body of the confirm dialog before leaving a room."
+  },
+  "common_cancel": "Cancel",
+  "@common_cancel": {
+    "description": "Cancel button of confirm dialogs."
+  },
+  "room_member_unknown": "Friend",
+  "@room_member_unknown": {
+    "description": "Name shown for a room member with no nickname and no known pet."
   }
 }

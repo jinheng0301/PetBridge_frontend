@@ -158,5 +158,19 @@
   "share_saved": "갤러리에 저장했어요",
   "share_denied": "저장하려면 사진 접근을 허용해 주세요",
   "share_unavailable": "이 코드는 더 이상 공유할 수 없어요",
-  "share_failed": "포스터를 만들지 못했어요. 다시 시도해 주세요"
+  "share_failed": "포스터를 만들지 못했어요. 다시 시도해 주세요",
+  "manage_title": "룸 관리",
+  "manage_open": "룸 관리",
+  "manage_owner": "방장",
+  "manage_remove": "룸에서 내보내기",
+  "manage_remove_confirm_title": "룸에서 내보낼까요?",
+  "manage_remove_confirm_body": "{name} 님이 룸에서 나가며 다시 참여할 수 없어요.",
+  "manage_dissolve": "룸 해산",
+  "manage_dissolve_confirm_title": "룸을 해산할까요?",
+  "manage_dissolve_confirm_body": "모든 멤버가 나가고 사용하지 않은 초대 코드는 무효가 돼요. 룸은 남아 있어서 새 친구를 초대할 수 있어요.",
+  "room_leave": "룸 나가기",
+  "room_leave_confirm_title": "이 룸에서 나갈까요?",
+  "room_leave_confirm_body": "다시 참여하려면 새 초대 코드가 필요해요.",
+  "common_cancel": "취소",
+  "room_member_unknown": "친구"
 }

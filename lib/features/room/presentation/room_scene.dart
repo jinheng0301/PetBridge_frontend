@@ -3,13 +3,13 @@ import 'dart:async';
 import 'package:flutter/rendering.dart' show BoxHitTestResult, RenderProxyBox;
 import 'package:material_ui/material_ui.dart';
 import 'package:petbridge/core/l10n/app_localizations.dart';
-import 'package:petbridge/features/pet/presentation/pet_catalog.dart';
 import 'package:petbridge/features/pet/presentation/pet_view.dart';
 import 'package:petbridge/features/room/application/realtime_coordinator.dart';
 import 'package:petbridge/features/room/application/room.dart';
 import 'package:petbridge/features/room/application/room_live.dart';
 import 'package:petbridge/features/room/application/room_view.dart';
 import 'package:petbridge/features/room/presentation/room_backdrop.dart';
+import 'package:petbridge/features/room/presentation/room_member_name.dart';
 
 /// Where a seat's pet stands, relative to the scene: [x], [y] are the
 /// centre of its feet, [width] its size, all as fractions (of the scene
@@ -174,7 +174,7 @@ class _RoomSceneState extends State<RoomScene> {
             _NamePlate(
               key: ValueKey('plate-${m.userId}'),
               member: m,
-              name: _displayName(l, m),
+              name: memberDisplayName(l, m),
               foot: foot,
               maxWidth: width * 1.2,
             ),
@@ -193,13 +193,6 @@ class _RoomSceneState extends State<RoomScene> {
         );
       },
     );
-  }
-
-  static String _displayName(AppLocalizations l, LiveMember m) {
-    final nickname = m.nickname;
-    if (nickname != null && nickname.isNotEmpty) return nickname;
-    final pet = m.petType;
-    return pet != null && isKnownPet(pet) ? petName(l, pet) : '';
   }
 }
 

@@ -508,4 +508,49 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get share_failed => 'ポスターを作成できませんでした。もう一度お試しください';
+
+  @override
+  String get manage_title => 'ルーム管理';
+
+  @override
+  String get manage_open => 'ルーム管理';
+
+  @override
+  String get manage_owner => 'オーナー';
+
+  @override
+  String get manage_remove => 'ルームから外す';
+
+  @override
+  String get manage_remove_confirm_title => 'ルームから外しますか？';
+
+  @override
+  String manage_remove_confirm_body(String name) {
+    return '$name はあなたのルームから出て、再び参加できなくなります。';
+  }
+
+  @override
+  String get manage_dissolve => 'ルームを解散';
+
+  @override
+  String get manage_dissolve_confirm_title => 'ルームを解散しますか？';
+
+  @override
+  String get manage_dissolve_confirm_body =>
+      '全員が退出し、未使用の招待コードは無効になります。ルームは残るので、新しい友だちを招待できます。';
+
+  @override
+  String get room_leave => 'ルームを出る';
+
+  @override
+  String get room_leave_confirm_title => 'このルームを出ますか？';
+
+  @override
+  String get room_leave_confirm_body => 'もう一度参加するには新しい招待コードが必要です。';
+
+  @override
+  String get common_cancel => 'キャンセル';
+
+  @override
+  String get room_member_unknown => 'ともだち';
 }

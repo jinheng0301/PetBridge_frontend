@@ -71,6 +71,14 @@ void main() {
     expect(redirectFor(const SessionReady(done), '/joined'), Routes.home);
   });
 
+  test('ready user may open /room/x/manage', () {
+    expect(
+      redirectFor(const SessionReady(done), Routes.roomManagePath('x')),
+      isNull,
+    );
+    expect(redirectFor(const SessionReady(done), '/roomy'), Routes.home);
+  });
+
   test('needsOnboarding on /join -> /onboarding/lang', () {
     expect(
       redirectFor(const SessionNeedsOnboarding(fresh), Routes.join),
