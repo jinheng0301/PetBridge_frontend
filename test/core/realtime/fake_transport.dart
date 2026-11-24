@@ -89,6 +89,12 @@ class FakeTransport implements WsTransport {
 
   FakeConnection get last => connections.last;
 
+  /// How many times [close] was called.
+  int closed = 0;
+
+  @override
+  void close() => closed++;
+
   @override
   Future<WsConnection> connect(Uri url, Map<String, String> headers) async {
     calls.add((url: url, headers: Map.of(headers)));

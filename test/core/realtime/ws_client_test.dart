@@ -20,10 +20,13 @@ void main() {
 
   late FakeTransport transport;
   late int refreshCalls;
+  late FakeSecureStore store;
+  late int expiredCalls;
 
   setUp(() {
     transport = FakeTransport();
     refreshCalls = 0;
+    expiredCalls = 0;
   });
 
   WsClient build({
@@ -34,14 +37,14 @@ void main() {
     transport: transport,
     url: url,
     tokens: TokenRefresher(
-      store: FakeSecureStore(
+      store: store = FakeSecureStore(
         TokenPair(access: access ?? longAccess, refresh: 'r-old'),
       ),
       refresh: (_) async {
         refreshCalls++;
         return const TokenPair(access: 'new', refresh: 'r-new');
       },
-      onSessionExpired: () {},
+      onSessionExpired: () => expiredCalls++,
     ),
     clock: () => now,
     appVersion: appVersion,
@@ -214,6 +217,88 @@ void main() {
       expect(c.halted, isTrue);
       expect(c.state, WsConnState.disconnected);
       expect(transport.calls, hasLength(1));
+      finish(async, c);
+    });
+  });
+
+  test('4001 halt is cleared by resume', () {
+    fakeAsync((async) {
+      final c = build();
+      startReady(async, c);
+      transport.last.drop(4001);
+      async.flushMicrotasks();
+      expect(c.halted, isTrue);
+
+      // Background then foreground: this device wants its socket back.
+      c
+        ..pause()
+        ..resume();
+      async.flushMicrotasks();
+
+      expect(c.halted, isFalse);
+      expect(transport.calls, hasLength(2));
+      expect(c.state, WsConnState.connected);
+      transport.last.hello();
+      async.flushMicrotasks();
+      expect(c.state, WsConnState.ready);
+      finish(async, c);
+    });
+  });
+
+  test('protocol halt is not cleared by resume', () {
+    fakeAsync((async) {
+      final c = build()..start();
+      async.flushMicrotasks();
+      transport.last.hello(proto: 2);
+      async.flushMicrotasks();
+      expect(c.halted, isTrue);
+
+      c
+        ..pause()
+        ..resume();
+      async
+        ..flushMicrotasks()
+        ..elapse(const Duration(minutes: 5));
+
+      expect(c.halted, isTrue);
+      expect(transport.calls, hasLength(1));
+      finish(async, c);
+    });
+  });
+
+  test('4403 halts without reconnect', () {
+    fakeAsync((async) {
+      final c = build();
+      startReady(async, c);
+
+      transport.last.drop(4403);
+      async
+        ..flushMicrotasks()
+        ..elapse(const Duration(minutes: 5));
+      c.resume();
+      async
+        ..flushMicrotasks()
+        ..elapse(const Duration(minutes: 5));
+
+      expect(c.halted, isTrue);
+      expect(c.state, WsConnState.disconnected);
+      expect(transport.calls, hasLength(1));
+      finish(async, c);
+    });
+  });
+
+  test('4403 ends the session like a disabled account', () {
+    fakeAsync((async) {
+      final c = build();
+      startReady(async, c);
+
+      transport.last.drop(4403);
+      async.flushMicrotasks();
+
+      expect(store.tokens, isNull);
+      expect(store.clears, 1);
+      expect(expiredCalls, 1);
+      expect(refreshCalls, 0);
       finish(async, c);
     });
   });
@@ -445,6 +530,19 @@ void main() {
       c.start();
       async.flushMicrotasks();
       expect(transport.calls, hasLength(1));
+    });
+  });
+
+  test('dispose closes the transport', () {
+    fakeAsync((async) {
+      final c = build();
+      startReady(async, c);
+      expect(transport.closed, 0);
+
+      unawaited(c.dispose());
+      async.flushMicrotasks();
+
+      expect(transport.closed, 1);
     });
   });
 }

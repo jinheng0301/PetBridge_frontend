@@ -8,6 +8,9 @@ import 'package:petbridge/core/realtime/ws_transport.dart';
 
 enum WsConnState { disconnected, connecting, connected, ready }
 
+/// Why the client halted; only [displaced] is undone by [WsClient.resume].
+enum _HaltReason { displaced, refused, accountDisabled }
+
 /// The session's one realtime socket: connects with the access token,
 /// reconnects with backoff, and passes server frames on. Knows nothing about
 /// rooms; subscriptions are the caller's job, redone after each `ready`.
@@ -17,8 +20,13 @@ enum WsConnState { disconnected, connecting, connected, ready }
 ///   jitter; the backoff resets once a connection has been `ready` for 60 s;
 /// - close 4401 and upgrade 401 refresh the token, then reconnect at once
 ///   (a second 401 in a row backs off instead);
-/// - close 4001, upgrade 403, `hello.proto` > 1 and `min_app_version` above
-///   ours halt: no reconnect until [stop] then [start];
+/// - upgrade 403, `hello.proto` > 1 and `min_app_version` above ours halt:
+///   no reconnect until [stop] then [start];
+/// - close 4001 (displaced by the user's newer connections) halts too, but
+///   [resume] (this device back in the foreground) reconnects;
+/// - close 4403 (account banned or deleted) halts and ends the session the
+///   way a refresh rejected with `ACCOUNT_DISABLED` does: tokens cleared,
+///   `onSessionExpired` run;
 /// - close 1001, a `server.restart` frame and upgrade 503 wait 1–10 s;
 ///   upgrade 429 waits `Retry-After`.
 class WsClient {
@@ -51,7 +59,7 @@ class WsClient {
   WsConnState _state = WsConnState.disconnected;
   bool _running = false;
   bool _paused = false;
-  bool _halted = false;
+  _HaltReason? _haltReason;
   bool _disposed = false;
 
   /// Bumped whenever the current connect attempt or connection is abandoned,
@@ -76,29 +84,31 @@ class WsClient {
   Stream<WsFrame> get frames => _frames.stream;
 
   /// The server told us not to come back (see class doc).
-  bool get halted => _halted;
+  bool get halted => _haltReason != null;
 
   void start() {
     if (_running || _disposed) return;
     _running = true;
     _paused = false;
-    _halted = false;
+    _haltReason = null;
     _resetBackoff();
     unawaited(_connect());
   }
 
   /// Closes the socket (1000) and stays closed until [resume].
   void pause() {
-    if (!_running || _halted) return;
+    if (!_running || _isHardHalted) return;
     _paused = true;
     _drop();
   }
 
-  /// Reconnects at once with a fresh backoff, if paused or waiting to retry.
+  /// Reconnects at once with a fresh backoff, if paused or waiting to retry,
+  /// or halted by close 4001.
   void resume() {
-    if (!_running || _halted) return;
+    if (!_running || _isHardHalted) return;
     if (!_paused && _state != WsConnState.disconnected) return;
     _paused = false;
+    _haltReason = null;
     _resetBackoff();
     unawaited(_connect());
   }
@@ -106,7 +116,7 @@ class WsClient {
   Future<void> stop() async {
     _running = false;
     _paused = false;
-    _halted = false;
+    _haltReason = null;
     final conn = _conn;
     _drop(closeConn: false);
     await conn?.close();
@@ -118,6 +128,7 @@ class WsClient {
     if (_disposed) return;
     _disposed = true;
     await stop();
+    _transport.close();
     await Future.wait([_states.close(), _frames.close()]);
   }
 
@@ -205,7 +216,7 @@ class WsClient {
         _refreshedFor401 = true;
         unawaited(_connect(rejected: access));
       case 403:
-        _halt();
+        _halt(_HaltReason.refused);
       case 429:
         _retryIn(e.retryAfter ?? _backoff());
       case 503:
@@ -236,7 +247,7 @@ class WsClient {
     if ((proto is num && proto > _supportedProto) ||
         (minVersion is String &&
             compareAppVersions(minVersion, _appVersion) > 0)) {
-      _halt();
+      _halt(_HaltReason.refused);
       return;
     }
     if (_state != WsConnState.connected) return;
@@ -257,7 +268,10 @@ class WsClient {
       case 4401:
         unawaited(_connect(rejected: access));
       case 4001:
-        _halt();
+        _halt(_HaltReason.displaced);
+      case 4403:
+        _halt(_HaltReason.accountDisabled);
+        unawaited(_tokens.endSession());
       case 1001:
         _retryIn(_restartWait());
       case _ when _restartAnnounced:
@@ -284,8 +298,11 @@ class WsClient {
     _refreshedFor401 = false;
   }
 
-  void _halt() {
-    _halted = true;
+  bool get _isHardHalted =>
+      _haltReason != null && _haltReason != _HaltReason.displaced;
+
+  void _halt(_HaltReason reason) {
+    _haltReason = reason;
     _drop();
   }
 

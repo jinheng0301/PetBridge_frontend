@@ -79,6 +79,14 @@ class TokenRefresher {
     return (await fresh()).access;
   }
 
+  /// Ends the session as a rejected refresh does: tokens cleared, then
+  /// `onSessionExpired`. For a server that says the account is gone some
+  /// other way (realtime close 4403).
+  Future<void> endSession() async {
+    await _store.clear();
+    _onSessionExpired();
+  }
+
   Future<TokenPair> _runRefresh(String refreshToken) async {
     try {
       final tokens = await _refresh(refreshToken);

@@ -9,6 +9,10 @@ abstract interface class WsTransport {
   /// Throws [WsUpgradeException] when the server answers the upgrade with
   /// anything but 101.
   Future<WsConnection> connect(Uri url, Map<String, String> headers);
+
+  /// Frees what the transport holds; open connections are not touched and
+  /// [connect] must not be called afterwards.
+  void close();
 }
 
 /// One open socket. When [messages] ends the connection is gone, and
@@ -91,6 +95,9 @@ class IoWsTransport implements WsTransport {
     )..pingInterval = pingInterval;
     return _IoWsConnection(ws);
   }
+
+  @override
+  void close() => _client.close();
 
   static Duration? _retryAfter(String? value) {
     final seconds = value == null ? null : int.tryParse(value.trim());
