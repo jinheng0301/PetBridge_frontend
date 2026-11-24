@@ -10,6 +10,7 @@ import 'package:petbridge/features/auth/application/session_controller.dart';
 import 'package:petbridge/features/invite/data/invite_repository.dart';
 import 'package:petbridge/features/room/application/realtime_coordinator.dart';
 import 'package:petbridge/features/room/application/room.dart';
+import 'package:petbridge/features/room/application/room_admin.dart';
 import 'package:petbridge/features/room/application/room_live.dart';
 import 'package:petbridge/features/room/application/rooms_provider.dart';
 import 'package:petbridge/features/room/data/room_repository.dart';
@@ -412,6 +413,62 @@ void main() {
         ('other', KickReason.left),
         ('own', KickReason.dissolved),
       ]);
+    });
+  });
+
+  test('room vanishing on resume emits kicked notice', () {
+    fakeAsync((async) {
+      final binding = TestWidgetsFlutterBinding.instance;
+      final c = makeReady(async);
+      final kicks = <KickNotice>[];
+      c.read(realtimeCoordinatorProvider).kicks.listen(kicks.add);
+      push(async, 'room.snapshot', snapshot('other'));
+
+      // Removed while in the background: no room.kicked ever arrives.
+      lifecycle(binding, toBackground);
+      listed = [room('own', own: true)];
+      lifecycle(binding, toForeground);
+      async.flushMicrotasks();
+
+      expect(kicks.map((k) => (k.roomId, k.reason)), [
+        ('other', KickReason.kicked),
+      ]);
+      expect(c.read(roomLiveProvider('other')), isNull);
+    });
+  });
+
+  test('own leave does not emit notice', () {
+    fakeAsync((async) {
+      final c = makeReady(async);
+      final kicks = <KickNotice>[];
+      c.read(realtimeCoordinatorProvider).kicks.listen(kicks.add);
+      when(() => repo.leave('other')).thenAnswer((_) async {
+        listed = [room('own', own: true)];
+      });
+
+      c.read(roomAdminProvider).leave('other').ignore();
+      async.flushMicrotasks();
+      expect(c.read(roomsProvider).value!.map((r) => r.id), ['own']);
+
+      // Even when a late room.kicked (`left`) follows.
+      push(async, 'room.kicked', {'room_id': 'other', 'reason': 'left'});
+      async.elapse(const Duration(seconds: 1));
+
+      expect(kicks, isEmpty);
+    });
+  });
+
+  test('own room vanishing emits no notice', () {
+    fakeAsync((async) {
+      final c = makeReady(async);
+      final kicks = <KickNotice>[];
+      c.read(realtimeCoordinatorProvider).kicks.listen(kicks.add);
+
+      listed = [room('other')];
+      c.read(roomsProvider.notifier).refresh().ignore();
+      async.flushMicrotasks();
+
+      expect(kicks, isEmpty);
     });
   });
 

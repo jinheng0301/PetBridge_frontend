@@ -50,13 +50,23 @@ class PetAction {
 
 enum KickReason { kicked, dissolved, left }
 
-/// The user is no longer in [roomId] (`room.kicked`).
+/// The user is no longer in [roomId]: a `room.kicked`, or a joined room
+/// gone from the list without one (removed while the app was paused).
 class KickNotice {
   const new(this.roomId, this.reason);
 
   final String roomId;
   final KickReason reason;
 }
+
+/// Rooms the user is leaving on this device (`RoomAdmin.leave`), so their
+/// going away is not reported as a [KickNotice] (own rooms never are).
+/// Reset per ready user; the coordinator takes an entry out once the room
+/// has gone.
+final expectedDeparturesProvider = Provider<Set<String>>((ref) {
+  ref.watch(readyUserIdProvider);
+  return <String>{};
+});
 
 /// Live state of one room, `null` until its snapshot arrives. Written only
 /// by [RealtimeCoordinator]; reset when the ready user changes.
@@ -144,6 +154,9 @@ class RealtimeCoordinator {
 
   /// The rooms to be subscribed: the listed ones, own room first.
   var _rooms = <String>[];
+
+  /// Which of [_rooms] the user joined rather than owns.
+  var _joined = <String>{};
 
   /// `room.sub` frame id → room, for `error.ref`.
   final _subRefs = <String, String>{};
@@ -260,11 +273,25 @@ class RealtimeCoordinator {
   void _onRooms(AsyncValue<List<Room>> next) {
     // Only settled lists: a reload may still carry the previous user's.
     if (next is! AsyncData<List<Room>>) return;
-    final rooms = [for (final r in next.value.take(_maxRooms)) r.id];
+    final listed = next.value.take(_maxRooms).toList();
+    final rooms = [for (final r in listed) r.id];
     final added = rooms.where((id) => !_rooms.contains(id)).toList();
     final removed = _rooms.where((id) => !rooms.contains(id)).toList();
+    final joinedBefore = _joined;
     _rooms = rooms;
-    removed.forEach(_dropRoom);
+    _joined = {
+      for (final r in listed)
+        if (!r.isOwner) r.id,
+    };
+    final expected = _ref.read(expectedDeparturesProvider);
+    for (final id in removed) {
+      _dropRoom(id);
+      // A room.kicked already took the room out of [_rooms] (and told the
+      // user); one that just disappeared went while the app was paused.
+      if (!expected.remove(id) && joinedBefore.contains(id)) {
+        _kicks.add(KickNotice(id, KickReason.kicked));
+      }
+    }
     for (final id in added) {
       _unsubscribed.remove(id);
       _sendSub(id);
@@ -308,6 +335,8 @@ class RealtimeCoordinator {
 
   /// The user left [roomId] (`room.kicked`, or `ROOM_NOT_FOUND` on sub).
   void _leaveRoom(String roomId, KickReason? notice) {
+    _joined.remove(roomId);
+    final expected = _ref.read(expectedDeparturesProvider).remove(roomId);
     if (_rooms.remove(roomId)) _dropRoom(roomId);
     if (_ref.read(selectedRoomProvider)?.id == roomId) {
       final rooms = _ref.read(roomsProvider).value ?? const <Room>[];
@@ -317,7 +346,7 @@ class RealtimeCoordinator {
       }
     }
     _refreshRoomsSoon();
-    if (notice != null) _kicks.add(KickNotice(roomId, notice));
+    if (notice != null && !expected) _kicks.add(KickNotice(roomId, notice));
   }
 
   // --- frames -------------------------------------------------------------

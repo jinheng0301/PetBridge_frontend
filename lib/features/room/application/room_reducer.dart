@@ -81,8 +81,7 @@ ReduceResult _applyInOrder(RoomLive state, WsFrame first) {
     final applied = _apply(current, frame);
     effects.addAll(applied.effects);
     final seq = frame.seq!;
-    final buffered = {...current.buffered}
-      ..removeWhere((key, _) => key <= seq);
+    final buffered = {...current.buffered}..removeWhere((key, _) => key <= seq);
     current = applied.state.copyWith(lastSeq: seq, buffered: buffered);
     final next = buffered[seq + 1];
     if (next == null) break;
