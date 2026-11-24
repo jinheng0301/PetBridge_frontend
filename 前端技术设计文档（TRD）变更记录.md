@@ -4,6 +4,12 @@
 
 ---
 
+## V1.12 变更说明
+
+对齐后端 TRD v1.14 的 B6a（内容审核、举报与屏蔽）与 PRD v1.10；后端设计见 `docs/superpowers/specs/2026-11-23-b6a-moderation-safety-design.md`。界面在 F4 实现，本次只定接口约定与处理规则。① **`CONTENT_BLOCKED` 两种文案**（8.2、11.1、第 18 章）：发消息被拦（不带 `details`）时气泡标“消息未能送达”，不提供重试、不自动重试（同一条重发仍会被拦），不说明原因，对应 PRD 5.2；onboarding 昵称被拦（`details.fields = ["nickname"]`）时在昵称框下提示“这个昵称不能使用，请换一个”，停在昵称页。新增 `BLOCK_LIMIT`（已屏蔽 500 人）与举报超过每日次数（`RATE_LIMITED`）的文案。② **新事件 `message.removed`**（第 7 章规则 10、第 18 章）：负载只有 `room_id`、`message_id`，表示这条消息对自己已被审核隐藏（只隐藏该语言组或整条撤回），从列表与本地缓存删掉卡片，不弹提示；原文卡片在 `message.new` 时已经显示过，所以这一步必须做。发送者自己不会收到，界面不暴露审核结论。③ **关闭码 4403 不重连**（9.2、第 18 章）：账号被封禁或删除，清空 token、回到登录页并提示“账号已停用”，与 REST 403 `ACCOUNT_DISABLED` 处理相同（后端计划自己拍板的决定第 5 条）。④ **屏蔽与举报的接口约定**（11.4）：`POST /blocks`、`DELETE /blocks/{user_id}`、`GET /blocks`（“我的 → 屏蔽列表”）；屏蔽双向生效、对方无感知、不影响同屋（用户选定的方案 2），屏蔽后刷新消息，对方的消息（含屏蔽前收到的）不再返回，解除后恢复。`POST /reports` 从宠物长按或消息长按进入，举报原因枚举为 `harassment` / `spam` / `sexual` / `self_harm` / `minor_safety` / `other`，`note` 选填且不超过 500 字，每人每天 20 次，重复举报返回同一条；举报后询问是否同时屏蔽（服务端不自动屏蔽）。⑤ 排期（第 20 章）注明后端 B6 拆为 B6a 合规、B6b 养成；第 22 章对应关系加上后端 7.9。⑥ 文首“配套文档”后端 TRD 版本写为 v1.14，“对应 PRD”写为 v1.10。
+
+---
+
 ## V1.11 变更说明
 
 F2（实时小屋、宠物绘制与房主管理）设计定稿，对齐 PRD v1.9 与后端 TRD v1.13；详细设计见 `docs/superpowers/specs/2026-11-23-f2-realtime-room-design.md`。后端接口不变。① **宠物由 Rive 改为代码绘制**（3、10.2、10.3、16）：团队暂无美术，16 只宠物用 `PetPainter` + `PetSpec` 画（圆滚滚 Q 版、同一套身体、无描边），MVP 姿态 `idle` / `sleep` / `cute`，第二版加 `eat` / `wash`（养成）；`PetView` 改为 `PetView(petType, pose, size)`，旧调用不用改；不再有 `.riv` 与资源体积预算，正式美术到位后可替换内部实现。WebSocket 也改用 `dart:io` 的 `WebSocket`，不新增依赖。② **不做 `/room/:id`**（6.2）：场景放在小屋 Tab，`/room/:id/manage` 保留。③ **第 7 章**：规则 7 删除（`last_seq` 只存内存，服务端每次订阅都给快照），其余规则编号不变；`roomControllerProvider` 改名 `roomLiveProvider`，F2 只含成员与 presence。④ **9.2**：前后台改为“`paused` 立即断开”，对齐 PRD F3.2“离开 App 时立即睡着”（原写“后台 30 秒后断开”与 PRD 冲突，按 PRD）；`4001` 与 `403 ONBOARDING_REQUIRED` 不重连；强制更新页放到 F6，F2 只停止重连并记日志。⑤ **11.4 / 11.6**：写入场景布局与座位比例、名牌、空位、⋯ 菜单、solo 卡片、轻触与长按弹层、重连提示、管理页；**名牌的母语国旗标识（PRD F3.4）延后，F2 不做**（用户决定，PRD 条文不变）。⑥ **19.4**：加入 `WS_URL` 与 `APP_VERSION`；真机环境文件仍用 `env/local.json`（已在 `.gitignore`），新增入库模板 `env/local.example.json`（局域网 IP 用 `192.168.x.x` 占位）。⑦ **第 20 章**：F2 分 F2a（实时与场景）与 F2b（管理与退出），验收设备为安卓模拟器 + 一台安卓真机。⑧ 顺带改正：11.6 引用 reducer 规则的编号由 5 改为 8（`room.kicked` 是规则 8）；文首“配套文档”后端 TRD 版本写为 v1.13。

@@ -2,9 +2,9 @@
 
 | 项目 | 内容 |
 | :-- | :-- |
-| 版本 | v1.11（草案，待自评审）<br>• v1.11 较 v1.10：F2 设计定稿：宠物由 Rive 改为代码绘制（`PetPainter` + `PetSpec`，MVP 姿态 `idle` / `sleep` / `cute`）；场景放在小屋 Tab、不做 `/room/:id`；删除规则 7（`last_seq` 不写 prefs），`roomControllerProvider` 改为 `roomLiveProvider`；前后台改为 `paused` 立即断开；新增 `WS_URL` 与真机环境文件；名牌国旗标识延后；对齐 PRD v1.9 与后端 TRD v1.13。<br>• v1.10 较 v1.9：F1 设计定稿：验证码输入页、背包、分享海报（保存与系统分享）、小屋 Tab 先用成员列表占位；`solo` / `inRoom` 由房间数据派生、不并进会话；背包显示今日剩余补码次数；房主管理与退出小屋移到 F2。<br>• v1.9 较 v1.8：对齐后端 TRD v1.9 的 B5 消息协议：原文卡片先到、译文与润色另发事件，消息事件按 id 插入或更新、状态只前进，重连后用 `after` 补消息，翻译失败不提供手动重试，润色改为异步、新增错误码文案。<br>• v1.8 较 v1.7：刷新 token 失败只在服务端拒绝时登出，两个 token 存在同一个键里一次写入，新增 `NOT_READY` 文案。<br>• v1.7 较 v1.6：对齐后端 TRD v1.7 的 MBTI 语气重构规则，信使卡片处理润色回退（“未润色”）。<br>• v1.6 较 v1.5：F0 联调后补齐实现细节：界面语言的取值顺序、启动时网络失败可重试、Google 取消与无账号不报错、设备时区回落、可空枚举的契约写法。<br>• v1.5 较 v1.4：对齐后端 TRD v1.5 的 WebSocket 加固：处理关闭码 4401、升级 429 / 503 与 `room.sub` 限流。<br>• v1.4 较 v1.3：对齐后端 B4 的 WebSocket 协议，reducer 改为以订阅快照为准，presence 只有在线 / 离线、离线显示为睡觉。<br>• v1.3 较 v1.2：对齐 PRD v1.5 与后端 TRD v1.3，F0 登录与 onboarding 设计定稿，首页改为四个 Tab，契约生成改用 swagger_parser。 |
-| 对应 PRD | 《跨国 MBTI 情感 AI 电子宠物 PRD v1.9》 |
-| 配套文档 | 《后端 TRD（Go）v1.13》：REST 接口见其第 8 章，WebSocket 协议见其第 9 章，本文以其为准 |
+| 版本 | v1.12（草案，待自评审）<br>• v1.12 较 v1.11：对齐后端 TRD v1.14 的 B6a 内容审核、举报与屏蔽：`CONTENT_BLOCKED` 分发消息与昵称两种文案，新增 `BLOCK_LIMIT` 文案，处理新事件 `message.removed`（删掉卡片），关闭码 4403 不重连、回到登录页，写明屏蔽与举报的接口约定和举报原因枚举；对齐 PRD v1.10。<br>• v1.11 较 v1.10：F2 设计定稿：宠物由 Rive 改为代码绘制（`PetPainter` + `PetSpec`，MVP 姿态 `idle` / `sleep` / `cute`）；场景放在小屋 Tab、不做 `/room/:id`；删除规则 7（`last_seq` 不写 prefs），`roomControllerProvider` 改为 `roomLiveProvider`；前后台改为 `paused` 立即断开；新增 `WS_URL` 与真机环境文件；名牌国旗标识延后；对齐 PRD v1.9 与后端 TRD v1.13。<br>• v1.10 较 v1.9：F1 设计定稿：验证码输入页、背包、分享海报（保存与系统分享）、小屋 Tab 先用成员列表占位；`solo` / `inRoom` 由房间数据派生、不并进会话；背包显示今日剩余补码次数；房主管理与退出小屋移到 F2。<br>• v1.9 较 v1.8：对齐后端 TRD v1.9 的 B5 消息协议：原文卡片先到、译文与润色另发事件，消息事件按 id 插入或更新、状态只前进，重连后用 `after` 补消息，翻译失败不提供手动重试，润色改为异步、新增错误码文案。<br>• v1.8 较 v1.7：刷新 token 失败只在服务端拒绝时登出，两个 token 存在同一个键里一次写入，新增 `NOT_READY` 文案。<br>• v1.7 较 v1.6：对齐后端 TRD v1.7 的 MBTI 语气重构规则，信使卡片处理润色回退（“未润色”）。<br>• v1.6 较 v1.5：F0 联调后补齐实现细节：界面语言的取值顺序、启动时网络失败可重试、Google 取消与无账号不报错、设备时区回落、可空枚举的契约写法。<br>• v1.5 较 v1.4：对齐后端 TRD v1.5 的 WebSocket 加固：处理关闭码 4401、升级 429 / 503 与 `room.sub` 限流。<br>• v1.4 较 v1.3：对齐后端 B4 的 WebSocket 协议，reducer 改为以订阅快照为准，presence 只有在线 / 离线、离线显示为睡觉。<br>• v1.3 较 v1.2：对齐 PRD v1.5 与后端 TRD v1.3，F0 登录与 onboarding 设计定稿，首页改为四个 Tab，契约生成改用 swagger_parser。 |
+| 对应 PRD | 《跨国 MBTI 情感 AI 电子宠物 PRD v1.10》 |
+| 配套文档 | 《后端 TRD（Go）v1.14》：REST 接口见其第 8 章，WebSocket 协议见其第 9 章，本文以其为准 |
 | 技术栈 | Flutter 3.x 稳定版 / Dart 3 |
 | 平台 | iOS 15+、Android 8+（竖屏，手机优先，不适配平板） |
 | 开发模式 | **单人全栈开发**，选型以“一个人能长期维护”为第一约束 |
@@ -484,6 +484,7 @@ unauthenticated ──登录成功──► needsOnboarding ──完成──�
 8. 收到 `room.kicked`（被房主移除、房间被解散，或自己在另一台设备上退出 `reason=left`）：取消该房间订阅，从 `roomsProvider` 移除，清除该房间的本地消息缓存与实时状态，并重新计算会话状态（可能退回 `solo`）；该事件不依赖 `seq`，收到即处理。`left` 不弹提示，其余只提示“你已离开该小屋”。
 9. 收到 `error` 帧：按 `ref` 找到对应的客户端帧；`room.sub` 得到 `ROOM_NOT_FOUND` 时，按房间已不存在处理（同规则 8，但不提示）（v1.4）。
 10. **消息事件**（v1.9）：`message.new`、`message.translated`、`message.polished` 都不带 seq，负载都是完整的 `MessageView`，交给 `chatControllerProvider` 按 `message.id` **插入或更新**，与到达顺序无关（`message.translated` 可能比 `message.new` 先到）。delivery 状态只前进不后退：`translation_status` 按 `pending < failed < done`，`polish_status` 按 `none < pending < done / fallback`，收到比本地更旧的状态就忽略。发送者本人收到的 `message.new` 带 `client_msg_id`、`delivery` 为空，用它把 outbox 里的本地气泡替换成服务端消息（其他设备则直接插入）。
+    v1.12：新增 `message.removed`（后端 TRD v1.14，不带 seq）：负载只有 `room_id`、`message_id`，表示这条消息对自己已被审核隐藏；从列表和本地缓存删掉这张卡片，本地没有就忽略。之后同一 id 的 `message.new` / `message.translated` / `message.polished` 一般不会再来，万一迟到也不再插入（记住已删除的 id，App 生命周期内有效），拉取也不会再返回它。
 11. **重新订阅后补消息**（v1.9）：每次对某房间收到 `room.snapshot`（包括断线重连、`resync`、seq 缺口引起的重新订阅），都对该房间调用 `GET /rooms/{id}/messages?after=<本地最新消息 id>` 补齐断线期间的消息；`has_more` 为 true 时继续翻页。本地没有缓存时取最新一页。
 
 ---
@@ -503,7 +504,7 @@ unauthenticated ──登录成功──► needsOnboarding ──完成──�
 ### 8.2 约定
 
 - 超时：连接 5 秒、接收 10 秒。v1.9：润色改为异步（`POST /deliveries/{id}/polish` 立即返回 202，结果走 `message.polished`），不再需要单独放宽超时。
-- 错误码映射到本地化文案：`err.CODE_INVALID`、`err.ROOM_FULL` 等，文案放 ARB，**不显示服务端 `message`**。503 `NOT_READY`（服务重启、登录提供方暂时不可达）显示 `err_NOT_READY`“服务暂时不可用，请稍后重试”（v1.8）。v1.9 新增：`QUOTA_EXCEEDED` 按 `details.reason` 分四条文案（`daily_quota` 今天的润色次数用完了，明天再来；`minute_limit` 太频繁，稍后再试；`global_budget` / `disabled` 润色暂时不可用）；`POLISH_NOT_READY`、`DELIVERY_NOT_FOUND` 一般不会出现，落到通用文案并刷新消息；`CONTENT_BLOCKED` 显示“消息未能送达”（B6 起才会出现）。
+- 错误码映射到本地化文案：`err.CODE_INVALID`、`err.ROOM_FULL` 等，文案放 ARB，**不显示服务端 `message`**。503 `NOT_READY`（服务重启、登录提供方暂时不可达）显示 `err_NOT_READY`“服务暂时不可用，请稍后重试”（v1.8）。v1.9 新增：`QUOTA_EXCEEDED` 按 `details.reason` 分四条文案（`daily_quota` 今天的润色次数用完了，明天再来；`minute_limit` 太频繁，稍后再试；`global_budget` / `disabled` 润色暂时不可用）；`POLISH_NOT_READY`、`DELIVERY_NOT_FOUND` 一般不会出现，落到通用文案并刷新消息；`CONTENT_BLOCKED` 显示“消息未能送达”（B6 起才会出现）。v1.12（对齐后端 TRD v1.14）：`CONTENT_BLOCKED` 分两种，不说明原因：发消息时（不带 `details`）气泡标“消息未能送达”，**不提供重试**（同一条重发仍会被拦），也不自动重试；onboarding 时（`details.fields = ["nickname"]`）在昵称框下显示“这个昵称不能使用，请换一个”，停在昵称页。`BLOCK_LIMIT`（409，已屏蔽 500 人）显示“屏蔽人数已达上限，请先解除一些屏蔽”。举报超过每日次数返回 `RATE_LIMITED`，提示“今天的举报次数已用完，明天再试”。
 - `request_id` 随错误上报到 Sentry，便于和后端日志对上。
 - 契约生成：用 `swagger_parser` 从后端仓库的 `api/openapi.yaml` 生成 `lib/gen/`（`dart run swagger_parser` + `build_runner`），CI 中校验生成结果无差异。
 - 可空枚举（v1.6）：openapi 3.0.3 里 `nullable: true` 的枚举字段必须把 `null` 写进 `enum` 列表（如 Profile 的 `native_lang`、`age_band`），否则生成的模型遇到 `null` 解析失败，未 onboarding 用户的 `/me` 会报错；`contract_decode_test` 覆盖这种情况。
@@ -533,7 +534,7 @@ disconnected ─► connecting ─► connected ─(收到 hello)─► ready �
 | `server.restart` | 随机等待 1–10 秒再重连，避免服务重启时所有客户端同时涌入；升级返回 503 `NOT_READY` 时同样处理（v1.5） |
 | 限流（v1.5） | 升级返回 429 `RATE_LIMITED` 时按 `Retry-After` 等待；`room.sub` 收到 `error{RATE_LIMITED}` 时 1 秒后再订阅；缺口或 `resync` 引起的重新订阅要合并，同一房间 1 秒内不重复发 |
 | 协议版本 | `hello.proto` 高于客户端支持的主版本，或 `hello.min_app_version` 高于当前 App 版本，或 REST 返回 HTTP 426 `UPGRADE_REQUIRED` → 停止重连并弹出强制更新页（接口约定见后端 TRD 第 8、9 章）。F2 只解析这两个值、不兼容时停止重连并记日志；强制更新页放到 F6（v1.11） |
-| 不重连的情形（v1.11） | 关闭码 **4001**（被同账号更新的连接替换）不重连；升级返回 **403 `ONBOARDING_REQUIRED`** 不重连。其余关闭码按上表退避重连 |
+| 不重连的情形（v1.11） | 关闭码 **4001**（被同账号更新的连接替换）不重连；升级返回 **403 `ONBOARDING_REQUIRED`** 不重连。v1.12：关闭码 **4403**（账号已被封禁或删除，服务端在 ping 时检查）不重连，清空 token、回到登录页并提示“账号已停用”，与 REST 返回 403 `ACCOUNT_DISABLED` 的处理相同。其余关闭码按上表退避重连 |
 | 发送 | 仅 `pet.tap` 等轻量事件走 WS；消息发送与润色走 REST，保证幂等与可重试 |
 | 状态指示 | 断线超过 3 秒才显示“正在重连”提示，避免闪烁 |
 
@@ -782,7 +783,7 @@ flowchart LR
    | J / P | 出去旅行，你通常… | 提前排好行程（J） | 到了再看心情（P） |
 
 4. 宠物揭晓：出生动画 + 该宠物的性格介绍（五语种文案，16 × 5 共 80 条，进 ARB）。揭晓在提交之前，宠物由客户端按 MBTI 本地查 `pet_type`（与后端 `internal/service/pet.go` 映射一致，单测核对 16 个 slug 与 openapi 枚举相同）；资源按 `pet_type` 命名。F0 用占位宠物。
-5. 昵称与年龄：昵称去首尾空格后 1–20 字、无控制字符（敏感词由服务端判定）；年龄三选一：未满 13 岁 / 13–17 岁 / 18 岁以上。选“未满 13 岁”进入 `/onboarding/too-young` 说明页，只提供“退出登录”，不提交；13–17 岁给出提示（私聊关闭等限制）。提交的 `tz` 取设备 IANA 时区；设备返回的不是 IANA 名（不含 `/`，如模拟器的 `GMT`）时提交 `UTC`（v1.6）。
+5. 昵称与年龄：昵称去首尾空格后 1–20 字、无控制字符（敏感词由服务端判定：被拦返回 422 `CONTENT_BLOCKED`、`details.fields = ["nickname"]`，文案见 8.2，v1.12）；年龄三选一：未满 13 岁 / 13–17 岁 / 18 岁以上。选“未满 13 岁”进入 `/onboarding/too-young` 说明页，只提供“退出登录”，不提交；13–17 岁给出提示（私聊关闭等限制）。提交的 `tz` 取设备 IANA 时区；设备返回的不是 IANA 名（不含 `/`，如模拟器的 `GMT`）时提交 `UTC`（v1.6）。
 6. 完成后调用 `POST /me/onboarding`（幂等，失败可原样重试）。
 7. **权限不在首启就弹**：推送权限延迟到“首次加入小屋或首次分享验证码”之后，用一个应用内说明弹窗做预授权。
 
@@ -828,6 +829,10 @@ flowchart LR
   - `message.polished` 的 `polish_status` 为 `fallback` 时（v1.7），润色结果没通过服务端校验：保持显示基础译文，润色一栏标“未润色”，不再显示“让 AI 润色”按钮（同一条再点大概率还是同样结果）；
   - 卡片状态（v1.9）：`translation_status=pending` 显示原文 + 译文骨架屏（“翻译中”）；`failed` 显示原文 + “暂无法翻译”标记，**不提供重试按钮**，服务端会在 24 小时内自动重试，成功后以 `message.translated` 自动换成译文；`done` 显示基础译文。同语言与短语消息到达时就是 `done`。
 - 长按宠物或消息：举报 / 屏蔽（F4；F2 的长按行为见上文场景一节）。
+- **屏蔽与举报的接口约定**（v1.12，对齐后端 TRD v1.14 的 7.9；F4 实现）：
+  - 屏蔽：`POST /blocks {user_id}` 返回 204，已屏蔽也是 204；`DELETE /blocks/{user_id}` 返回 204；`GET /blocks` 返回 `{ items: [{ user_id, nickname, pet_type, blocked_at }] }`（新的在前、不分页），用于“我的 → 屏蔽列表”页，可在列表里解除。屏蔽后对方的消息从列表里消失（服务端拉取不再返回，屏蔽前收到的也一起隐藏），屏蔽成功后刷新该房间消息；解除后重新拉取即恢复。对方无感知，同屋、宠物与在线状态照常显示。
+  - 举报：`POST /reports { target_user_id, room_id, message_id?, reason, note? }` 返回 201 `{ id, created_at }`；从宠物长按（只带 `target_user_id`、`room_id`）或消息长按（再带 `message_id`）进入 `/report`。`reason` 六选一：`harassment` 骚扰、`spam` 广告或诈骗、`sexual` 色情、`self_harm` 自伤、`minor_safety` 未成年人安全、`other` 其他；`note` 选填，去首尾空白后不超过 500 字。重复举报同一人同一条消息返回同一条，前端照常显示“已收到举报”；每人每天 20 次。举报成功后询问“要不要同时屏蔽 TA”，选是再调 `POST /blocks`。
+  - 自己的宠物和自己的消息不显示举报 / 屏蔽入口。
 
 ### 11.5 打卡与装扮
 
@@ -992,6 +997,9 @@ Android：Jetpack Glance（或 RemoteViews）读取共享存储渲染
 | 润色额度用尽 | 按钮置灰并提示“明天再来”（`QUOTA_EXCEEDED`，`reason=daily_quota`）；`minute_limit` 提示稍后再试，`global_budget` / `disabled` 提示润色暂时不可用（v1.9） |
 | 发送时润色次数已用完 | 消息照常发出，轻提示“今天的润色次数用完了”（响应里 `polish_requested=false`，v1.9） |
 | 润色被服务端回退（`polish_status = fallback`，v1.7） | 卡片显示基础译文，润色一栏标“未润色”，不弹提示、不提供重试 |
+| 发送的内容被审核拦截（`CONTENT_BLOCKED`，v1.12） | 气泡标“消息未能送达”，不提供重试，不说明原因 |
+| 收到 `message.removed`（v1.12） | 卡片直接消失，不弹提示 |
+| 账号被停用（关闭码 4403 或 403 `ACCOUNT_DISABLED`，v1.12） | 清空 token，回到登录页并提示“账号已停用” |
 | 验证码冷却 | 倒计时展示，输入框禁用 |
 | 房间已满 | 友好提示，并提供“用我自己的验证码邀请朋友”入口 |
 | 被房主移除 / 房间被解散 | 轻量提示“你已离开该小屋”，退回首页；不展示原因与操作者（见 11.6） |
@@ -1126,7 +1134,7 @@ flutter run -d <真机ID> --dart-define-from-file=env/local.json
 | W3–4 | B3 验证码与入房事务 | F1 验证码输入、背包（含今日剩余补码次数）、分享海报（保存与系统分享）、小屋 Tab 成员列表（F2 换成场景）；onboarding 与占位宠物已在 F0 完成（v1.10） | **核心机制跑通（M1）** |
 | W5–6 | B4 WS 与事件分发（订阅快照、presence 在线 / 离线、`pet.tap`） | F2 分两段（v1.11）：**F2a 实时与场景**——WsClient、reducer、小屋场景与座位、16 只代码绘制宠物、presence（离线显示为睡觉）、点宠物卖萌；**F2b 管理与退出**——房主管理（11.6）与退出小屋（v1.10 从 F1 移入）。验收设备：安卓模拟器 + 一台安卓真机，互相看到对方宠物上线、下线 | 多人实时可见（M2） |
 | W7–8 | B5 消息与 AI 网关 | F3 聊天、信使卡片、短语、outbox | **跨语言消息可用（M3）** |
-| W9–10 | B6 审核、举报、打卡装扮 | F4 打卡、装扮、举报屏蔽、设置、账号删除、分享海报 | 功能完整的内测版（M4） |
+| W9–10 | B6 审核、举报、打卡装扮（后端 v1.14 拆为 B6a 合规、B6b 养成） | F4 打卡、装扮、举报屏蔽、设置、账号删除、分享海报 | 功能完整的内测版（M4） |
 | W11–12 | B7 推送、Widget 快照 | F5 推送、深链、**Widget（iOS + Android）** | 外部依赖对接完成 |
 | W13–14 | B8 压测与演练 | F6 性能优化、真机兼容、埋点、替换正式美术资源 | 压测与性能达标 |
 | W15 | 联调修复 | 内测（TestFlight / Play 内测），修 bug | 内测反馈清零 |
@@ -1176,8 +1184,8 @@ flutter run -d <真机ID> --dart-define-from-file=env/local.json
 | :-- | :-- | :-- |
 | F1 注册与 MBTI 宠物 | 6、11.1、10 | 7.1、第 8 章 |
 | F2 验证码与裂变 | 11.2、11.3、15.2 | 7.2、12.1 |
-| F3 小屋 5 人实时、房主管理 | 9、10、11.4、11.6 | 7.3、7.8、第 9 章 |
-| F4 AI 信使 | 11.4、12（outbox）、18 | 7.4、第 10 章、12.2 |
+| F3 小屋 5 人实时、房主管理、举报与屏蔽 | 9、10、11.4、11.6 | 7.3、7.8、7.9、第 9 章 |
+| F4 AI 信使、内容安全 | 11.4、12（outbox）、18 | 7.4、7.9、第 10 章、12.2 |
 | F5 养成、Widget、推送 | 11.5、14、15.1 | 7.5、7.6、7.7 |
 | 多语言 | 13 | — |
 | 非功能：实时、性能、兼容 | 9、16 | 第 2 章 |
