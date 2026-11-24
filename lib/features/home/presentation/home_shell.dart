@@ -1,13 +1,17 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:petbridge/core/l10n/app_localizations.dart';
 import 'package:petbridge/core/network/app_failure.dart';
 import 'package:petbridge/features/invite/application/codes_provider.dart';
+import 'package:petbridge/features/room/application/realtime_coordinator.dart';
 
 /// Bottom navigation for the four home tabs: room, chat, backpack, me.
 /// Also reloads the codes whenever the app comes back to the foreground;
-/// the rooms are reloaded by the realtime coordinator.
+/// the rooms are reloaded by the realtime coordinator. Tells the user when
+/// they were moved out of a room.
 class HomeShell extends ConsumerStatefulWidget {
   const new({required this.shell, super.key});
 
@@ -19,16 +23,38 @@ class HomeShell extends ConsumerStatefulWidget {
 
 class _HomeShellState extends ConsumerState<HomeShell> {
   late final AppLifecycleListener _lifecycle;
+  StreamSubscription<KickNotice>? _kicks;
 
   @override
   void initState() {
     super.initState();
     _lifecycle = AppLifecycleListener(onResume: _refreshCodes);
+    // The coordinator is rebuilt per session: follow the current one.
+    ref.listenManual(
+      realtimeCoordinatorProvider,
+      (_, coordinator) => _followKicks(coordinator),
+      fireImmediately: true,
+    );
+  }
+
+  void _followKicks(RealtimeCoordinator coordinator) {
+    unawaited(_kicks?.cancel());
+    _kicks = coordinator.kicks.listen(_onKick);
+  }
+
+  void _onKick(KickNotice notice) {
+    if (!mounted || notice.reason == KickReason.left) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context).room_left_notice)),
+      );
   }
 
   @override
   void dispose() {
     _lifecycle.dispose();
+    unawaited(_kicks?.cancel());
     super.dispose();
   }
 

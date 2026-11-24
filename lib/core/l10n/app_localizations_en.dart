@@ -607,4 +607,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get room_member_unknown => 'Friend';
+
+  @override
+  String get room_left_notice => 'You\'ve left this room';
 }

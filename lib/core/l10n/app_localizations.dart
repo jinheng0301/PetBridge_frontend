@@ -1135,6 +1135,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Friend'**
   String get room_member_unknown;
+
+  /// Snackbar when the user was removed from a room or it was dissolved.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve left this room'**
+  String get room_left_notice;
 }
 
 class _AppLocalizationsDelegate

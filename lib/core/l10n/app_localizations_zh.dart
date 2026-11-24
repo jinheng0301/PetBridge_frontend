@@ -517,10 +517,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get manage_owner => '房主';
 
   @override
-  String get manage_remove => '移除出小屋';
+  String get manage_remove => '移出小屋';
 
   @override
-  String get manage_remove_confirm_title => '移除出小屋？';
+  String get manage_remove_confirm_title => '移出小屋？';
 
   @override
   String manage_remove_confirm_body(String name) {
@@ -551,6 +551,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get room_member_unknown => '朋友';
+
+  @override
+  String get room_left_notice => '你已离开该小屋';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1065,10 +1068,10 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get manage_owner => '房主';
 
   @override
-  String get manage_remove => '移除出小屋';
+  String get manage_remove => '移出小屋';
 
   @override
-  String get manage_remove_confirm_title => '移除出小屋？';
+  String get manage_remove_confirm_title => '移出小屋？';
 
   @override
   String manage_remove_confirm_body(String name) {
@@ -1099,6 +1102,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get room_member_unknown => '朋友';
+
+  @override
+  String get room_left_notice => '你已离开该小屋';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -1613,10 +1619,10 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get manage_owner => '屋主';
 
   @override
-  String get manage_remove => '移除出小屋';
+  String get manage_remove => '移出小屋';
 
   @override
-  String get manage_remove_confirm_title => '移除出小屋？';
+  String get manage_remove_confirm_title => '移出小屋？';
 
   @override
   String manage_remove_confirm_body(String name) {
@@ -1647,4 +1653,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get room_member_unknown => '朋友';
+
+  @override
+  String get room_left_notice => '你已離開該小屋';
 }

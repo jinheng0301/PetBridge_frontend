@@ -770,5 +770,9 @@
   "room_member_unknown": "Friend",
   "@room_member_unknown": {
     "description": "Name shown for a room member with no nickname and no known pet."
+  },
+  "room_left_notice": "You've left this room",
+  "@room_left_notice": {
+    "description": "Snackbar when the user was removed from a room or it was dissolved."
   }
 }

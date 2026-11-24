@@ -555,4 +555,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get room_member_unknown => '친구';
+
+  @override
+  String get room_left_notice => '이 방에서 나갔어요';
 }

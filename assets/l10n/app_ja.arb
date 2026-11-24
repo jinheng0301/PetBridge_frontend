@@ -172,5 +172,6 @@
   "room_leave_confirm_title": "このルームを出ますか？",
   "room_leave_confirm_body": "もう一度参加するには新しい招待コードが必要です。",
   "common_cancel": "キャンセル",
-  "room_member_unknown": "ともだち"
+  "room_member_unknown": "ともだち",
+  "room_left_notice": "このルームから退出しました"
 }

@@ -161,8 +161,8 @@
   "manage_title": "管理小屋",
   "manage_open": "管理小屋",
   "manage_owner": "房主",
-  "manage_remove": "移除出小屋",
-  "manage_remove_confirm_title": "移除出小屋？",
+  "manage_remove": "移出小屋",
+  "manage_remove_confirm_title": "移出小屋？",
   "manage_remove_confirm_body": "{name} 将离开你的小屋，并且无法再次加入。",
   "manage_dissolve": "解散小屋",
   "manage_dissolve_confirm_title": "解散你的小屋？",
@@ -171,5 +171,6 @@
   "room_leave_confirm_title": "退出这个小屋？",
   "room_leave_confirm_body": "退出后需要新的验证码才能再次加入。",
   "common_cancel": "取消",
-  "room_member_unknown": "朋友"
+  "room_member_unknown": "朋友",
+  "room_left_notice": "你已离开该小屋"
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -29,7 +31,14 @@ void main() {
     petType: 'happy_shiba',
   );
 
-  Future<void> pumpHome(WidgetTester tester) async {
+  late StreamController<KickNotice> kicks;
+
+  setUp(() => kicks = StreamController<KickNotice>.broadcast());
+  tearDown(() => kicks.close());
+
+  Future<void> pumpHome(WidgetTester tester, {bool fakeKicks = false}) async {
+    final coordinator = MockCoordinator();
+    when(() => coordinator.kicks).thenAnswer((_) => kicks.stream);
     session = FakeSessionController(const SessionReady(me));
     rooms = MockRoomRepository();
     when(() => rooms.listMine()).thenAnswer((_) async => []);
@@ -44,6 +53,8 @@ void main() {
           inviteRepositoryProvider.overrideWithValue(invites),
           // No real socket in widget tests.
           wsClientProvider.overrideWithValue(null),
+          if (fakeKicks)
+            realtimeCoordinatorProvider.overrideWithValue(coordinator),
         ],
         child: const PetBridgeApp(),
       ),
@@ -139,4 +150,28 @@ void main() {
 
     verify(() => invites.listCodes()).called(1);
   });
+
+  for (final reason in [KickReason.kicked, KickReason.dissolved]) {
+    testWidgets('${reason.name} shows left notice', (tester) async {
+      await pumpHome(tester, fakeKicks: true);
+
+      kicks.add(KickNotice('r1', reason));
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text(en.room_left_notice), findsOneWidget);
+    });
+  }
+
+  testWidgets('left shows nothing', (tester) async {
+    await pumpHome(tester, fakeKicks: true);
+
+    kicks.add(const KickNotice('r1', KickReason.left));
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text(en.room_left_notice), findsNothing);
+  });
 }
+
+class MockCoordinator extends Mock implements RealtimeCoordinator;

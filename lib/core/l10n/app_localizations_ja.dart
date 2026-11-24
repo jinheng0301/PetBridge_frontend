@@ -553,4 +553,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get room_member_unknown => 'ともだち';
+
+  @override
+  String get room_left_notice => 'このルームから退出しました';
 }

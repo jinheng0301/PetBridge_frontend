@@ -14,6 +14,7 @@ import 'package:petbridge/features/auth/application/session_controller.dart';
 import 'package:petbridge/features/invite/data/invite_repository.dart';
 import 'package:petbridge/features/pet/presentation/pet_catalog.dart';
 import 'package:petbridge/features/room/application/room.dart';
+import 'package:petbridge/features/room/application/rooms_provider.dart';
 import 'package:petbridge/features/room/data/room_repository.dart';
 import 'package:petbridge/features/room/presentation/room_manage_page.dart';
 
@@ -220,5 +221,59 @@ void main() {
     expect(find.text(en.err_NETWORK), findsOneWidget);
     expect(tester.widget<FilledButton>(dissolveButton()).onPressed, isNotNull);
     expect(find.text('ROOM-TAB'), findsNothing);
+  });
+
+  testWidgets('room vanishing while open returns to room tab', (tester) async {
+    var rooms = [
+      room([aki, bo]),
+    ];
+    when(() => repo.listMine()).thenAnswer((_) async => rooms);
+    await pump(tester);
+    expect(find.text('ROOM-TAB'), findsNothing);
+
+    // As after a kick: the next reload no longer lists the room.
+    rooms = [];
+    await ProviderScope.containerOf(tester.element(find.byType(RoomManagePage)))
+        .read(roomsProvider.notifier)
+        .refresh();
+    await tester.pumpAndSettle();
+
+    expect(find.text('ROOM-TAB'), findsOneWidget);
+  });
+
+  testWidgets('no redirect while the first load is pending', (tester) async {
+    final gate = Completer<List<Room>>();
+    when(() => repo.listMine()).thenAnswer((_) => gate.future);
+    router = GoRouter(
+      initialLocation: Routes.roomManagePath('own'),
+      routes: [
+        GoRoute(path: Routes.home, builder: (_, _) => const Text('ROOM-TAB')),
+        GoRoute(
+          path: Routes.roomManage,
+          builder: (_, s) => RoomManagePage(roomId: s.pathParameters['id']!),
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sessionControllerProvider.overrideWith(
+            () => FakeSessionController(const SessionReady(me)),
+          ),
+          roomRepositoryProvider.overrideWithValue(repo),
+          inviteRepositoryProvider.overrideWithValue(invites),
+        ],
+        child: MaterialApp.router(
+          routerConfig: router,
+          localizationsDelegates: appLocalizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('ROOM-TAB'), findsNothing);
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
   });
 }
