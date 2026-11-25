@@ -2,9 +2,9 @@
 
 | 项目 | 内容 |
 | :-- | :-- |
-| 版本 | v1.12（草案，待自评审）<br>• v1.12 较 v1.11：对齐后端 TRD v1.14 的 B6a 内容审核、举报与屏蔽：`CONTENT_BLOCKED` 分发消息与昵称两种文案，新增 `BLOCK_LIMIT` 文案，处理新事件 `message.removed`（删掉卡片），关闭码 4403 不重连、回到登录页，写明屏蔽与举报的接口约定和举报原因枚举；对齐 PRD v1.10。<br>• v1.11 较 v1.10：F2 设计定稿：宠物由 Rive 改为代码绘制（`PetPainter` + `PetSpec`，MVP 姿态 `idle` / `sleep` / `cute`）；场景放在小屋 Tab、不做 `/room/:id`；删除规则 7（`last_seq` 不写 prefs），`roomControllerProvider` 改为 `roomLiveProvider`；前后台改为 `paused` 立即断开；新增 `WS_URL` 与真机环境文件；名牌国旗标识延后；对齐 PRD v1.9 与后端 TRD v1.13。<br>• v1.10 较 v1.9：F1 设计定稿：验证码输入页、背包、分享海报（保存与系统分享）、小屋 Tab 先用成员列表占位；`solo` / `inRoom` 由房间数据派生、不并进会话；背包显示今日剩余补码次数；房主管理与退出小屋移到 F2。<br>• v1.9 较 v1.8：对齐后端 TRD v1.9 的 B5 消息协议：原文卡片先到、译文与润色另发事件，消息事件按 id 插入或更新、状态只前进，重连后用 `after` 补消息，翻译失败不提供手动重试，润色改为异步、新增错误码文案。<br>• v1.8 较 v1.7：刷新 token 失败只在服务端拒绝时登出，两个 token 存在同一个键里一次写入，新增 `NOT_READY` 文案。<br>• v1.7 较 v1.6：对齐后端 TRD v1.7 的 MBTI 语气重构规则，信使卡片处理润色回退（“未润色”）。<br>• v1.6 较 v1.5：F0 联调后补齐实现细节：界面语言的取值顺序、启动时网络失败可重试、Google 取消与无账号不报错、设备时区回落、可空枚举的契约写法。<br>• v1.5 较 v1.4：对齐后端 TRD v1.5 的 WebSocket 加固：处理关闭码 4401、升级 429 / 503 与 `room.sub` 限流。<br>• v1.4 较 v1.3：对齐后端 B4 的 WebSocket 协议，reducer 改为以订阅快照为准，presence 只有在线 / 离线、离线显示为睡觉。<br>• v1.3 较 v1.2：对齐 PRD v1.5 与后端 TRD v1.3，F0 登录与 onboarding 设计定稿，首页改为四个 Tab，契约生成改用 swagger_parser。 |
-| 对应 PRD | 《跨国 MBTI 情感 AI 电子宠物 PRD v1.10》 |
-| 配套文档 | 《后端 TRD（Go）v1.14》：REST 接口见其第 8 章，WebSocket 协议见其第 9 章，本文以其为准 |
+| 版本 | v1.13（草案，待自评审）<br>• v1.13 较 v1.12：对齐后端 TRD v1.15 的 B6b 打卡与装扮：快照带能量、装扮与打卡状态，`checkin.updated` / `decor.unlocked` 不带 seq、按只增不减合并，装扮改为代码绘制，11.5 重写并定下五语种文案；对齐 PRD v1.11。<br>• v1.12 较 v1.11：对齐后端 TRD v1.14 的 B6a 内容审核、举报与屏蔽：`CONTENT_BLOCKED` 分发消息与昵称两种文案，新增 `BLOCK_LIMIT` 文案，处理新事件 `message.removed`（删掉卡片），关闭码 4403 不重连、回到登录页，写明屏蔽与举报的接口约定和举报原因枚举；对齐 PRD v1.10。<br>• v1.11 较 v1.10：F2 设计定稿：宠物由 Rive 改为代码绘制（`PetPainter` + `PetSpec`，MVP 姿态 `idle` / `sleep` / `cute`）；场景放在小屋 Tab、不做 `/room/:id`；删除规则 7（`last_seq` 不写 prefs），`roomControllerProvider` 改为 `roomLiveProvider`；前后台改为 `paused` 立即断开；新增 `WS_URL` 与真机环境文件；名牌国旗标识延后；对齐 PRD v1.9 与后端 TRD v1.13。<br>• v1.10 较 v1.9：F1 设计定稿：验证码输入页、背包、分享海报（保存与系统分享）、小屋 Tab 先用成员列表占位；`solo` / `inRoom` 由房间数据派生、不并进会话；背包显示今日剩余补码次数；房主管理与退出小屋移到 F2。<br>• v1.9 较 v1.8：对齐后端 TRD v1.9 的 B5 消息协议：原文卡片先到、译文与润色另发事件，消息事件按 id 插入或更新、状态只前进，重连后用 `after` 补消息，翻译失败不提供手动重试，润色改为异步、新增错误码文案。<br>• v1.8 较 v1.7：刷新 token 失败只在服务端拒绝时登出，两个 token 存在同一个键里一次写入，新增 `NOT_READY` 文案。<br>• v1.7 较 v1.6：对齐后端 TRD v1.7 的 MBTI 语气重构规则，信使卡片处理润色回退（“未润色”）。<br>• v1.6 较 v1.5：F0 联调后补齐实现细节：界面语言的取值顺序、启动时网络失败可重试、Google 取消与无账号不报错、设备时区回落、可空枚举的契约写法。<br>• v1.5 较 v1.4：对齐后端 TRD v1.5 的 WebSocket 加固：处理关闭码 4401、升级 429 / 503 与 `room.sub` 限流。<br>• v1.4 较 v1.3：对齐后端 B4 的 WebSocket 协议，reducer 改为以订阅快照为准，presence 只有在线 / 离线、离线显示为睡觉。<br>• v1.3 较 v1.2：对齐 PRD v1.5 与后端 TRD v1.3，F0 登录与 onboarding 设计定稿，首页改为四个 Tab，契约生成改用 swagger_parser。 |
+| 对应 PRD | 《跨国 MBTI 情感 AI 电子宠物 PRD v1.11》 |
+| 配套文档 | 《后端 TRD（Go）v1.15》：REST 接口见其第 8 章，WebSocket 协议见其第 9 章，本文以其为准 |
 | 技术栈 | Flutter 3.x 稳定版 / Dart 3 |
 | 平台 | iOS 15+、Android 8+（竖屏，手机优先，不适配平板） |
 | 开发模式 | **单人全栈开发**，选型以“一个人能长期维护”为第一约束 |
@@ -272,10 +272,12 @@ sequenceDiagram
         Red->>RoomC: 整体替换房间状态 · last_seq = 快照 seq
     end
     Red->>Red: seq ≤ last_seq 丢弃；无 seq 直接应用；缺口 < 20 先缓冲，超时仍缺口或收到 resync → 重新 room.sub
-    alt member.joined / member.left / presence.update / checkin.updated / decor.unlocked
-        Red->>RoomC: 更新成员、presence、能量、装扮
+    alt member.joined / member.left / presence.update
+        Red->>RoomC: 更新成员、presence
         Red->>Rooms: member_count 变化
         Rooms->>Sess: 重新派生 solo / inRoom
+    else checkin.updated / decor.unlocked（不带 seq，v1.13）
+        Red->>RoomC: 合并能量、打卡状态、装扮（第 7 章规则 12）
     else message.new / message.translated / message.polished
         Red->>ChatC: 按 message.id 插入或更新消息（v1.9，见第 7 章规则 10）
     else pet.action
@@ -305,7 +307,7 @@ sequenceDiagram
 | 常见前端分层 | 本项目对应 | 说明 |
 | :-- | :-- | :-- |
 | `api/` | `features/*/data/` + `gen/` + `core/network/` | 接口由 OpenAPI 生成（`gen/`），Repository 在各 feature 的 `data/`，dio 与拦截器在 `core/network/` |
-| `assets/` | `assets/` | 图片、装扮、ARB、短语模板（宠物由代码绘制，v1.11 起无 Rive 资源） |
+| `assets/` | `assets/` | 图片、ARB、短语模板（宠物与装扮由代码绘制，v1.11 起无 Rive 资源，v1.13 起无装扮资源） |
 | `components/` | `shared/widgets/` | 跨业务复用的通用 UI 组件；仅某 feature 使用的组件放该 feature 的 `presentation/widgets/` |
 | `config/` | `config/` | 环境变量、常量、错误码枚举 |
 | `hooks/` / `composables/` | `features/*/application/` + `shared/providers/` | Flutter 没有 hooks 概念，对应 Riverpod 的 provider 与 Notifier |
@@ -385,7 +387,6 @@ petbridge_app/
 ├── assets/
 │   ├── images/                           # 通用图标、插画（WebP / SVG）
 │   ├── pets/                             # 仅放 Widget 静态图（v1.11：宠物本体由 features/pet/presentation/pet_painter.dart 代码绘制，无 .riv）
-│   ├── decor/                            # 装扮 WebP 与解锁前剪影
 │   ├── l10n/                             # ARB（ja / ko / zh-Hant / zh-Hans / en）
 │   └── phrases/                          # 随包的短语模板兜底版本
 ├── env/                                  # dev_android.json / local.json 等 --dart-define-from-file 配置（不含密钥）
@@ -464,7 +465,7 @@ unauthenticated ──登录成功──► needsOnboarding ──完成──�
 | `sessionProvider` | 路由用会话状态（派生） | auth + me（v1.10 起不含房间） |
 | `roomsProvider` | 我的房间列表 | `GET /rooms/mine`（按 6.1 的时机刷新）+ WS 事件（F2 起） |
 | `roomModeProvider` / `selectedRoomProvider` | `solo` / `inRoom`；小屋 Tab 当前显示哪一间（v1.10） | 由 `roomsProvider` 派生；选中项只存内存 |
-| `roomLiveProvider(roomId)` | 房间成员、presence（v1.11 由 `roomControllerProvider` 改名；F2 只含这两项，打卡与装扮 F4 再加） | 快照 + WS 事件 reducer |
+| `roomLiveProvider(roomId)` | 房间成员、presence（v1.11 由 `roomControllerProvider` 改名；F2 只含这两项，F4 再加能量、已解锁装扮与每个成员的 `checkin_expires_at`，v1.13） | 快照 + WS 事件 reducer |
 | `chatControllerProvider(roomId)` | 消息列表、发送状态、润色状态 | drift 缓存 + REST + WS |
 | `codesProvider` | 背包验证码、生成验证码 | `GET /codes`、`POST /rooms/{id}/codes` + `code.invalidated` |
 | `joinControllerProvider` | 验证码输入流程、冷却与限流倒计时（App 生命周期内保留，v1.10） | `POST /rooms/join` |
@@ -474,9 +475,9 @@ unauthenticated ──登录成功──► needsOnboarding ──完成──�
 
 **事件 reducer 规则**（`RoomEventReducer`，纯函数，必须有单元测试）：
 
-1. 收到 `room.snapshot`：用快照**整体替换**该房间状态（成员、座位、presence），并把 `last_seq` **设为**快照的 `seq`，不取较大值（Redis 重启后服务端 seq 会从头开始）（v1.4）。
+1. 收到 `room.snapshot`：用快照**整体替换**该房间状态（成员、座位、presence，以及 v1.13 的能量、装扮、打卡状态），并把 `last_seq` **设为**快照的 `seq`，不取较大值（Redis 重启后服务端 seq 会从头开始）（v1.4）。
 2. 带 `seq` 的事件（目前是 `member.joined`、`member.left`）：`seq ≤ last_seq` 直接丢弃，否则应用并更新 `last_seq`。缺口小于 20 时先缓冲、短暂等待；超时仍有缺口，对该房间重新发 `room.sub` 拿新快照（v1.4：不再拉 `GET /rooms/{id}`）。
-3. 不带 `seq` 的事件（`presence.update`、`pet.action`、`room.kicked`、`code.invalidated`，以及服务端 Redis 故障时的 `member.*`）收到即应用，不改 `last_seq`（v1.4）。
+3. 不带 `seq` 的事件（`presence.update`、`pet.action`、`checkin.updated`、`decor.unlocked`、`room.kicked`、`code.invalidated`，以及服务端 Redis 故障时的 `member.*`）收到即应用，不改 `last_seq`（v1.4）。
 4. 成员事件按 `user_id` **幂等**：`member.joined` 是“有则覆盖、无则加入”，`member.left` 是“有则删除、无则忽略”。快照与紧随其后的事件可能重复描述同一变化，必须幂等（v1.4）。
 5. 收到 `resync`：对 `room_id` 指定的房间（缺省为全部已订阅房间）重新发 `room.sub`（v1.4）。
 6. 不认识的事件类型**忽略而不是报错**，保证向前兼容。
@@ -486,6 +487,7 @@ unauthenticated ──登录成功──► needsOnboarding ──完成──�
 10. **消息事件**（v1.9）：`message.new`、`message.translated`、`message.polished` 都不带 seq，负载都是完整的 `MessageView`，交给 `chatControllerProvider` 按 `message.id` **插入或更新**，与到达顺序无关（`message.translated` 可能比 `message.new` 先到）。delivery 状态只前进不后退：`translation_status` 按 `pending < failed < done`，`polish_status` 按 `none < pending < done / fallback`，收到比本地更旧的状态就忽略。发送者本人收到的 `message.new` 带 `client_msg_id`、`delivery` 为空，用它把 outbox 里的本地气泡替换成服务端消息（其他设备则直接插入）。
     v1.12：新增 `message.removed`（后端 TRD v1.14，不带 seq）：负载只有 `room_id`、`message_id`，表示这条消息对自己已被审核隐藏；从列表和本地缓存删掉这张卡片，本地没有就忽略。之后同一 id 的 `message.new` / `message.translated` / `message.polished` 一般不会再来，万一迟到也不再插入（记住已删除的 id，App 生命周期内有效），拉取也不会再返回它。
 11. **重新订阅后补消息**（v1.9）：每次对某房间收到 `room.snapshot`（包括断线重连、`resync`、seq 缺口引起的重新订阅），都对该房间调用 `GET /rooms/{id}/messages?after=<本地最新消息 id>` 补齐断线期间的消息；`has_more` 为 true 时继续翻页。本地没有缓存时取最新一页。
+12. **打卡事件**（v1.13）：`checkin.updated`、`decor.unlocked` 不带 seq，与打卡的 REST 响应一起，叠加到当前状态上：`energy_total` 取较大值，`next_threshold` 跟着较大的那份走；`checkin_expires_at` 按成员取较晚的；装扮按 `item_id` 取并集，不认识的 `item_id` 忽略（不绘制）。快照照旧整体替换，不走合并。`member.joined` 不带 `checkin_expires_at`（当作没打过，成员已在列表里时保留原值）。
 
 ---
 
@@ -504,7 +506,7 @@ unauthenticated ──登录成功──► needsOnboarding ──完成──�
 ### 8.2 约定
 
 - 超时：连接 5 秒、接收 10 秒。v1.9：润色改为异步（`POST /deliveries/{id}/polish` 立即返回 202，结果走 `message.polished`），不再需要单独放宽超时。
-- 错误码映射到本地化文案：`err.CODE_INVALID`、`err.ROOM_FULL` 等，文案放 ARB，**不显示服务端 `message`**。503 `NOT_READY`（服务重启、登录提供方暂时不可达）显示 `err_NOT_READY`“服务暂时不可用，请稍后重试”（v1.8）。v1.9 新增：`QUOTA_EXCEEDED` 按 `details.reason` 分四条文案（`daily_quota` 今天的润色次数用完了，明天再来；`minute_limit` 太频繁，稍后再试；`global_budget` / `disabled` 润色暂时不可用）；`POLISH_NOT_READY`、`DELIVERY_NOT_FOUND` 一般不会出现，落到通用文案并刷新消息；`CONTENT_BLOCKED` 显示“消息未能送达”（B6 起才会出现）。v1.12（对齐后端 TRD v1.14）：`CONTENT_BLOCKED` 分两种，不说明原因：发消息时（不带 `details`）气泡标“消息未能送达”，**不提供重试**（同一条重发仍会被拦），也不自动重试；onboarding 时（`details.fields = ["nickname"]`）在昵称框下显示“这个昵称不能使用，请换一个”，停在昵称页。`BLOCK_LIMIT`（409，已屏蔽 500 人）显示“屏蔽人数已达上限，请先解除一些屏蔽”。举报超过每日次数返回 `RATE_LIMITED`，提示“今天的举报次数已用完，明天再试”。
+- 错误码映射到本地化文案：`err.CODE_INVALID`、`err.ROOM_FULL` 等，文案放 ARB，**不显示服务端 `message`**。503 `NOT_READY`（服务重启、登录提供方暂时不可达）显示 `err_NOT_READY`“服务暂时不可用，请稍后重试”（v1.8）。v1.9 新增：`QUOTA_EXCEEDED` 按 `details.reason` 分四条文案（`daily_quota` 今天的润色次数用完了，明天再来；`minute_limit` 太频繁，稍后再试；`global_budget` / `disabled` 润色暂时不可用）；`POLISH_NOT_READY`、`DELIVERY_NOT_FOUND` 一般不会出现，落到通用文案并刷新消息；`CONTENT_BLOCKED` 显示“消息未能送达”。v1.12（对齐后端 TRD v1.14）：`CONTENT_BLOCKED` 分两种，不说明原因：发消息时（不带 `details`）气泡标“消息未能送达”，**不提供重试**（同一条重发仍会被拦），也不自动重试；onboarding 时（`details.fields = ["nickname"]`）在昵称框下显示“这个昵称不能使用，请换一个”，停在昵称页。`BLOCK_LIMIT`（409，已屏蔽 500 人）显示“屏蔽人数已达上限，请先解除一些屏蔽”。举报超过每日次数返回 `RATE_LIMITED`，提示“今天的举报次数已用完，明天再试”。
 - `request_id` 随错误上报到 Sentry，便于和后端日志对上。
 - 契约生成：用 `swagger_parser` 从后端仓库的 `api/openapi.yaml` 生成 `lib/gen/`（`dart run swagger_parser` + `build_runner`），CI 中校验生成结果无差异。
 - 可空枚举（v1.6）：openapi 3.0.3 里 `nullable: true` 的枚举字段必须把 `null` 写进 `enum` 列表（如 Profile 的 `native_lang`、`age_band`），否则生成的模型遇到 `null` 解析失败，未 onboarding 用户的 `/me` 会报错；`contract_decode_test` 覆盖这种情况。
@@ -551,7 +553,7 @@ disconnected ─► connecting ─► connected ─(收到 hello)─► ready �
 ```
 RoomScene（固定比例容器，RepaintBoundary）
 ├── 背景层：墙、窗、置物架、木地板、地毯（`CustomPainter` 绘制，v1.11；原写房间底图 WebP）
-├── 装扮层：已解锁装扮（按 item_id 摆放在预设锚点）
+├── 装扮层：已解锁装扮（按 item_id 在预设锚点用 `CustomPainter` 绘制，v1.13）
 ├── 宠物层：最多 5 个座位锚点（seat_no 1–5 → 固定坐标）
 │     └── PetView(pet_type, pose) + 名牌（👑 + 昵称；国旗角标延后，见 11.4）
 └── 特效层：打招呼、打卡完成、装扮解锁的一次性动画
@@ -582,8 +584,8 @@ RoomScene（固定比例容器，RepaintBoundary）
 
 - 16 只宠物 × 3 个姿态（待机 / 睡觉 / 卖萌；第二版再加吃 / 洗）。正式美术到位前全程代码绘制；到位后沿用 `PetView` 接口替换。
 - 桌面 Widget 用静态图（每只 × 待机 / 开心 / 瞌睡，见第 14 章）：Widget 不能跑 Flutter 动画；正式美术到位前由 `PetPainter` 离屏渲染导出。
-- 装扮 10–15 件，WebP，统一锚点与透视；每件提供解锁前的剪影图。
-- 资源体积：宠物由代码绘制，**不占资源体积**（原预算“单个 `.riv` 小于 200KB、总资源 3MB”改为只含装扮与 Widget 静态图，总计仍控制在 3MB 以内）。
+- 装扮 12 件，由代码绘制（v1.13，原写 WebP），与背景用同一套设计画布与锚点；解锁前的剪影由同一套绘制填单色得到。目录与建议位置见 11.5。
+- 资源体积：宠物由代码绘制，**不占资源体积**（原预算“单个 `.riv` 小于 200KB、总资源 3MB”改为只含 Widget 静态图，总计仍控制在 3MB 以内，v1.13 起装扮也不占）。
 
 ---
 
@@ -836,8 +838,46 @@ flowchart LR
 
 ### 11.5 打卡与装扮
 
-- 打卡按钮每天一次（以用户本地日期为准，服务端为准，按钮状态来自 `GET /rooms/{id}`）。
-- 打卡成功：本地播放庆祝动画，能量条增长；收到 `decor.unlocked` 时在装扮层播放解锁动效。
+v1.13 重写，F4 实现；规则见后端 TRD 7.5。
+
+- **状态来源**：`room.snapshot` 的 `progress`、`decor`、成员的 `checkin_expires_at`（原写的 `GET /rooms/{id}` 不实现），加上 REST 响应与两个 WS 事件，合并规则见第 7 章规则 12。第一份快照到达前不显示能量条与打卡按钮；WS 断开时按钮仍可用（走 REST），按响应更新。
+- **打卡按钮**：按小屋、每天一次。现在 < 自己的 `checkin_expires_at` 时显示“今天已打卡”并置灰，过了这个时刻恢复，不需要事件；时间用 `hello.server_time` 校正。`POST /rooms/{id}/checkin` 重复调用返回 200、`already: true`，超时重试与连点不用特殊处理。
+- **勾**：成员现在 < `checkin_expires_at` 时宠物头上亮勾。全员奖励按 24 小时窗口另算，界面**不解释规则**，只在 `bonus_gained > 0` 时提示一句（自己打卡看响应，别人打卡看事件）。
+- **动画**：自己打卡的庆祝动画只由 REST 响应触发（`already` 为 false 时）；收到 `user_id` 是自己的 `checkin.updated` 只更新数值。别人打卡：亮勾、能量条增长。解锁动画只由 REST 响应的 `unlocked` 与 `decor.unlocked` 触发，且那一件此前不在本地集合里才播（响应与事件带来同一件不重复播）；快照里的装扮直接显示，不播动画，打开 App 或重连时不会重播。
+- **装扮列表页**：从能量条右侧进入，`GET /rooms/{id}/decor`，未解锁的画剪影与“能量达到 {n} 解锁”。
+- **失败**：`ROOM_NOT_FOUND` 按小屋已不存在处理；`RATE_LIMITED` 与网络错误走通用提示。
+- **建议位置**：`wall_clock` 窗户右侧墙面；`picture_frame` 左上墙面；`floor_lamp` 左后墙角；`string_lights` 墙面顶部横向；`potted_tree` 右后墙角；`wall_map` 窗户下方墙面；`woven_basket` 前排左下角；`bookshelf` 右侧墙面下部；`mailbox` 后墙根中右；`yarn_ball` 前排右下角；`record_player` 后墙根左侧；`wind_chime` 窗帘杆右端。
+
+文案（ARB，装扮名称也只在前端）：
+
+| 用途 | zh-Hans | zh-Hant | ja | ko | en |
+| :-- | :-- | :-- | :-- | :-- | :-- |
+| 打卡按钮 | 打卡 | 打卡 | チェックイン | 출석하기 | Check in |
+| 已打卡 | 今天已打卡 | 今天已打卡 | 今日はチェックイン済み | 오늘 출석 완료 | Checked in today |
+| 打卡成功 | 小屋能量 +{n} | 小屋能量 +{n} | おうちエネルギー +{n} | 하우스 에너지 +{n} | House energy +{n} |
+| 全员奖励 | 大家都打卡了！小屋能量 +{n} | 大家都打卡了！小屋能量 +{n} | みんなチェックイン完了！おうちエネルギー +{n} | 모두 출석했어요! 하우스 에너지 +{n} | Everyone checked in! House energy +{n} |
+| 解锁 | 解锁了新装扮：{name} | 解鎖了新裝扮：{name} | 新しい飾りを手に入れました：{name} | 새 장식을 얻었어요: {name} | New decoration: {name} |
+| 装扮页标题 | 小屋装扮 | 小屋裝扮 | おうちの飾り | 하우스 장식 | Decorations |
+| 未解锁 | 能量达到 {n} 解锁 | 能量達到 {n} 解鎖 | エネルギー {n} で解放 | 에너지 {n}에 열려요 | Unlocks at {n} energy |
+| 全部解锁 | 装扮已全部解锁 | 裝扮已全部解鎖 | すべての飾りを集めました | 모든 장식을 모았어요 | All decorations unlocked |
+| 无障碍标签 | {name}今天已打卡 | {name}今天已打卡 | {name}さんは今日チェックイン済み | {name}님 오늘 출석 완료 | {name} checked in today |
+
+装扮名称：
+
+| item_id | zh-Hans | zh-Hant | ja | ko | en |
+| :-- | :-- | :-- | :-- | :-- | :-- |
+| `wall_clock` | 挂钟 | 掛鐘 | 掛け時計 | 벽시계 | Wall clock |
+| `picture_frame` | 相框 | 相框 | フォトフレーム | 액자 | Picture frame |
+| `floor_lamp` | 落地灯 | 落地燈 | フロアランプ | 스탠드 조명 | Floor lamp |
+| `string_lights` | 串灯 | 串燈 | ストリングライト | 줄조명 | String lights |
+| `potted_tree` | 盆栽小树 | 盆栽小樹 | 鉢植えの木 | 화분 나무 | Potted tree |
+| `wall_map` | 世界地图 | 世界地圖 | 世界地図 | 세계 지도 | World map |
+| `woven_basket` | 藤编篮 | 藤編籃 | 編みかご | 바구니 | Woven basket |
+| `bookshelf` | 小书架 | 小書架 | 小さな本棚 | 작은 책장 | Bookshelf |
+| `mailbox` | 小邮筒 | 小郵筒 | 小さなポスト | 작은 우체통 | Mailbox |
+| `yarn_ball` | 毛线球 | 毛線球 | 毛糸玉 | 털실 뭉치 | Yarn ball |
+| `record_player` | 唱片机 | 唱片機 | レコードプレーヤー | 턴테이블 | Record player |
+| `wind_chime` | 风铃 | 風鈴 | 風鈴 | 풍경 | Wind chime |
 
 ### 11.6 房主管理（v1.2 新增，对应 PRD R10/R11、后端 TRD 7.8）
 
@@ -960,7 +1000,7 @@ Android：Jetpack Glance（或 RemoteViews）读取共享存储渲染
 
 **手段**：
 
-- 装扮资源懒加载、WebP；宠物由代码绘制，不占资源体积（v1.11）；不打包 CJK 字体；`--tree-shake-icons`。
+- 宠物（v1.11）与装扮（v1.13）由代码绘制，不占资源体积；不打包 CJK 字体；`--tree-shake-icons`。
 - `const` 构造、`ref.watch(provider.select(...))` 精确订阅，避免大范围重建。
 - 聊天列表使用 `ListView.builder`；动画层包 `RepaintBoundary`；图片使用 `cacheWidth/cacheHeight` 解码缩小。
 - 启动路径只做必要初始化（读令牌、读 prefs），其余（Sentry、分析、推送）在首帧后延迟初始化。
@@ -1134,7 +1174,7 @@ flutter run -d <真机ID> --dart-define-from-file=env/local.json
 | W3–4 | B3 验证码与入房事务 | F1 验证码输入、背包（含今日剩余补码次数）、分享海报（保存与系统分享）、小屋 Tab 成员列表（F2 换成场景）；onboarding 与占位宠物已在 F0 完成（v1.10） | **核心机制跑通（M1）** |
 | W5–6 | B4 WS 与事件分发（订阅快照、presence 在线 / 离线、`pet.tap`） | F2 分两段（v1.11）：**F2a 实时与场景**——WsClient、reducer、小屋场景与座位、16 只代码绘制宠物、presence（离线显示为睡觉）、点宠物卖萌；**F2b 管理与退出**——房主管理（11.6）与退出小屋（v1.10 从 F1 移入）。验收设备：安卓模拟器 + 一台安卓真机，互相看到对方宠物上线、下线 | 多人实时可见（M2） |
 | W7–8 | B5 消息与 AI 网关 | F3 聊天、信使卡片、短语、outbox | **跨语言消息可用（M3）** |
-| W9–10 | B6 审核、举报、打卡装扮（后端 v1.14 拆为 B6a 合规、B6b 养成） | F4 打卡、装扮、举报屏蔽、设置、账号删除、分享海报 | 功能完整的内测版（M4） |
+| W9–10 | B6 审核、举报、打卡装扮（后端 v1.14 拆为 B6a 合规、B6b 养成，v1.15 均已完成） | F4 打卡、装扮、举报屏蔽、设置、账号删除、分享海报 | 功能完整的内测版（M4） |
 | W11–12 | B7 推送、Widget 快照 | F5 推送、深链、**Widget（iOS + Android）** | 外部依赖对接完成 |
 | W13–14 | B8 压测与演练 | F6 性能优化、真机兼容、埋点、替换正式美术资源 | 压测与性能达标 |
 | W15 | 联调修复 | 内测（TestFlight / Play 内测），修 bug | 内测反馈清零 |
