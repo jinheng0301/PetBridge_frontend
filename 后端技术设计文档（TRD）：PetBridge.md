@@ -2,9 +2,9 @@
 
 | 项目 | 内容 |
 | :-- | :-- |
-| 版本 | v1.15（草案，待自评审）<br>• v1.15 较 v1.14：B6b 打卡与装扮落地：按小屋打卡、全员奖励（24 小时窗口、用掉打卡记录）、12 件装扮按能量解锁，迁移 0007，快照新增能量 / 装扮 / 打卡状态，新 WS 事件 `checkin.updated` 与 `decor.unlocked`（不带 seq），`LocalDayBounds` 修正没有零点的日期。<br>• v1.14 较 v1.13：B6a 内容审核、举报与屏蔽落地：本地五语种词库 + 模型 `risk` 两层审核（发送前拦截 422 `CONTENT_BLOCKED`，译文高危只隐藏该语言组或整条撤回，润色高危回退基础译文），审核记录表 `mod_flags` 与运营 CLI `modctl`，屏蔽（双向不投递、对方无感知）与举报接口，新 WS 事件 `message.removed` 与关闭码 4403，翻译 / 润色缓存改存 JSON 并带上 `risk`，B6 拆为 B6a / B6b。<br>• v1.13 较 v1.12：对齐 PRD v1.9 与前端 TRD v1.11：演进路线（18.3）补一句第二版宠物养成，接口与数据模型不变。<br>• v1.12 较 v1.11：B5b 润色与成本落地：重放在扣配额前判定，接收方按钮先认领再扣配额，网关缓存先于预算检查，润色校验的长度下限与数字规范化细则，`ai_usage_daily` 按用户记账，新增评测工具 `polisheval`。<br>• v1.11 较 v1.10：B5a 总审阅后修正：付费 Gemini 按配置的价格计入成本，production 缺价格拒绝启动；asynq 共用应用的 Redis 客户端，入队最多等 1 秒。<br>• v1.10 较 v1.9：配合前端 F1，`GET /rooms/mine` 的自己小屋增加 `regen_remaining_today`（今日剩余补码次数）。<br>• v1.9 较 v1.8：B5 消息与 AI 网关设计定稿：落库即推原文卡片、译文与润色另发事件，断线后从数据库补消息，Gemini 主力 + Claude 备用，不接机翻，翻译失败自动重试，每日预算与翻译硬上限，B5 拆为 B5a / B5b。<br>• v1.8 较 v1.7：refresh token 轮换加 60 秒重试宽限，Google 公钥拉取失败返回 503，`ROOM_CAPACITY` 生效，presence 补发进程崩溃后的离线。<br>• v1.7 较 v1.6：新增 10.3 MBTI 语气重构逻辑，润色只按接收方 MBTI 调整，失败回退基础译文。<br>• v1.6 较 v1.5：F0 联调后修正契约中可空枚举的写法，补充本机集成测试须串行运行。<br>• v1.5 较 v1.4：B4 安全审查后加固 WebSocket：连接在 access token 到期时关闭（4401），连接与订阅限流。<br>• v1.4 较 v1.3：B4 WebSocket 协议定稿，断线恢复改为每次订阅下发快照，presence 只有在线 / 离线，Redis 故障时本机兜底推送。<br>• v1.3 较 v1.2：对齐 PRD v1.5 与前端 TRD v1.3，Google 登录接入真实校验，Apple 登录延后，本地端口统一为 8090。<br>• v1.2 较 v1.1：对齐 PRD v1.4，新增房主管理，修正消息表分区方案，补充本地运行说明。 |
-| 对应 PRD | 《跨国 MBTI 情感 AI 电子宠物 PRD v1.11》 |
-| 配套文档 | 《前端 TRD（Flutter）v1.13》：WebSocket 协议、API 调用方式以本文第 8、9 章为准 |
+| 版本 | v1.16（草案，待自评审）<br>• v1.16 较 v1.15：为前端 F3 聊天补三项小改动：拉消息可按 `scope=room` 或 `peer_id` 筛选，小屋通知（`scope=room`）每人每间小屋每天 10 条（429 `RATE_LIMITED`，`details.reason = "notice_daily"`），`MessageView.delivery` 的可空对象契约写法；`scope=room` 的产品含义改为小屋通知，真正的群聊列入第二版；对齐 PRD v1.12。<br>• v1.15 较 v1.14：B6b 打卡与装扮落地：按小屋打卡、全员奖励（24 小时窗口、用掉打卡记录）、12 件装扮按能量解锁，迁移 0007，快照新增能量 / 装扮 / 打卡状态，新 WS 事件 `checkin.updated` 与 `decor.unlocked`（不带 seq），`LocalDayBounds` 修正没有零点的日期。<br>• v1.14 较 v1.13：B6a 内容审核、举报与屏蔽落地：本地五语种词库 + 模型 `risk` 两层审核（发送前拦截 422 `CONTENT_BLOCKED`，译文高危只隐藏该语言组或整条撤回，润色高危回退基础译文），审核记录表 `mod_flags` 与运营 CLI `modctl`，屏蔽（双向不投递、对方无感知）与举报接口，新 WS 事件 `message.removed` 与关闭码 4403，翻译 / 润色缓存改存 JSON 并带上 `risk`，B6 拆为 B6a / B6b。<br>• v1.13 较 v1.12：对齐 PRD v1.9 与前端 TRD v1.11：演进路线（18.3）补一句第二版宠物养成，接口与数据模型不变。<br>• v1.12 较 v1.11：B5b 润色与成本落地：重放在扣配额前判定，接收方按钮先认领再扣配额，网关缓存先于预算检查，润色校验的长度下限与数字规范化细则，`ai_usage_daily` 按用户记账，新增评测工具 `polisheval`。<br>• v1.11 较 v1.10：B5a 总审阅后修正：付费 Gemini 按配置的价格计入成本，production 缺价格拒绝启动；asynq 共用应用的 Redis 客户端，入队最多等 1 秒。<br>• v1.10 较 v1.9：配合前端 F1，`GET /rooms/mine` 的自己小屋增加 `regen_remaining_today`（今日剩余补码次数）。<br>• v1.9 较 v1.8：B5 消息与 AI 网关设计定稿：落库即推原文卡片、译文与润色另发事件，断线后从数据库补消息，Gemini 主力 + Claude 备用，不接机翻，翻译失败自动重试，每日预算与翻译硬上限，B5 拆为 B5a / B5b。<br>• v1.8 较 v1.7：refresh token 轮换加 60 秒重试宽限，Google 公钥拉取失败返回 503，`ROOM_CAPACITY` 生效，presence 补发进程崩溃后的离线。<br>• v1.7 较 v1.6：新增 10.3 MBTI 语气重构逻辑，润色只按接收方 MBTI 调整，失败回退基础译文。<br>• v1.6 较 v1.5：F0 联调后修正契约中可空枚举的写法，补充本机集成测试须串行运行。<br>• v1.5 较 v1.4：B4 安全审查后加固 WebSocket：连接在 access token 到期时关闭（4401），连接与订阅限流。<br>• v1.4 较 v1.3：B4 WebSocket 协议定稿，断线恢复改为每次订阅下发快照，presence 只有在线 / 离线，Redis 故障时本机兜底推送。<br>• v1.3 较 v1.2：对齐 PRD v1.5 与前端 TRD v1.3，Google 登录接入真实校验，Apple 登录延后，本地端口统一为 8090。<br>• v1.2 较 v1.1：对齐 PRD v1.4，新增房主管理，修正消息表分区方案，补充本地运行说明。 |
+| 对应 PRD | 《跨国 MBTI 情感 AI 电子宠物 PRD v1.12》 |
+| 配套文档 | 《前端 TRD（Flutter）v1.14》：WebSocket 协议、API 调用方式以本文第 8、9 章为准 |
 | 语言 / 运行时 | Go 1.26（以 `go.mod` 为准） |
 | 开发模式 | **单人全栈开发**，所有选型以“一个人能长期维护”为第一约束 |
 | 目标区域 | 日本东京区域起步（覆盖 JP / KR / TW 延迟；中国大陆暂不首发） |
@@ -264,7 +264,7 @@ sequenceDiagram
 
     C->>H: POST /rooms/{id}/messages
     H->>S: Send(...)
-    S->>S: 校验 · 限流 · 前置审核 · 润色配额（发送方开关）
+    S->>S: 校验 · 限流 · 小屋通知上限（v1.16）· 前置审核 · 润色配额（发送方开关）
     S->>R: 一个事务：幂等写 messages + 每个接收者一行 deliveries
     Note over S,R: 同语言、短语、纯 emoji 直接 done；其余 pending
     S->>Pub: Publish message.new（原文卡片，各自视角）
@@ -597,17 +597,19 @@ ALTER TABLE room_bans ADD CONSTRAINT pk_room_ban PRIMARY KEY (room_id, user_id);
 
 v1.9 按 B5 设计（`docs/superpowers/specs/2026-11-21-b5-messaging-ai-gateway-design.md`）重写。B5 分两段交付：**B5a** 消息与翻译，**B5b** 润色与成本（第 17 章）。v1.14 按 B6a 设计（`docs/superpowers/specs/2026-11-23-b6a-moderation-safety-design.md`）接入审核与屏蔽，下面只写它们在流程里的位置，规则见 7.9。
 
-`POST /rooms/{id}/messages`，体：`client_msg_id`（客户端生成，1–64 个字母、数字、`-`、`_`）、`kind`（`text` / `phrase`）、`text`（文本消息）或 `phrase_id`（短语消息）、`scope`（`room` / `dm`，默认 `room`）、`to_user_id`（私聊必填）、`polish`（布尔，默认 false，只对文本有效）。幂等以请求体里的 `client_msg_id` 为准，`Idempotency-Key` 头服务端不读。
+`POST /rooms/{id}/messages`，体：`client_msg_id`（客户端生成，1–64 个字母、数字、`-`、`_`）、`kind`（`text` / `phrase`）、`text`（文本消息）或 `phrase_id`（短语消息）、`scope`（`room` 小屋通知 / `dm` 私聊，默认 `room`；v1.16 起 `room` 在产品上就是小屋通知，发给全屋，真正的群聊列入第二版）、`to_user_id`（私聊必填）、`polish`（布尔，默认 false，只对文本有效）。幂等以请求体里的 `client_msg_id` 为准，`Idempotency-Key` 头服务端不读。
 
 ```
 同步段（api，目标 < 100ms）
   1. 校验：调用者在席（否则 ROOM_NOT_FOUND）；文本去首尾空白后 1–500 字；phrase_id 存在；
      私聊对象是同房间其他在席成员，且双方都是成年人（否则 AGE_RESTRICTED）；
      接收者只取账号 status=active 的在席成员，被封的人不再生成 delivery，也不花翻译费用（v1.14）；
-     去掉与发送者有屏蔽关系的接收者（v1.14）：群聊里他们没有 delivery、也收不到 message.new；
+     去掉与发送者有屏蔽关系的接收者（v1.14）：小屋通知里他们没有 delivery、也收不到 message.new；
      私聊对象有屏蔽关系时照常返回 202、消息入库，但不生成 delivery，发送方看不出区别
   2. 限流：每用户每分钟 20 条、每日 1000 条（RATE_LIMITED）；限流在审核之前，被拦的消息也计数
   3. 先按 (sender_id, client_msg_id) 查重放：已存在直接返回原消息，不扣配额、不再审核（v1.12）
+     小屋通知上限（v1.16）：不是重放且 scope=room 时，该用户当天在这间小屋的小屋通知已有 10 条
+       → 429 RATE_LIMITED（details.reason = notice_daily），不入库、不审核、不扣配额，规则见下
   4. 前置审核（v1.14）：短语不审核（模板是我们自己写的）；文本过本地词库（7.9）：
        高危 → 422 CONTENT_BLOCKED（不带 details），消息不入库、不扣配额，写 mod_flags（stage outgoing，存原文）；
               同一 client_msg_id 重发会再次被拦（重放查不到）
@@ -641,11 +643,15 @@ v1.9 按 B5 设计（`docs/superpowers/specs/2026-11-21-b5-messaging-ai-gateway-
 
 **翻译失败与重试**（v1.9）：整条供应商链都失败时记为 `failed`，卡片显示原文 + “暂无法翻译”，**不提供手动重试**。asynq 重试 3 次（间隔 15 秒、60 秒）；之后由补偿扫描继续：worker 每 60 秒扫一次，重新入队 ① 停在 `pending` 超过 2 分钟的翻译，② 消息发出不到 24 小时、距上次尝试已过 10 分钟的 `failed` 翻译（供应商故障期间熔断器是打开的，这些重试不会真的调用供应商），③ 翻译已 `done`、停在 `pending` 超过 2 分钟的润色。超过 24 小时仍失败的翻译不再重试，挂在上面的润色记为 `fallback`。
 
+**小屋通知上限**（v1.16）【假设】：`scope=room` 的消息，每人每间小屋每天 **10 条**，文本与短语都算，写成代码常量；私聊不受限。“天”按发送者时区（`LocalDayBounds`，与润色配额一致），条数从 `messages` 表计，被前置审核拦下的没有入库，不计。检查放在查重放之后、前置审核之前，所以重放不受限，超限的消息不送审、不扣配额。超出返回 429 `RATE_LIMITED`，`Retry-After` 为距发送者下一个零点的秒数，`error.details.reason = "notice_daily"`；第 2 步的每分钟 / 每日限流不带 `reason`，前端靠这个区分文案。并发首发最多多放过一两条，可接受。
+
 **源语言**：取发送者的 `native_lang`，不做语言识别（PRD 8.1，v1.9）。
 
-**拉取** `GET /rooms/{id}/messages?before=|after=&limit=`（v1.9）：`limit` 默认 30、最大 100；不给游标取最新的，`before` 取紧挨着它之前的，`after` 取紧挨着它之后的，二者不能同时给。返回 `{ items, has_more }`，`items` 一律按 id 从旧到新。只返回调用者自己发的或有自己 delivery 的（私聊只有双方可见）；调用者必须当前在席。接收者在发送那一刻确定：之后入房的人看不到之前的消息。v1.14：调用者自己那份 delivery 被审核隐藏（`mod_status = block`）的消息不返回；发送者与调用者有屏蔽关系的消息也不返回（自己发的照常返回），解除屏蔽后重新出现（7.9）。**断线恢复**：重新 `room.sub` 后，客户端用 `after=<本地最新消息 id>` 补齐，不做 Redis Stream 重放。
+**拉取** `GET /rooms/{id}/messages?before=|after=&limit=&scope=|peer_id=`（v1.9；`scope` / `peer_id` 为 v1.16 新增）：`limit` 默认 30、最大 100；不给游标取最新的，`before` 取紧挨着它之前的，`after` 取紧挨着它之后的，二者不能同时给。返回 `{ items, has_more }`，`items` 一律按 id 从旧到新。只返回调用者自己发的或有自己 delivery 的（私聊只有双方可见）；调用者必须当前在席。接收者在发送那一刻确定：之后入房的人看不到之前的消息。v1.14：调用者自己那份 delivery 被审核隐藏（`mod_status = block`）的消息不返回；发送者与调用者有屏蔽关系的消息也不返回（自己发的照常返回），解除屏蔽后重新出现（7.9）。**断线恢复**：重新 `room.sub` 后，客户端用 `after=` 补齐（不带筛选；起点怎么取见前端 TRD 第 7 章规则 11，`after` 只要求是 UUID，不要求真有这条消息，v1.16），不做 Redis Stream 重放。
 
-**`MessageView`**（REST 响应与三种消息事件共用）：`id`、`room_id`、`sender{user_id, nickname, pet_type}`、`scope`、`to_user_id`、`kind`、`phrase_id`、`src_lang`、`text`（原文）、`client_msg_id`（只在发送者自己的视图里有）、`polish_requested`、`created_at`、`delivery`（发送者为空；接收者为自己那一行：`id`、`target_lang`、`base_text`、`translation_status`、`polished_text`、`polish_status`）。
+**按会话筛选**（v1.16）：两个可选参数，与 `before` / `after` / `limit` 可组合。`scope=room` 只返回小屋通知；`peer_id=<uuid>` 只返回调用者与该用户之间的私聊（双向），对方已离席也照常返回历史，查不到就是空列表；两者都不给与原来相同（混合）。两者同时给、`scope` 不是 `room`、`peer_id` 不是 UUID 或等于自己：400 `VALIDATION_FAILED`，`fields` 列出对应参数；空值视为没给。上面的可见性规则（delivery、屏蔽、审核隐藏、在席）全部不变，筛选只是再收窄。不加索引：现有的 `(room_id, id)` 对一间小屋 30 天的量够用。
+
+**`MessageView`**（REST 响应与三种消息事件共用）：`id`、`room_id`、`sender{user_id, nickname, pet_type}`、`scope`、`to_user_id`、`kind`、`phrase_id`、`src_lang`、`text`（原文）、`client_msg_id`（只在发送者自己的视图里有）、`polish_requested`、`created_at`、`delivery`（发送者视角为 null，键始终输出，契约写法见第 8 章，v1.16；接收者为自己那一行：`id`、`target_lang`、`base_text`、`translation_status`、`polished_text`、`polish_status`）。
 
 **润色的两个入口**【假设】（B5b）：
 - **发送方开关**：`polish=true`，扣发送者 1 次（第 4 步），每个接收者的翻译完成后各自润色；翻译最终放弃时润色记为 `fallback`，配额不退。同一 `client_msg_id` 并发首发时两次请求都可能扣配额（最多多扣 1 次），不退还（v1.12）。
@@ -794,7 +800,7 @@ v1.15 按 B6b 设计（`docs/superpowers/specs/2026-11-25-b6b-checkin-decor-desi
 - 接口见第 8 章，需登录且已 onboarding（否则 `ONBOARDING_REQUIRED`）。`POST /blocks {user_id}` 返回 204，已屏蔽也是 204（幂等）；屏蔽自己、用户不存在、对方未 onboarding 返回 400 `VALIDATION_FAILED`（`fields: ["user_id"]`）；`user_id` 不区分大小写，存小写；每人最多屏蔽 500 人，超出返回 409 `BLOCK_LIMIT`。`DELETE /blocks/{user_id}` 返回 204，本来没屏蔽也是 204。`GET /blocks` 返回 `{ items: [{ user_id, nickname, pet_type, blocked_at }] }`，按 `blocked_at` 倒序，不分页。
 - 屏蔽时不发任何 WS 事件，对方无感知；屏蔽者的其他设备下次拉取时生效。
 - **效果**（任一方向存在 blocks 行即“有屏蔽关系”）：
-  1. 群聊：不给对方生成 delivery，`message.new` 也不发给对方。
+  1. 小屋通知（`scope=room`，v1.16 改称）：不给对方生成 delivery，`message.new` 也不发给对方。
   2. 私聊：照常返回 202、消息入库，但不生成 delivery，对方什么也收不到，发送方看起来一切正常；`AGE_RESTRICTED` 校验照旧在前面。
   3. 拉历史：对方发的消息不返回（自己发的照常返回），屏蔽前已收到的也一起隐藏，解除后重新出现；屏蔽期间发的消息没有 delivery，解除后也看不到。
   4. 在途的翻译 / 润色：屏蔽前发出、屏蔽后才完成的，worker 推 `message.translated` / `message.polished` / `message.removed` 前检查屏蔽关系，有就不推；润色按钮返回 `DELIVERY_NOT_FOUND`，不扣配额。
@@ -829,6 +835,8 @@ v1.15 按 B6b 设计（`docs/superpowers/specs/2026-11-25-b6b-checkin-decor-desi
 
 **契约写法（v1.6）**：`api/openapi.yaml` 为 OAS 3.0.3，`nullable: true` 的枚举字段必须把 `null` 写进 `enum` 列表（如 Profile 的 `native_lang: [ja, ko, zh-Hant, zh-Hans, en, null]`、`age_band: [13_17, 18_plus, null]`），否则按契约生成的客户端会拒绝 `null`。
 
+**可空对象的契约写法（v1.16）**：`MessageView.delivery` 在发送者视角是 `null`，原来 `required` + `allOf` + `nullable: true` 的写法会让 swagger_parser 生成不可空字段，发送响应与自己的历史消息都会解析失败。服务端行为不变（始终输出该键，值可为 null），只改 `openapi.yaml` 的写法，使生成的字段为 `DeliveryView?`：先把 `delivery` 移出 `required`，仍不行再升级 swagger_parser。由前端 `contract_decode_test` 覆盖 null 与有值两种情况。
+
 | 分组 | 方法与路径 | 说明 |
 | :-- | :-- | :-- |
 | 认证 | POST /auth/login/apple、/auth/login/google | 换取 token；手机号登录列为 P1【假设】 |
@@ -845,7 +853,7 @@ v1.15 按 B6b 设计（`docs/superpowers/specs/2026-11-25-b6b-checkin-decor-desi
 |  | DELETE /rooms/{id}/members/{user\_id} | 房主移除成员，见 7.8 |
 |  | POST /rooms/{id}/dissolve | 房主解散，见 7.8 |
 |  | POST /rooms/{id}/codes | 房主自助补码，见 7.8 |
-| 消息 | POST /rooms/{id}/messages；GET /rooms/{id}/messages?before=\|after=&limit= | 发送（202）、双向游标分页，见 7.4（B5a）；文本被拦返回 422 `CONTENT_BLOCKED`（v1.14） |
+| 消息 | POST /rooms/{id}/messages；GET /rooms/{id}/messages?before=\|after=&limit=&scope=\|peer\_id= | 发送（202）、双向游标分页，见 7.4（B5a）；文本被拦返回 422 `CONTENT_BLOCKED`（v1.14）；小屋通知超过每天 10 条返回 429 `RATE_LIMITED`（`reason: notice_daily`），拉取可按 `scope=room`（小屋通知）或 `peer_id`（与某人的私聊）筛选，参数不合法返回 400 `VALIDATION_FAILED`（v1.16） |
 |  | POST /deliveries/{id}/polish | 接收方润色（202，结果走 `message.polished`，B5b） |
 |  | POST /deliveries/{id}/read | 已读；v1.9 移到 B7，与 Widget 一起做 |
 | 小屋 | POST /rooms/{id}/checkin；GET /rooms/{id}/decor | 打卡（200，重复打卡 `already: true`；每用户每分钟 10 次，超出 429 `RATE_LIMITED`）与装扮目录，见 7.5；没有新错误码（v1.15，B6b） |
@@ -863,7 +871,7 @@ v1.15 按 B6b 设计（`docs/superpowers/specs/2026-11-25-b6b-checkin-decor-desi
 | CODE_INVALID | 404 | 对外不区分原因，计入输错冷却 |
 | ROOM_FULL / ALREADY_MEMBER（`room_id`） / ROOM_LIMIT | 409 | 不消耗码 |
 | AGE_RESTRICTED | 403 | 成年人与未成年人不同房 |
-| CODE_COOLDOWN（`retry_after_seconds`） / RATE_LIMITED（`Retry-After` 头） | 429 | |
+| CODE_COOLDOWN（`retry_after_seconds`） / RATE_LIMITED（`Retry-After` 头；`reason`：`notice_daily`，只在小屋通知超过每天 10 条时有，v1.16） | 429 | |
 | NOT_ROOM_OWNER | 403 | 在席但不是房主 |
 | ROOM_NOT_FOUND | 404 | 房间不存在，或调用者在该房间没有座位（不区分） |
 | OWNER_CANNOT_LEAVE | 409 | 房主应使用解散 |
@@ -890,7 +898,7 @@ v1.15 按 B6b 设计（`docs/superpowers/specs/2026-11-25-b6b-checkin-decor-desi
 | DELIVERY\_NOT\_FOUND | 不是自己的 delivery（v1.9） | 刷新消息列表 |
 | CONTENT\_BLOCKED | 内容未通过审核（v1.14 起触发） | 发消息时提示“消息未能送达”；onboarding 时按 `details.fields` 提示换一个昵称；不说明原因 |
 | BLOCK\_LIMIT | 屏蔽人数已达 500 上限（v1.14） | 提示先解除一些屏蔽 |
-| RATE\_LIMITED | 触发限流 | 退避重试 |
+| RATE\_LIMITED | 触发限流；`details.reason = notice_daily` 表示当天在这间小屋的小屋通知已满 10 条（v1.16） | 退避重试；`notice_daily` 提示明天再来 |
 | UPGRADE\_REQUIRED | App 版本低于最低要求（HTTP 426） | 全屏强制更新页，跳转商店 |
 | ROOM\_LIMIT | 已在 2 间房内，不能再加入（v1.2 新增） | 提示先退出已加入的小屋 |
 | NOT\_ROOM\_OWNER | 非房主执行房主操作（v1.2 新增） | 隐藏入口，一般不会触发 |
@@ -899,7 +907,7 @@ v1.15 按 B6b 设计（`docs/superpowers/specs/2026-11-25-b6b-checkin-decor-desi
 | ONBOARDING\_REQUIRED | 未完成 onboarding 就调用入房等接口（7.1 约定） | 跳转 onboarding |
 | ROOM\_NOT\_FOUND | 房间不存在，或调用者与该房间无关（不泄露房间是否存在） | 刷新房间列表 |
 
-**HTTP 状态映射**：CODE\_INVALID 404；ROOM\_FULL、ALREADY\_MEMBER（`details.room_id`）、ROOM\_LIMIT、OWNER\_CANNOT\_LEAVE、CODE\_ISSUE\_LIMIT、BLOCK\_LIMIT（v1.14）409；AGE\_RESTRICTED、ONBOARDING\_REQUIRED、NOT\_ROOM\_OWNER、ACCOUNT\_DISABLED 403；CODE\_COOLDOWN（`details.retry_after_seconds`）、RATE\_LIMITED（带 `Retry-After` 头）、QUOTA\_EXCEEDED 429；ROOM\_NOT\_FOUND、DELIVERY\_NOT\_FOUND 404；POLISH\_NOT\_READY 409；CONTENT\_BLOCKED 422（v1.9）。举报超过每日 20 次返回 RATE\_LIMITED 429，`Retry-After` 为到下一个 UTC 零点的秒数（v1.14）。
+**HTTP 状态映射**：CODE\_INVALID 404；ROOM\_FULL、ALREADY\_MEMBER（`details.room_id`）、ROOM\_LIMIT、OWNER\_CANNOT\_LEAVE、CODE\_ISSUE\_LIMIT、BLOCK\_LIMIT（v1.14）409；AGE\_RESTRICTED、ONBOARDING\_REQUIRED、NOT\_ROOM\_OWNER、ACCOUNT\_DISABLED 403；CODE\_COOLDOWN（`details.retry_after_seconds`）、RATE\_LIMITED（带 `Retry-After` 头）、QUOTA\_EXCEEDED 429；ROOM\_NOT\_FOUND、DELIVERY\_NOT\_FOUND 404；POLISH\_NOT\_READY 409；CONTENT\_BLOCKED 422（v1.9）。举报超过每日 20 次返回 RATE\_LIMITED 429，`Retry-After` 为到下一个 UTC 零点的秒数（v1.14）。小屋通知超过每天 10 条返回 RATE\_LIMITED 429，`details.reason = notice_daily`，`Retry-After` 为到发送者时区下一个零点的秒数（v1.16）。
 
 ---
 
@@ -1148,7 +1156,7 @@ v1.9：删除原 `room:{rid}:events`（断线重放用的 Stream）。消息断�
 | :-- | :-- |
 | 验证码输入 | 同一用户 10 分钟内连续输错 5 次，冷却 30 分钟（PRD R8）；同一设备/IP 每小时上限 30 次；房间已满不计入失败 |
 | 登录 | 同一 IP 每分钟 10 次 |
-| 发消息 | 每用户每分钟 20 条、每日 1000 条 |
+| 发消息 | 每用户每分钟 20 条、每日 1000 条；小屋通知另限每人每间小屋每天 10 条（发送者时区，数据库计数），超出 429 `RATE_LIMITED`，`details.reason = notice_daily`（v1.16，见 7.4） |
 | 润色 | 见 10.2 配额 |
 | 举报与屏蔽（v1.14） | 举报每人每个 UTC 日 20 次，数据库计数，超出 429 `RATE_LIMITED`；屏蔽每人最多 500 人（409 `BLOCK_LIMIT`）；两者都不另设每分钟上限 |
 | 打卡（v1.15） | 每用户每分钟 10 次，超出 429 `RATE_LIMITED` |
@@ -1181,7 +1189,7 @@ v1.9：删除原 `room:{rid}:events`（断线重放用的 Stream）。消息断�
 | 消息保留 | 消息正文与译文保留 30 天，之后脱敏为元数据【假设，对应 PRD 数据保留】 |
 | 账号删除 | `DELETE /me` 先软删除并立即吊销全部 token，30 天后由定时任务硬删除个人数据，消息按匿名化处理 |
 | 区域与数据主体权利 | 提供数据导出、删除入口；隐私政策按 JP / KR / TW 分别准备；若运营主体在马来西亚，另需评估马来西亚 PDPA（法律结论需法务确认） |
-| 未成年人 | 注册收集年龄区间；未满 13 岁拒绝注册；未满 18 岁禁用私聊；**未成年人与成年人双向隔离**：未成年人只能加入全员未成年的房间，成年人也不能加入含未成年成员的房间【假设】，该规则在入房事务（7.2 第 1a 步）与发消息校验中服务端强制 |
+| 未成年人 | 注册收集年龄区间；未满 13 岁拒绝注册；未满 18 岁禁用私聊，只能用小屋通知（v1.16）；**未成年人与成年人双向隔离**：未成年人只能加入全员未成年的房间，成年人也不能加入含未成年成员的房间【假设】，该规则在入房事务（7.2 第 1a 步）与发消息校验中服务端强制 |
 | 内容安全 | v1.14（B6a，熟人内测阶段）：本地五语种词库 + 模型返回的 `risk` 两层审核（发送前、译文与润色后），不接外部审核 API（送审前再作为新的 `Moderator` 实现接入）；疑似与高危都写入 `mod_flags`，由 `modctl` 人工复核；举报只落库、由 `modctl` 处理；屏蔽即时生效、对方无感知；封禁用 `modctl ban`。细节见 7.9 |
 | 防刷 | 设备标识、IP、邀请关系树异常检测（短时间大量新号涌入同一房间则暂停奖励发放）；后续接入 App Attest / Play Integrity（P2） |
 | 输入校验 | 所有入参用 validator 校验；昵称做敏感词过滤（v1.14，onboarding 时，见 7.1）；消息长度、频率限制 |
@@ -1424,6 +1432,7 @@ volumes:
 | 并发集成测试 | 100 协程抢同一房间最后一席；同一用户重复提交同一验证码（幂等）；奖励只发一次；房间满员后其余验证码自动作废；同一用户并发加入两间房（断言最多 2 间）；房主踢人/解散/补码与入房并发（不超员、不死锁，见 7.8） |
 | AI 网关测试 | 用假供应商注入延迟与失败：超时、熔断打开与恢复、降级链路、缓存命中；Gemini 与 Claude 客户端用本地假 HTTP 服务器测请求格式、解析、超时与 429，自动化测试不访问外网、不花钱（v1.9） |
 | 消息测试（v1.9） | 幂等（同一 `client_msg_id` 并发只写一条）；接收者在发送时确定；被移除者收不到之后的消息事件、拉不到消息；未成年人不能私聊；补偿扫描能捡起停住的翻译；润色配额不重复扣；10.3.7 五项校验各有用例 |
+| 会话筛选与通知上限测试（v1.16） | `scope=room` / `peer_id` 只收窄、可与游标组合，屏蔽、审核隐藏与离席规则在筛选下不变，非法参数列出字段；第 11 条小屋通知被拒且不入库、不审核、不扣配额，文本与短语都算，私聊与另一间小屋不受影响，过发送者零点恢复，重放不受限，被拦的不计 |
 | 审核与屏蔽测试（v1.14） | 词库归一化与变体写法（全角、大小写、片假名、插空格或分隔符、零宽字符）、英文整词不误伤；发送前拦截不入库不扣配额；词库判高危只隐藏一组、模型判 block 整条撤回且之后的重试与扫描跳过；被隐藏或有屏蔽关系的 delivery 点润色返回 404 且不扣配额；屏蔽双向不投递、私聊静默、历史隐藏与恢复；举报校验、去重与每日限额；`modctl` 的 ban / unban 与处理举报；被封账号的 WS 在下一次 ping 时以 4403 关闭 |
 | 打卡测试（v1.15） | 同一天只算一次、跨当地零点与夏令时（含没有零点的日期）；全员奖励的 24 小时边界、“早、晚、早、晚”只发两次、被封或已删账号不算；5 人同时打卡恰好一次奖励，与移除、入房并发不死锁；解散后能量与装扮还在；事件不带 seq |
 | 契约测试 | 以 `openapi.yaml` 为准校验响应结构，前端同步使用生成的客户端 |
@@ -1440,7 +1449,7 @@ volumes:
 | B2 | 登录（Apple/Google）、token、onboarding、宠物映射 | 前端可注册 |
 | B3 | 验证码生成、入房事务、奖励发放、限流冷却（含登录限流）、房主踢人/解散/自助补码/退出（7.8）、并发测试；分 B3a（入房主路径）与 B3b（房主管理）两段交付 | **核心机制跑通** |
 | B4 | WS Hub、presence（在线 / 离线）、事件分发与 Redis 故障兜底、订阅快照、`pet.tap`；断线重放改为每次订阅下发快照（v1.4） | 小屋实时同步 |
-| B5 | 消息收发、短语模板、AI 网关（缓存/熔断/降级/配额）；v1.9 分两段：**B5a** 消息与翻译（迁移 0004、短语、发送与拉取、`message.new` / `message.translated`、worker、Gemini + Claude 翻译网关、重试与补偿扫描、成本累加与翻译硬上限），**B5b** 润色与成本（两个润色入口、`message.polished`、10.3 提示词与校验、配额与预算、`ai_usage_daily`、评测工具）；审核、屏蔽、推送、已读不在 B5。v1.12：B5b 完成 | 跨语言消息可用 |
+| B5 | 消息收发、短语模板、AI 网关（缓存/熔断/降级/配额）；v1.9 分两段：**B5a** 消息与翻译（迁移 0004、短语、发送与拉取、`message.new` / `message.translated`、worker、Gemini + Claude 翻译网关、重试与补偿扫描、成本累加与翻译硬上限），**B5b** 润色与成本（两个润色入口、`message.polished`、10.3 提示词与校验、配额与预算、`ai_usage_daily`、评测工具）；审核、屏蔽、推送、已读不在 B5。v1.12：B5b 完成。v1.16：为前端 F3 补会话筛选、小屋通知上限与 `delivery` 可空契约，无迁移 | 跨语言消息可用 |
 | B6 | 内容审核、举报屏蔽、未成年人规则、打卡与装扮（房主解散已提前到 B3）；v1.14 分两段：**B6a** 合规（本地词库与 `pkg/wordfilter`、发送前与译后审核、`mod_flags`、缓存存 `risk`、昵称过滤、屏蔽、举报、`message.removed`、关闭码 4403、`modctl`，迁移 0006），**B6b** 养成（打卡与装扮，另写设计）；未成年人规则已在 B3（入房隔离）与 B5（私聊仅限成年人）完成。v1.14：B6a 完成；v1.15：B6b 完成（迁移 0007、打卡与全员奖励、12 件装扮、快照字段、两个 WS 事件），打卡提醒推送在 B7 | 合规与养成 |
 | B7 | 推送、Widget 快照、分享卡片数据、账号删除 | 功能补齐 |
 | B8 | 压测、故障演练、监控告警、备份恢复演练、灰度准备 | 可灰度上线 |
@@ -1464,6 +1473,7 @@ volumes:
 9. 消息与 AI 网关（v1.9，B5）：落库即推原文卡片；翻译失败不提供手动重试，24 小时内自动重试；源语言取发送者母语，不做语言识别；发送方润色开关每条消息扣 1 次、失败不退；超过 2 倍日预算停止翻译；纯 emoji / 标点的文本不翻译；已读与 30 天清理移到 B7。
 10. 内容审核与屏蔽（v1.14，B6a）：面向熟人内测，不是送审；词库随代码发版、不做热更新，所有语种合成一个自动机；译文高危按来源区分（只有词库命中隐藏一组，模型判 block 整条撤回）；整条撤回时发送者照常看到消息；翻译失败的不做译后审核；屏蔽双向不投递、对方无感知、不影响同屋；屏蔽上限 500；举报每日 20 次；`mod_flags` 保留 30 天、随消息清理一起做；被封者的席位不动。
 11. 打卡与装扮（v1.15，B6b）：打卡 +10、全员奖励固定 +20；奖励只算 active 的在席成员、至少 2 人，只在打卡时判断，长期不来的成员不豁免；12 件装扮与阈值写在代码里；`checkins` 不清理；重复打卡返回 200；两个事件不带 seq。
+12. 会话筛选与小屋通知（v1.16，F3）：消息接口加 `scope` / `peer_id` 筛选，不建 conversations 表与会话接口（用户选定），不加索引；小屋通知每人每间小屋每天 10 条，文本与短语都算，按发送者时区，写成代码常量，从 `messages` 计数，并发时最多多放过一两条。
 
 ### 18.2 主要风险
 
@@ -1484,6 +1494,7 @@ volumes:
 3. Redis Pub/Sub 成为瓶颈 → 按房间哈希拆多个频道，再考虑 NATS。
 4. 团队扩大后 → 先拆出 AI 网关为独立服务，其次才是消息服务。
 5. 第二版宠物养成（v1.13，对应 PRD v1.9）：吃 / 洗 / 睡累积 level、level 决定亲密度并解锁玩法。MVP 的接口与数据模型不为它预留字段，到第二版再单独设计；现有接口不变。
+6. 第二版小屋群聊（v1.16，对应 PRD v1.12）：MVP 的 `scope=room` 只作小屋通知，不为群聊预留字段，到第二版再单独设计。
 
 ---
 
